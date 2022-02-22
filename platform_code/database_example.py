@@ -139,22 +139,22 @@ def create_flstlog_dataframe():
         if cnt<10:
             continue
         line_list=line.split(",")
-        tmp_list=[cnt-10,scenario_name]
+        tmp_list=[cnt-10,scenario_name,line_list[1],"-","-","-","-","-","-","-","-","-"]
         for iv,value in enumerate(line_list):
-            if (iv==0 or iv >3 )and iv !=7:
+            if iv==0 or (iv>1 and iv <14) or (iv>14 and iv<18):
+                tmp_list.append(float(value))
+            if iv==14:
                 tmp_list.append(value)
-            elif iv==7:
-                tmp_list.append(value)  
-            else:
-                tmp_list.append(value)
+            elif iv==18:
+                tmp_list.append(float(value[:-2]))  
     
         flstlog_list.append(tmp_list)
     
-    col_list=['Flight_id',"scenario_name","ACID","Origin","Dest","Baseline_deparure_time","Aircarft_type","Priority","Loitering","Baseline_2d_path_length","Baseline_3d_path_length",\
+    col_list=['Flight_id',"scenario_name","ACID","Origin","Dest","Baseline_deparure_time","Aircarft_type","Priority","Baseline_2d_path_length","Baseline_3d_path_length",\
               "Baseline_vertical_path_length","Baseline_flight_duration","DEL_time","SPAWN_time","FLIGHT_time","2D_dist","3D_dist","ALT_dist","Work_done","DEL_LAT"\
               ,"DEL_LON","DEL_ALT","TAS","DEL_VS","DEL_HDG","ASAS_active","PILOT_ALT","PILOT_SPD","PILOT_HDG","PILOT_VS"]
     
-    df = pd.DataFrame(flstlog_list,columns=col_list )
+    df = pd.DataFrame(flstlog_list,columns=col_list)
     
     flstlog_data_frame=spark.createDataFrame(df)
     
@@ -163,68 +163,113 @@ def create_flstlog_dataframe():
 
 ####
 
-##FLSTLOG dataframe
-def create_reglog_dataframe():
+def read_reglog():
     reglog_file=open("example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log","r")
+
     
-    reglog_list=list()
+    acid_lines_list=[]
+    alt_lines_list=[]
+    lon_lines_list=[]
+    lat_lines_list=[]
+
+
+    cnt_modulo=0
     cnt=0
     for line in reglog_file:
         cnt=cnt+1
         if cnt<10:
             continue
-        line_list=line.split(",")
-        tmp_list=[cnt-10,scenario_name,scenario_name+line_list[1]]
-        tmp_list.append(float(line_list[0]))
-        aircraft_num=0
-        acid_list=[]
-        alt_list=[]
-        lat_list=[]
-        lon_list=[]
-        alt_cnt=0
-        lat_cnt=0
-        lon_cnt=0
-        for iv,value in enumerate(line_list):
+
+        if cnt_modulo%4==0:
+            acid_lines_list.append(line[:-2])
+        elif cnt_modulo%4==1:
+            alt_lines_list.append(line[:-2])
+        elif cnt_modulo%4==2:
+            lat_lines_list.append(line[:-2])
+        else:
+            lon_lines_list.append(line[:-2])   
+        cnt_modulo=cnt_modulo+1
+        
+        
+    
+    return acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list
+
+##REGLOG dataframe
+def create_reglog_dataframe():
+    acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list=read_reglog()
+    
+    reglog_list=list()
+    reglog_object_counter=0
+    
+    
+    
+    for i, line in enumerate(acid_lines_list):
+
+        acid_line_list=line.split(",")
+        alt_line_list=alt_lines_list[i].split(",")
+        lat_line_list=lat_lines_list[i].split(",")
+        lon_line_list=lon_lines_list[i].split(",")
+        
+        for iv, value in enumerate(acid_line_list):
             if iv==0:
                 continue
-            if value[0]=="D":
-                aircraft_num=aircraft_num+1
-                acid_list.append(value)
-            elif alt_cnt<aircraft_num:
-                alt_list.append(float(value))
-                alt_cnt=alt_cnt+1
-            elif lat_cnt<aircraft_num:
-                lat_list.append(float(value))
-                lat_cnt=lat_cnt+1     
-            elif lon_cnt<aircraft_num-1:
-                lon_list.append(float(value))
-                lon_cnt=lon_cnt+1 
-            else:
-                lon_list.append(float(value[:-2]))
+            
+            tmp_list=[reglog_object_counter,scenario_name,float(acid_line_list[0])]
+            tmp_list.append(value)
+            tmp_list.append(alt_line_list[iv])
+            tmp_list.append(lat_line_list[iv])
+            tmp_list.append(lon_line_list[iv])
+            
+            reglog_object_counter=reglog_object_counter+1
+
+            reglog_list.append(tmp_list) #pyspark gives an error when trying to pass list as a value
     
-        tmp_list.append(aircraft_num)
-        tmp_list.append(acid_list)
-        tmp_list.append(alt_list)
-        tmp_list.append(lat_list)  
-        tmp_list.append(lon_list)
-        reglog_list.append(tmp_list) #pyspark gives an error when trying to pass list as a value
-    
-    col_list=['REG_id',"scenario_name","Time","Aicraft_num","Flight_name","ACID","ALT","LAT","LON"]
+    col_list=["REG_id","scenario_name","Time_stamp","ACID","ALT","LAT","LON"]
     
     df = pd.DataFrame(reglog_list,columns=col_list )
     
     reglog_data_frame=spark.createDataFrame(df)
     
-    reglog_data_frame.show()
+    #reglog_data_frame.show()
+    
     return reglog_data_frame
 
-####
-##FLSTLOG dataframe
-def create_reglog_grouped_dataframe():
-    reglog_grouped_data_frame=1
-    return reglog_grouped_data_frame
+
+##time object dataframe
+def create_time_object_dataframe():
+    
+    acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list=read_reglog()
+    
+    
+    time_object_cnt=0
+    time_list=list()
+
+    for line in acid_lines_list:
+        
+        line_list=line.split(",")    
+        tmp_list=[time_object_cnt,scenario_name,float(line_list[0])]
+        time_object_cnt=time_object_cnt+1
+        aircraft_counter=len(line_list)-1
+
+        
+        tmp_list.append(aircraft_counter)
+        tmp_list.append("-")
+        tmp_list.append("-")
+        tmp_list.append("-")
+        time_list.append(tmp_list)
+
+    
+    col_list=["Time_object_id","scenario_name","Time_stamp","#Aircaft_Alive","Sound_exposure_p1","Sound_exposure_p2","Sound_exposure_p3"]## add as many "Sound_exposure_p1" as the points of interest
+    
+    df = pd.DataFrame(time_list,columns=col_list )
+    
+    time_data_frame=spark.createDataFrame(df)
+    
+    time_data_frame.show()
+    return time_data_frame
 
 ####
+
 ##metrics dataframe
 def create_metrics_dataframe():
     
@@ -233,7 +278,7 @@ def create_metrics_dataframe():
     metrics_list.append(tmp_list)
 
     
-    col_list=["Scenario_name","Aircraft_number","AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","CAP3","CAP4","ENV1","ENV2","ENV3","ENV4","SAF1","SAF2","SAF3","SAF4","SAF5","SAF6"\
+    col_list=["Scenario_name","#Aircraft_number","AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","CAP3","CAP4","ENV1","ENV2","ENV3","ENV4","SAF1","SAF2","SAF3","SAF4","SAF5","SAF6"\
               "EFF1","EFF2","EFF3","EFF4","EFF5","EFF6","EFF7","EFF8","PRI1","PRI2","PRI3","PRI4","PRI5"]
     
     df = pd.DataFrame(metrics_list,columns=col_list )
@@ -245,9 +290,28 @@ def create_metrics_dataframe():
 
 ####
 
-loslog_dataframe=create_loslog_dataframe()
-conflog_dataframe=create_conflog_dataframe()
-geolog_dataframe=create_geolog_dataframe()
 
-metrics_dataframe=create_metrics_dataframe()
+#loslog_dataframe=create_loslog_dataframe()
+#conflog_dataframe=create_conflog_dataframe()
+#geolog_dataframe=create_geolog_dataframe()
 
+#metrics_dataframe=create_metrics_dataframe()
+
+#flst_log_dataframe=create_flstlog_dataframe()
+
+#time_log_dataframe=create_time_object_dataframe()
+reglog_obj_dataframe=create_reglog_dataframe()
+
+
+
+## Here are some filtering examples:
+print("D1 apperances:", reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] =="D1").count())
+reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] =="D1").show()
+##############
+    
+print("objects from that secnario with time <210:",reglog_obj_dataframe.filter((reglog_obj_dataframe["Time_stamp"] <210) & (reglog_obj_dataframe["scenario_name"] ==scenario_name)).count())
+reglog_obj_dataframe.filter((reglog_obj_dataframe["Time_stamp"] <210) & (reglog_obj_dataframe["scenario_name"] ==scenario_name)).show()
+################
+    
+print("Unique acids in the scenario:",reglog_obj_dataframe.filter((reglog_obj_dataframe["Time_stamp"] <210) & (reglog_obj_dataframe["scenario_name"] ==scenario_name)).select("ACID").distinct().count())
+reglog_obj_dataframe.filter((reglog_obj_dataframe["Time_stamp"] <210) & (reglog_obj_dataframe["scenario_name"] ==scenario_name)).select("ACID").distinct().show()
