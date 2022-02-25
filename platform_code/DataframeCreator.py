@@ -4,7 +4,7 @@ Created on Wed Feb 23 17:42:34 2022
 
 @author: jpedrero
 """
-from MainApp import *
+import pandas as pd
 
 class DataframeCreator():
 
@@ -41,7 +41,7 @@ class DataframeCreator():
 
         df = pd.DataFrame(loslog_list, columns=col_list)
 
-        loslog_data_frame = self.spark.createDataFrame(df)
+        loslog_data_frame = self.spark.createDataFrame(loslog_list, col_list)
 
         loslog_data_frame.show()
         return loslog_data_frame
@@ -186,7 +186,7 @@ class DataframeCreator():
 
     ##REGLOG dataframe
     def create_reglog_dataframe(self):
-        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = read_reglog()
+        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog()
 
         reglog_list = list()
         reglog_object_counter = 0
@@ -224,7 +224,7 @@ class DataframeCreator():
     ##time object dataframe
     def create_time_object_dataframe(self):
 
-        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = read_reglog()
+        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog()
 
         time_object_cnt = 0
         time_list = list()

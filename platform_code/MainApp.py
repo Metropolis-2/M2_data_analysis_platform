@@ -9,8 +9,6 @@ import pandas as pd
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
 
-import BaselineComputations
-import ComputeMetrics
 import DataframeCreator
 import AEQ_metrics
 import CAP_metrics
@@ -22,18 +20,23 @@ import PRI_metrics
 
 class MainClass():
     def __init__(self, *args, **kwargs):
-        
+
         ##Init    
         self.spark = SparkSession.builder.appName('Platform Analysis.com').getOrCreate()
         sparkContext = self.spark.sparkContext
         self.scenario_name = None
+
+        self.readLogFiles()
         self.dataframe_creator = DataframeCreator.DataframeCreator(self.scenario_name, self.spark)
+
         self.loslog_dataframe = None
         self.conflog_dataframe = None
         self.geolog_dataframe = None
         self.flst_log_dataframe = None
         self.reglog_obj_dataframe = None
-        
+        self.createDataframes()
+
+
         self.AEQ_metrics = AEQ_metrics.AEQ_metrics()
         self.CAP_metrics = CAP_metrics.CAP_metrics()
         self.EFF_metrics = EFF_metrics.EFF_metrics()
@@ -60,10 +63,10 @@ class MainClass():
             "example_logs/CONFLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         self.geolog_dataframe = self.dataframe_creator.create_geolog_dataframe(
             "example_logs/GEOLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
-        self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe(
-            "example_logs/FLSTLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
-        self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe(
-            "example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
+        # self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe(
+        #     "example_logs/FLSTLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
+        # self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe(
+        #     "example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         
         # time_log_dataframe=create_time_object_dataframe()
         # metrics_dataframe=create_metrics_dataframe()
@@ -73,10 +76,7 @@ class MainClass():
 
 
     def main(self):
-        # self.readLogFiles()
-        # self.createDataframes()
-        
-        
+
         def selectOptionMenu(dictionary):
             for key, value in dictionary.items():
                 print(str(key) + " - " + value)
@@ -108,7 +108,7 @@ class MainClass():
         
         exit_now = False
         while not exit_now:
-            print("=========================")
+            print("\n=========================")
             print("M2_data_analysis_platform")
             print("=========================")
             option = selectOptionMenu(indicator_dict)
@@ -174,14 +174,16 @@ class MainClass():
 
             elif option == 5:
                 SAF_metrics_dict={
-                    1: 'ENV-1: Work done',
-                    2: 'ENV-2: Weighted average altitude',
-                    3: 'ENV-3: Equivalent Noise Level',
-                    4: 'ENV-4: Altitude dispersion',
-                    5: "Go back"
+                    1: 'SAF-1: Number of conflicts',
+                    2: 'SAF-2: Number of intrusions',
+                    3: 'SAF-3: Intrusion prevention rate',
+                    4: 'SAF-4: Minimum separation',
+                    5: 'SAF-5: Time spent in LOS',
+                    6: 'SAF-6: Geofence violations',
+                    7: "Go back"
                 }
                 SAF_option = selectOptionMenu(SAF_metrics_dict)
-                result = self.SAF_metrics.evaluate_SAF_metric(SAF_option)
+                result = self.SAF_metrics.evaluate_SAF_metric(SAF_option, self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
                 print (result)
 
                 
@@ -215,20 +217,20 @@ class MainClass():
         # print("D1 apperances:", self.reglog_obj_dataframe.filter(self.reglog_obj_dataframe["ACID"] == "D1").count())
         # self.reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] == "D1").show()
         # ##############
-
+        #
         # print("objects from that secnario with time <210:", self.reglog_obj_dataframe.filter(
         #     (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
         #                 self.reglog_obj_dataframe["scenario_name"] == scenario_name)).count())
         # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
         #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).show()
         # ################
-
+        #
         # print("Unique acids in the scenario:", self.reglog_obj_dataframe.filter(
         #     (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
         #                 self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().count())
         # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
         #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().show()
-
+        #
 
 if __name__ == "__main__":
     MainClass().main()
