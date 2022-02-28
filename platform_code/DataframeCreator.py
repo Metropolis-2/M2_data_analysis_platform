@@ -5,6 +5,8 @@ Created on Wed Feb 23 17:42:34 2022
 @author: jpedrero
 """
 import pandas as pd
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+
 
 class DataframeCreator():
 
@@ -276,3 +278,23 @@ class DataframeCreator():
         return metrics_data_frame
 
     ####
+
+    ##senario (scn file) dataframe
+    def create_fp_intention_dataframe(self, filePath):
+        schema = StructType([
+            StructField("RECEPTION_TIME_FP_INDEX", StringType(), True),
+            StructField("FPLAN_ID_INDEX", StringType(), True),
+            StructField("VEHICLE_INDEX", StringType(), True),
+            StructField("DEPARTURE_INDEX", StringType(), True),
+            StructField("INITIAL_LOCATION_INDEX", StringType(), True),
+            StructField("FINAL_LOCATION_INDEX", StringType(), True),
+            StructField("PRIORITY_INDEX", StringType(), True),
+            StructField("STATUS_INDEX", StringType(), True),
+            StructField("GEOFENCE_DURATION", StringType(), True),
+            StructField("GEOFENCE_BBOX_POINT1", StringType(), True),
+            StructField("GEOFENCE_BBOX_POINT2", StringType(), True)
+        ])
+
+        fp_intention_dataframe = self.spark.read.csv(filePath, header=False, schema=schema)
+        fp_intention_dataframe.show()
+        return fp_intention_dataframe
