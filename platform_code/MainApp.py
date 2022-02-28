@@ -29,6 +29,7 @@ class MainClass():
         self.readLogFiles()
         self.dataframe_creator = DataframeCreator.DataframeCreator(self.scenario_name, self.spark)
 
+        self.fp_intention_dataframe = None
         self.loslog_dataframe = None
         self.conflog_dataframe = None
         self.geolog_dataframe = None
@@ -36,15 +37,12 @@ class MainClass():
         self.reglog_obj_dataframe = None
         self.createDataframes()
 
-
         self.AEQ_metrics = AEQ_metrics.AEQ_metrics()
         self.CAP_metrics = CAP_metrics.CAP_metrics()
         self.EFF_metrics = EFF_metrics.EFF_metrics()
         self.ENV_metrics = ENV_metrics.ENV_metrics()
         self.SAF_metrics = SAF_metrics.SAF_metrics()
         self.PRI_metrics = PRI_metrics.PRI_metrics()
-        
-        
         
     def readLogFiles(self):
         ##Read the log file
@@ -57,23 +55,22 @@ class MainClass():
         
 
     def createDataframes(self):
+        self.fp_intention_dataframe = self.dataframe_creator.create_fp_intention_dataframe(
+            "example_logs/Flight_intention_very_low_40_8.csv")
         self.loslog_dataframe = self.dataframe_creator.create_loslog_dataframe(
             "example_logs/LOSLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         self.conflog_dataframe = self.dataframe_creator.create_conflog_dataframe(
             "example_logs/CONFLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         self.geolog_dataframe = self.dataframe_creator.create_geolog_dataframe(
             "example_logs/GEOLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
-        # self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe(
-        #     "example_logs/FLSTLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
+        self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe(
+            "example_logs/FLSTLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         # self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe(
         #     "example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         
         # time_log_dataframe=create_time_object_dataframe()
         # metrics_dataframe=create_metrics_dataframe()
         
-        
-        
-
 
     def main(self):
 
@@ -94,8 +91,7 @@ class MainClass():
             print("Option selected: {}".format(dictionary[option]))
             print("---------------")
             return option
-        
-        
+
         indicator_dict={
                 1: 'ACCESS AND EQUITY',
                 2: 'CAPACITY',
@@ -169,7 +165,7 @@ class MainClass():
                     5: "Go back"
                 }   
                 ENV_option = selectOptionMenu(ENV_metrics_dict)
-                result = self.ENV_metrics.evaluate_ENV_metric(ENV_option)
+                result = self.ENV_metrics.evaluate_ENV_metric(ENV_option, self.flst_log_dataframe)
                 print (result)
 
             elif option == 5:
@@ -193,11 +189,11 @@ class MainClass():
                     2: 'PRI-2: Weighted mission track length',
                     3: 'PRI-3: Average mission duration per priority level',
                     4: 'PRI-4: Average mission track length per priority level',
-                    4: 'PRI-5: Total delay per priority level',
-                    5: "Go back"
+                    5: 'PRI-5: Total delay per priority level',
+                    6: "Go back"
                 } 
                 PRI_option = selectOptionMenu(PRI_metrics_dict)
-                result = self.PRI_metrics.evaluate_PRI_metric(PRI_option)
+                result = self.PRI_metrics.evaluate_PRI_metric(PRI_option, self.fp_intention_dataframe, self.flst_log_dataframe)
                 print (result)
 
 
