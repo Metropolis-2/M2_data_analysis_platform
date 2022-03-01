@@ -45,7 +45,7 @@ class DataframeCreator():
 
         loslog_data_frame = self.spark.createDataFrame(loslog_list, col_list)
 
-        loslog_data_frame.show()
+        #loslog_data_frame.show()
         return loslog_data_frame
 
     ####
@@ -79,7 +79,7 @@ class DataframeCreator():
 
         conflog_data_frame = self.spark.createDataFrame(df)
 
-        conflog_data_frame.show()
+        #conflog_data_frame.show()
         return conflog_data_frame
 
     ####
@@ -113,7 +113,7 @@ class DataframeCreator():
 
         geolog_data_frame = self.spark.createDataFrame(df)
 
-        geolog_data_frame.show()
+        #geolog_data_frame.show()
         return geolog_data_frame
 
     ####
@@ -151,7 +151,7 @@ class DataframeCreator():
 
         flstlog_data_frame = self.spark.createDataFrame(df)
 
-        flstlog_data_frame.show()
+        #flstlog_data_frame.show()
         return flstlog_data_frame
 
     ####
@@ -187,8 +187,8 @@ class DataframeCreator():
     ####
 
     ##REGLOG dataframe
-    def create_reglog_dataframe(self):
-        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog()
+    def create_reglog_dataframe(self, log_file):
+        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
 
         reglog_list = list()
         reglog_object_counter = 0
@@ -219,7 +219,7 @@ class DataframeCreator():
 
         reglog_data_frame = self.spark.createDataFrame(df)
 
-        # reglog_data_frame.show()
+        #reglog_data_frame.show()
 
         return reglog_data_frame
 
@@ -251,7 +251,7 @@ class DataframeCreator():
 
         time_data_frame = self.spark.createDataFrame(df)
 
-        time_data_frame.show()
+        #time_data_frame.show()
         return time_data_frame
 
     ####
@@ -274,7 +274,7 @@ class DataframeCreator():
 
         metrics_data_frame = self.spark.createDataFrame(df)
 
-        metrics_data_frame.show()
+        #metrics_data_frame.show()
         return metrics_data_frame
 
     ####
@@ -296,5 +296,5 @@ class DataframeCreator():
         ])
 
         fp_intention_dataframe = self.spark.read.csv(filePath, header=False, schema=schema)
-        fp_intention_dataframe.show()
+        #fp_intention_dataframe.show()
         return fp_intention_dataframe

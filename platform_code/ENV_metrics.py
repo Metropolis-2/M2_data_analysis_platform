@@ -7,11 +7,11 @@ Created on Thu Feb 24 10:49:23 2022
 
 class ENV_metrics():
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, flst_log_dataframe):
+        self.flst_log_dataframe = flst_log_dataframe
         return
         
-    def evaluate_ENV_metric(self, metric_id, flst_log_dataframe):
-        self.flst_log_dataframe = flst_log_dataframe
+    def evaluate_ENV_metric(self, metric_id):
         if(metric_id == 1):
             return self.compute_ENV1_metric()
         elif(metric_id == 2):
