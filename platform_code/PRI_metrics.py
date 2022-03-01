@@ -8,36 +8,28 @@ import utils
 
 class PRI_metrics():
     
-    def __init__(self):
-        self.prio1_list = None
-        self.prio2_list = None
-        self.prio3_list = None
-        self.prio4_list = None
-        self.num_prio1 = 0
-        self.num_prio2 = 0
-        self.num_prio3 = 0
-        self.num_prio4 = 0
-        return
-        
-    def evaluate_PRI_metric(self, metric_id, scn_dataframe, flst_log_dataframe):
-        self.scn_dataframe = scn_dataframe
-        self.flst_log_dataframe = flst_log_dataframe
+    def __init__(self, fp_intention_dataframe, flst_log_dataframe):
+
         self.utils = utils.Utils()
+        self.fp_intention_dataframe = fp_intention_dataframe
+        self.flst_log_dataframe = flst_log_dataframe
 
         #Extract list ACIDs of each priority type
         self.prio1_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.scn_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==1").collect()]
+                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==1").collect()]
         self.num_prio1 = len(self.prio1_list)
         self.prio2_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.scn_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==2").collect()]
+                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==2").collect()]
         self.num_prio2 = len(self.prio2_list)
         self.prio3_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.scn_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==3").collect()]
+                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==3").collect()]
         self.num_prio3 = len(self.prio3_list)
         self.prio4_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.scn_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==4").collect()]
+                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==4").collect()]
         self.num_prio4 = len(self.prio4_list)
-
+        return
+        
+    def evaluate_PRI_metric(self, metric_id):
         if(metric_id == 1):
             return self.compute_PRI1_metric()
         elif(metric_id == 2):
@@ -178,7 +170,7 @@ class PRI_metrics():
         # we can only calculate the delay that each flight plan mission had for each vehicle and make the sum
 
         #Extract departure_time of fplanintention of each ACID
-        departure_time_dict = dict([(str(row.FPLAN_ID_INDEX),[self.utils.get_sec(str(row.DEPARTURE_INDEX))]) for row in self.scn_dataframe.select("FPLAN_ID_INDEX", "DEPARTURE_INDEX").collect()])
+        departure_time_dict = dict([(str(row.FPLAN_ID_INDEX),[self.utils.get_sec(str(row.DEPARTURE_INDEX))]) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "DEPARTURE_INDEX").collect()])
         #Extract spawn_time of FLSTLOG of each ACID
         spawn_time_dict = dict([(str(row["ACID"]), [int(row["SPAWN_time"])]) for row in self.flst_log_dataframe.select("ACID","SPAWN_time").collect()])
         print("len(departure_time_dict): {} and values: {}".format(len(departure_time_dict),departure_time_dict))

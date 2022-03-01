@@ -37,12 +37,12 @@ class MainClass():
         self.reglog_obj_dataframe = None
         self.createDataframes()
 
-        self.AEQ_metrics = AEQ_metrics.AEQ_metrics()
-        self.CAP_metrics = CAP_metrics.CAP_metrics()
+        self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
+        self.CAP_metrics = CAP_metrics.CAP_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         self.EFF_metrics = EFF_metrics.EFF_metrics()
-        self.ENV_metrics = ENV_metrics.ENV_metrics()
-        self.SAF_metrics = SAF_metrics.SAF_metrics()
-        self.PRI_metrics = PRI_metrics.PRI_metrics()
+        self.ENV_metrics = ENV_metrics.ENV_metrics(self.flst_log_dataframe)
+        self.SAF_metrics = SAF_metrics.SAF_metrics(self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
+        self.PRI_metrics = PRI_metrics.PRI_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         
     def readLogFiles(self):
         ##Read the log file
@@ -65,8 +65,8 @@ class MainClass():
             "example_logs/GEOLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe(
             "example_logs/FLSTLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
-        # self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe(
-        #     "example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
+        self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe(
+            "example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         
         # time_log_dataframe=create_time_object_dataframe()
         # metrics_dataframe=create_metrics_dataframe()
@@ -165,7 +165,7 @@ class MainClass():
                     5: "Go back"
                 }   
                 ENV_option = selectOptionMenu(ENV_metrics_dict)
-                result = self.ENV_metrics.evaluate_ENV_metric(ENV_option, self.flst_log_dataframe)
+                result = self.ENV_metrics.evaluate_ENV_metric(ENV_option)
                 print (result)
 
             elif option == 5:
@@ -179,7 +179,7 @@ class MainClass():
                     7: "Go back"
                 }
                 SAF_option = selectOptionMenu(SAF_metrics_dict)
-                result = self.SAF_metrics.evaluate_SAF_metric(SAF_option, self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
+                result = self.SAF_metrics.evaluate_SAF_metric(SAF_option)
                 print (result)
 
                 
@@ -193,7 +193,7 @@ class MainClass():
                     6: "Go back"
                 } 
                 PRI_option = selectOptionMenu(PRI_metrics_dict)
-                result = self.PRI_metrics.evaluate_PRI_metric(PRI_option, self.fp_intention_dataframe, self.flst_log_dataframe)
+                result = self.PRI_metrics.evaluate_PRI_metric(PRI_option)
                 print (result)
 
 

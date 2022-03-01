@@ -7,15 +7,12 @@ Created on Thu Feb 24 10:49:23 2022
 
 class SAF_metrics():
     
-    def __init__(self,):
-        self.loslog_dataframe = None
-        self.conflog_dataframe = None
-        
-    def evaluate_SAF_metric(self, metric_id, loslog_dataframe, conflog_dataframe, geolog_dataframe):
+    def __init__(self, loslog_dataframe, conflog_dataframe, geolog_dataframe):
         self.loslog_dataframe = loslog_dataframe
         self.conflog_dataframe = conflog_dataframe
         self.geolog_dataframe = geolog_dataframe
-
+        
+    def evaluate_SAF_metric(self, metric_id):
         if(metric_id == 1):
             return self.compute_SAF1_metric()
         elif(metric_id == 2):
