@@ -8,17 +8,20 @@ import utils
 
 class CAP_metrics():
     
-    def __init__(self, fp_intention_dataframe, flst_log_dataframe):
+    def __init__(self, fp_intention_dataframe, flst_log_dataframe, loslog_dataframe):
         self.utils = utils.Utils()
         self.fp_intention_dataframe = fp_intention_dataframe
         self.flst_log_dataframe = flst_log_dataframe
-        self.rec_snd_pointDict = dict(
-            [(str(row["FPLAN_ID_INDEX"]), [eval(row["INITIAL_LOCATION_INDEX"]), eval(row["FINAL_LOCATION_INDEX"])]) for
-             row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "INITIAL_LOCATION_INDEX", "FINAL_LOCATION_INDEX").collect()])
+        self.loslog_dataframe = loslog_dataframe
+
+        self.delay_times = list()
+        self.rec_snd_points = dict([(str(row["FPLAN_ID_INDEX"]), [eval(row["INITIAL_LOCATION_INDEX"]), eval(row["FINAL_LOCATION_INDEX"])]) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "INITIAL_LOCATION_INDEX", "FINAL_LOCATION_INDEX").collect()])
+        self.vehicle_types = dict([(str(row["FPLAN_ID_INDEX"]), str(row["VEHICLE_INDEX"])) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "VEHICLE_INDEX").collect()])
+        self.flight_times = dict([(str(row["ACID"]), float(row["FLIGHT_time"])) for row in self.flst_log_dataframe.select("ACID", "FLIGHT_time").collect()])
         return
         
     def evaluate_CAP_metric(self, metric_id,):
-
+        self.delay_times.clear()
         if(metric_id == 1):
             return self.compute_CAP1_metric()
         elif(metric_id == 2):
@@ -40,16 +43,23 @@ class CAP_metrics():
         from origin to destination departing at the requested time as if a user were alone in the system,
         respecting all concept airspace rules. Realized arrival time comes directly from the simulation)
         '''
-        #Calculate euclidian distance between sending and receiving points for each ACID
-        dist_pointDict = {}
-        for key, value in self.rec_snd_pointDict.items():
+        #Calculate path 2D distance between sending and receiving points for each ACID
+        ideal_route_dist = {}
+        ideal_flight_time = {}
+        for key, value in self.rec_snd_points.items():
             snd_point = value[0]
             rcv_point = value[1]
-            eu_dist = self.utils.calculateDistTwoPoints(snd_point, rcv_point)
-            dist_pointDict[key] = eu_dist
+            route_dist = self.utils.distCoords(snd_point, rcv_point)
+            ideal_route_dist[key] = route_dist
+            vehicle_speed = self.utils.getVehicleMaxSpeed(self.vehicle_types[key])
+            ideal_flight_time[key] = route_dist/vehicle_speed
 
-        print (dist_pointDict)
-        return
+        for key, value in self.flight_times.items():
+            delay = abs(self.flight_times[key] - ideal_flight_time[key])
+            self.delay_times.append(delay)
+
+        result = self.utils.average_statistics(self.delay_times)
+        return result
     
     def compute_CAP2_metric(self):
         '''
@@ -58,7 +68,11 @@ class CAP_metrics():
         and number of flight intentions.Intrusions are situations in which the distance between two aircraft is smaller
         than separation norm of 32 metres horizontally and 25 feet vertically, and is directly computed during the simulation)
         '''
-        return
+
+        number_intrusions = self.loslog_dataframe.select("ACID1", "ACID2").count()
+        number_fp_intentions = len(self.vehicle_types)
+        result = number_intrusions/number_fp_intentions
+        return result
     
     def compute_CAP3_metric(self):
         '''
@@ -66,6 +80,7 @@ class CAP_metrics():
         (Calculated as an increase of the CAP-1 indicator with the introduction of rogue aircraft)
         :return:
         '''
+        #TODO: We have not any scenario with rogue aircraft
         return
     
     def compute_CAP4_metric(self):
@@ -73,5 +88,6 @@ class CAP_metrics():
         CAP-4: Additional number of intrusions
         (Calculated as an increase of the CAP-2 indicator with the introduction of rogue aircraft)
         '''
+        # TODO: We have not any scenario with rogue aircraft
         return
     
