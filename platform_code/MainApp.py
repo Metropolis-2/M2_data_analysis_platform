@@ -38,8 +38,8 @@ class MainClass():
         self.createDataframes()
 
         self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
-        self.CAP_metrics = CAP_metrics.CAP_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
-        self.EFF_metrics = EFF_metrics.EFF_metrics()
+        self.CAP_metrics = CAP_metrics.CAP_metrics(self.fp_intention_dataframe, self.flst_log_dataframe, self.loslog_dataframe)
+        self.EFF_metrics = EFF_metrics.EFF_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         self.ENV_metrics = ENV_metrics.ENV_metrics(self.flst_log_dataframe)
         self.SAF_metrics = SAF_metrics.SAF_metrics(self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
         self.PRI_metrics = PRI_metrics.PRI_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)

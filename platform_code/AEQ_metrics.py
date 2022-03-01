@@ -63,7 +63,7 @@ class AEQ_metrics():
             rcv_point = value[1]
             route_dist = self.utils.distCoords(snd_point, rcv_point)
             ideal_route_dist[key] = route_dist
-            vehicle_speed = self.utils.getVehicleSpeed(self.vehicle_types[key])
+            vehicle_speed = self.utils.getVehicleMaxSpeed(self.vehicle_types[key])
             ideal_flight_time[key] = route_dist/vehicle_speed
 
         list_cancelled_demands = list()

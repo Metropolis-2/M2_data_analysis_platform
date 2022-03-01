@@ -30,8 +30,8 @@ class Utils():
         dst = geopy.distance.distance(coords_1, coords_2).m
         return dst
 
-    def getVehicleSpeed(self, vehicle_type): #vehicle_type will be 'MP20' or 'MP30'
-        speed = json.load(open(self.AIRCRAFT_PATH))[vehicle_type]['envelop']['cruising_speed']
+    def getVehicleMaxSpeed(self, vehicle_type): #vehicle_type will be 'MP20' or 'MP30'
+        speed = json.load(open(self.AIRCRAFT_PATH))[vehicle_type]['envelop']['v_max']
         return speed #in m/s
 
     def stdDeviation_statistics(self, data_list): #return standard deviation of data_list
@@ -39,3 +39,6 @@ class Utils():
 
     def average_statistics(self, data_list): #return average value of data_list
         return sum(data_list)/len(data_list)
+
+    def feetToMeter(self, feet):
+        return float(feet/3.281)
