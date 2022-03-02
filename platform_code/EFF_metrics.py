@@ -9,6 +9,7 @@ import utils
 
 class EFF_metrics():
 
+    '''EFF2,3,4 Lowest altitude of flying'''
     HEIGHT_LOW_LAYER = 60 #feet
     
     def __init__(self, fp_intention_dataframe, flst_log_dataframe):
@@ -18,7 +19,6 @@ class EFF_metrics():
 
         self.rec_snd_points = dict([(str(row["FPLAN_ID_INDEX"]), [eval(row["INITIAL_LOCATION_INDEX"]), eval(row["FINAL_LOCATION_INDEX"])]) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "INITIAL_LOCATION_INDEX", "FINAL_LOCATION_INDEX").collect()])
         self.vehicle_types = dict([(str(row["FPLAN_ID_INDEX"]), str(row["VEHICLE_INDEX"])) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "VEHICLE_INDEX").collect()])
-
         return
         
     def evaluate_EFF_metric(self, metric_id):
@@ -46,10 +46,8 @@ class EFF_metrics():
         EFF-1: Horizontal distance route efficiency
         (Ratio representing the length of the ideal horizontal route to the actual horizontal route)
         '''
-
         # Calculate length_ideal_horizontal_route
-        #Calculate 2D distance between sending and receiving points for each ACID
-        ideal_route_dist = {}
+        ideal_route_dist = {} #route_path 2D distance between sending and receiving points for each vehicle ACID
         for key, value in self.rec_snd_points.items():
             snd_point = value[0]
             rcv_point = value[1]
@@ -77,15 +75,14 @@ class EFF_metrics():
         # Calculate lenght_ideal_vertical_route
         ideal_vertical_dist = self.utils.feetToMeter(2*self.HEIGHT_LOW_LAYER)
 
-        #Calculate lenght_actual_vertical_route
-        #Include ascensing_distances and descending_distances
+        #Calculate lenght_actual_vertical_route (include ascensing_distances and descending_distances)
         alt_dist = dict([(str(row["ACID"]), float(row["ALT_dist"])) for row in self.flst_log_dataframe.select("ACID", "ALT_dist").collect()])
 
         alt_dist_ratios = {}
         for key, value in alt_dist.items():
             if(alt_dist[key] >0):
                 alt_dist_ratios[key] = ideal_vertical_dist/alt_dist[key]
-            else:
+            else: #TODO: Are there cases where the ALT-dist of the dataframe is zero?
                 alt_dist_ratios[key] = -1
 
         result = alt_dist_ratios
@@ -98,13 +95,14 @@ class EFF_metrics():
         '''
 
         heigh_lowest_layer = self.utils.feetToMeter(self.HEIGHT_LOW_LAYER)
+        # TODO: ascensing_distance is is half of ALT in the dataframe?
         alt_dist_ascending = dict([(str(row["ACID"]), float(row["ALT_dist"])/2) for row in self.flst_log_dataframe.select("ACID", "ALT_dist").collect()])
 
         alt_dist_ascending_ratios = {}
         for key, value in alt_dist_ascending.items():
             if(alt_dist_ascending[key] >0):
                 alt_dist_ascending_ratios[key] = heigh_lowest_layer/alt_dist_ascending[key]
-            else:
+            else: #TODO: Are there cases where the ALT-dist of the dataframe is zero?
                 alt_dist_ascending_ratios[key] = -1
 
         result = alt_dist_ascending_ratios
@@ -116,8 +114,8 @@ class EFF_metrics():
         (Ratio representing the 3D length of the ideal route to the 3D length of the actual route)
         '''
 
-        ideal_route_dist = {}
-        length_ideal_3D_route = {}
+        ideal_route_dist = {} #route_path 2D distance between sending and receiving points for each vehicle ACID
+        length_ideal_3D_route = {} #ideal_route_dist + vertical_distances (takeoff and landing events)
         for key, value in self.rec_snd_points.items():
             snd_point = value[0]
             rcv_point = value[1]
@@ -131,7 +129,7 @@ class EFF_metrics():
         for key, value in length_actual_3D_route.items():
             if(length_actual_3D_route[key] > 0):
                 distance_route_efficiency[key] = length_ideal_3D_route[key]/length_actual_3D_route[key]
-            else:
+            else: #TODO: Are there cases where the 3D_dist of the dataframe is zero?
                 distance_route_efficiency[key] = -1
 
         result = distance_route_efficiency
@@ -143,7 +141,9 @@ class EFF_metrics():
         (Ratio representing the time duration of the ideal route to the time duration of the actual route)
         '''
 
-        time_duration_ideal_route = {}
+        #TODO: Clarify parameters SPAWN_time, DEL_time and FLIGHT_time of dataframe FLST_LOG
+
+        time_duration_ideal_route = {}  #ideal flight_time based on ideal route_dist and vehicle_speed
         for key, value in self.rec_snd_points.items():
             snd_point = value[0]
             rcv_point = value[1]
@@ -151,7 +151,9 @@ class EFF_metrics():
             vehicle_speed = self.utils.getVehicleMaxSpeed(self.vehicle_types[key])
             time_duration_ideal_route[key] = route_dist/vehicle_speed
 
+        #TODO: in time_vertiport_arrival how estimate when it reaches its destination vertiport? DEL_time when it hits the ground?
         time_vertiport_arrival = dict([(str(row["ACID"]), float(row["DEL_time"])) for row in self.flst_log_dataframe.select("ACID", "DEL_time").collect()])
+        #TODO: SPAWN_time is equivalent to take_off time?
         time_vertiport_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
         time_duration_actual_route = {}
 
@@ -162,7 +164,7 @@ class EFF_metrics():
         for key, value in time_duration_actual_route.items():
             if(time_duration_actual_route[key] >0):
                 route_duration_efficiency[key] = time_duration_ideal_route[key]/time_duration_actual_route[key]
-            else:
+            else: #TODO: Are there cases where the route_duration_efficiency is zero?
                 route_duration_efficiency[key] = -1
 
         result = route_duration_efficiency
@@ -174,6 +176,7 @@ class EFF_metrics():
         (Time duration from the planned departure time until the actual departure time of the aircraft)
         '''
         time_planned_departure = dict([(str(row.FPLAN_ID_INDEX), self.utils.get_sec(str(row.DEPARTURE_INDEX))) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "DEPARTURE_INDEX").collect()])
+        #TODO: time_actual_departure == SPAWN_time == take_off time??
         time_actual_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
         departure_delay = {}
         for key, value in time_actual_departure.items():
@@ -186,6 +189,7 @@ class EFF_metrics():
         EFF-7: Departure sequence delay
         (Time duration from the time that the aircraft starts its flight to the time that the aircraft takes off from the origin point)
         '''
+        #TODO: How to estimate when the drone starts to fly? FLIGHT_time is the time between takeoff and landing directly? (takeoff == SPAWN_time) and (landing == DEL_time)??
         time_actual_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
         time_takeoff = dict([(str(row["ACID"]), abs(float(row["SPAWN_time"])-float(row["FLIGHT_time"]))) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time", "FLIGHT_time").collect()])
         departure_sequence_delay = {}
@@ -199,7 +203,7 @@ class EFF_metrics():
         EFF-8: Arrival sequence delay
         (Time duration from the time that the aircraft arrived at the destination vertiport to the time that the aircraft landed at the destination point)
         '''
-        #TODO: How to know the point of reached_landing_vertiport
+        #TODO: How to know the point of reached_landing_vertiport?? (takeoff == SPAWN_time) and (landing == DEL_time)??
 
         time_reached_landing_vertiport = dict([(str(row["ACID"]), float(row["DEL_time"])) for row in self.flst_log_dataframe.select("ACID", "DEL_time").collect()])
         time_landing = dict([(str(row["ACID"]), abs(float(row["DEL_time"])-float(row["FLIGHT_time"]))) for row in self.flst_log_dataframe.select("ACID", "DEL_time", "FLIGHT_time").collect()])

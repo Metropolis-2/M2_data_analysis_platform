@@ -29,7 +29,7 @@ class MainClass():
         self.readLogFiles()
         self.dataframe_creator = DataframeCreator.DataframeCreator(self.scenario_name, self.spark)
 
-        self.fp_intention_dataframe = None
+        self.fp_intention_dataframe = None #TODO: It was necessary a fpintention dataframe to manage the columns of the file
         self.loslog_dataframe = None
         self.conflog_dataframe = None
         self.geolog_dataframe = None
@@ -44,7 +44,7 @@ class MainClass():
         self.SAF_metrics = SAF_metrics.SAF_metrics(self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
         self.PRI_metrics = PRI_metrics.PRI_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         
-    def readLogFiles(self):
+    def readLogFiles(self): #TODO: How will these parameters be received?
         ##Read the log file
         concept = "3"  ##DECENTRALISED
         density = "very_low"
@@ -55,6 +55,7 @@ class MainClass():
         
 
     def createDataframes(self):
+        #TODO: input files must be passed as parameters
         self.fp_intention_dataframe = self.dataframe_creator.create_fp_intention_dataframe(
             "example_logs/Flight_intention_very_low_40_8.csv")
         self.loslog_dataframe = self.dataframe_creator.create_loslog_dataframe(
@@ -68,8 +69,8 @@ class MainClass():
         self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe(
             "example_logs/REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
         
-        # time_log_dataframe=create_time_object_dataframe()
-        # metrics_dataframe=create_metrics_dataframe()
+        # time_log_dataframe=create_time_object_dataframe() #TODO: is necessary?
+        # metrics_dataframe=create_metrics_dataframe() #TODO: structure to write metric computation results?
         
 
     def main(self):
@@ -229,4 +230,5 @@ class MainClass():
         #
 
 if __name__ == "__main__":
+    #TODO: This call to the main() function should be repeated for each of the scenarios in a loop or option menu
     MainClass().main()

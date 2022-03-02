@@ -21,7 +21,7 @@ class CAP_metrics():
         return
         
     def evaluate_CAP_metric(self, metric_id,):
-        self.delay_times.clear()
+        self.delay_times.clear() #CRITICAL POINT
         if(metric_id == 1):
             return self.compute_CAP1_metric()
         elif(metric_id == 2):
@@ -44,8 +44,8 @@ class CAP_metrics():
         respecting all concept airspace rules. Realized arrival time comes directly from the simulation)
         '''
         #Calculate path 2D distance between sending and receiving points for each ACID
-        ideal_route_dist = {}
-        ideal_flight_time = {}
+        ideal_route_dist = {} #route_path 2D distance between sending and receiving points for each vehicle ACID
+        ideal_flight_time = {} #ideal flight_time based on ideal route_dist and vehicle_speed
         for key, value in self.rec_snd_points.items():
             snd_point = value[0]
             rcv_point = value[1]
@@ -56,7 +56,7 @@ class CAP_metrics():
 
         for key, value in self.flight_times.items():
             delay = abs(self.flight_times[key] - ideal_flight_time[key])
-            self.delay_times.append(delay)
+            self.delay_times.append(delay) #Add to delay list
 
         result = self.utils.average_statistics(self.delay_times)
         return result
@@ -74,20 +74,20 @@ class CAP_metrics():
         result = number_intrusions/number_fp_intentions
         return result
     
-    def compute_CAP3_metric(self):
+    def compute_CAP3_metric(self): #TODO: PENDING
         '''
         CAP-3: Additional demand delay
         (Calculated as an increase of the CAP-1 indicator with the introduction of rogue aircraft)
         :return:
         '''
-        #TODO: We have not any scenario with rogue aircraft
+        #TODO: Rogue aircraft??
         return
     
-    def compute_CAP4_metric(self):
+    def compute_CAP4_metric(self): #TODO: PENDING
         '''
         CAP-4: Additional number of intrusions
         (Calculated as an increase of the CAP-2 indicator with the introduction of rogue aircraft)
         '''
-        # TODO: We have not any scenario with rogue aircraft
+        #TODO: Rogue aircraft??
         return
     
