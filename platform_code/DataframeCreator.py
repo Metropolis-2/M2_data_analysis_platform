@@ -289,10 +289,11 @@ class DataframeCreator():
             StructField("INITIAL_LOCATION_INDEX", StringType(), True),
             StructField("FINAL_LOCATION_INDEX", StringType(), True),
             StructField("PRIORITY_INDEX", StringType(), True),
-            StructField("STATUS_INDEX", StringType(), True),
             StructField("GEOFENCE_DURATION", StringType(), True),
-            StructField("GEOFENCE_BBOX_POINT1", StringType(), True),
-            StructField("GEOFENCE_BBOX_POINT2", StringType(), True)
+            StructField("GEOFENCE_BBOX_POINT1_lon", StringType(), True),
+            StructField("GEOFENCE_BBOX_POINT2_lon", StringType(), True),
+            StructField("GEOFENCE_BBOX_POINT1_lat", StringType(), True),
+            StructField("GEOFENCE_BBOX_POINT2_lat", StringType(), True)
         ])
 
         fp_intention_dataframe = self.spark.read.csv(filePath, header=False, schema=schema)

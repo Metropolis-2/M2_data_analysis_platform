@@ -11,6 +11,8 @@ class SAF_metrics():
         self.loslog_dataframe = loslog_dataframe
         self.conflog_dataframe = conflog_dataframe
         self.geolog_dataframe = geolog_dataframe
+
+        #TODO: What types of conflicts exist apart from loss_separation? Differences between the CONF_LOG and LOSS_LOG files?
         
     def evaluate_SAF_metric(self, metric_id):
         if(metric_id == 1):
@@ -33,6 +35,7 @@ class SAF_metrics():
         SAF-1: Number of conflicts
         (Number of aircraft pairs that will experience a loss of separation within the look-ahead time)
         '''
+        #TODO: "conflict" is a general conflict of CONFLOG file?
         result = self.conflog_dataframe.select("ACID1", "ACID2").count()
         return result
     
@@ -41,6 +44,7 @@ class SAF_metrics():
         SAF-2: Number of intrusions
         (Number of aircraft pairs that experience loss of separation)
         '''
+        # TODO: "intrusion" is a loss_separation copnflcit of LOSLOG file?
         result = self.loslog_dataframe.select("ACID1", "ACID2").count()
         return result
     
@@ -49,7 +53,8 @@ class SAF_metrics():
         SAF-3: Intrusion prevention rate
         (Ratio representing the proportion of conflicts that did not result in a loss of separation)
         '''
-        result = int(self.conflog_dataframe.select("ACID1", "ACID2").count()) / int(self.loslog_dataframe.select("ACID1", "ACID2").count())
+        num_conflicts = self.compute_SAF1_metric() #TODO: Is a conflict resulting from a loss of separation an intrusion?
+        result = int(num_conflicts) / int(self.loslog_dataframe.select("ACID1", "ACID2").count())
         return result
     
     def compute_SAF4_metric(self):
@@ -57,14 +62,16 @@ class SAF_metrics():
         SAF-4: Minimum separation
         (The minimum separation between aircraft during conflicts)
         '''
+        #TODO: minimum_separation is "DIST "param of dataframe LOSLOG?
         result = self.loslog_dataframe.select("ACID1", "ACID2", "DIST").show()
-        return
+        return result
 
     def compute_SAF5_metric(self):
         '''
         SAF-5: Time spent in LOS
         (Total time spent in a state of intrusion)
         '''
+        # TODO: intrusion_time is "Time_of_min_distance" param of dataframe LOSLOG?
         result = self.loslog_dataframe.select("ACID1", "ACID2", "Time_of_min_distance").show()
         return
 
@@ -73,5 +80,6 @@ class SAF_metrics():
         SAF-6: Geofence violations
         (The number of geofence/building area violations)
         '''
+        #TODO: all the lines of GEOLOG are geofence/building area violations?
         result = self.geolog_dataframe.select("ACID").count()
         return result

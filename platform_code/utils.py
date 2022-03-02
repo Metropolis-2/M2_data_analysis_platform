@@ -27,15 +27,15 @@ class Utils():
         return dict3
 
     def distCoords(self, coords_1, coords_2): #coords_1=(x1,y1,z1) and coords_2=(x2,y2,z2)
-        dst = geopy.distance.distance(coords_1, coords_2).m
+        dst = geopy.distance.distance(coords_1, coords_2).m #TODO: direct distance calculation (in meters) between two points, is this approach correct?
         return dst
 
     def getVehicleMaxSpeed(self, vehicle_type): #vehicle_type will be 'MP20' or 'MP30'
-        speed = json.load(open(self.AIRCRAFT_PATH))[vehicle_type]['envelop']['v_max']
+        speed = json.load(open(self.AIRCRAFT_PATH))[vehicle_type]['envelop']['v_max'] #TODO: v_max o cruising_speed
         return speed #in m/s
 
     def stdDeviation_statistics(self, data_list): #return standard deviation of data_list
-        return statistics.stdev(data_list)
+        return statistics.stdev(data_list) #TODO: check if is correct: https://docs.python.org/3/library/statistics.html
 
     def average_statistics(self, data_list): #return average value of data_list
         return sum(data_list)/len(data_list)
