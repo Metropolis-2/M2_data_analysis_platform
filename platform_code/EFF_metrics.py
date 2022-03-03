@@ -12,13 +12,12 @@ class EFF_metrics():
     '''EFF2,3,4 Lowest altitude of flying'''
     HEIGHT_LOW_LAYER = 60 #feet
     
-    def __init__(self, fp_intention_dataframe, flst_log_dataframe):
+    def __init__(self, flst_log_dataframe):
         self.utils = utils.Utils()
-        self.fp_intention_dataframe = fp_intention_dataframe
         self.flst_log_dataframe = flst_log_dataframe
 
-        self.rec_snd_points = dict([(str(row["FPLAN_ID_INDEX"]), [eval(row["INITIAL_LOCATION_INDEX"]), eval(row["FINAL_LOCATION_INDEX"])]) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "INITIAL_LOCATION_INDEX", "FINAL_LOCATION_INDEX").collect()])
-        self.vehicle_types = dict([(str(row["FPLAN_ID_INDEX"]), str(row["VEHICLE_INDEX"])) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "VEHICLE_INDEX").collect()])
+        self.rec_snd_points = dict([(str(row["ACID"]), [(row["Origin_LAT"], row["Origin_LON"]), (row["Dest_LAT"], row["Dest_LON"])]) for row in self.flst_log_dataframe.select("ACID", "Origin_LAT", "Origin_LON", "Dest_LAT", "Dest_LON").collect()])
+        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircarft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircarft_type").collect()])
         return
         
     def evaluate_EFF_metric(self, metric_id):
@@ -175,7 +174,7 @@ class EFF_metrics():
         EFF-6: Departure delay
         (Time duration from the planned departure time until the actual departure time of the aircraft)
         '''
-        time_planned_departure = dict([(str(row.FPLAN_ID_INDEX), self.utils.get_sec(str(row.DEPARTURE_INDEX))) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "DEPARTURE_INDEX").collect()])
+        time_planned_departure = dict([(str(row.ACID), self.utils.get_sec(str(row.Baseline_deparure_time))) for row in self.flst_log_dataframe.select("ACID", "Baseline_deparure_time").collect()])
         #TODO: time_actual_departure == SPAWN_time == take_off time??
         time_actual_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
         departure_delay = {}

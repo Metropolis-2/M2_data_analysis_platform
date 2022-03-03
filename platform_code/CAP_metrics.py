@@ -8,15 +8,14 @@ import utils
 
 class CAP_metrics():
     
-    def __init__(self, fp_intention_dataframe, flst_log_dataframe, loslog_dataframe):
+    def __init__(self, flst_log_dataframe, loslog_dataframe):
         self.utils = utils.Utils()
-        self.fp_intention_dataframe = fp_intention_dataframe
         self.flst_log_dataframe = flst_log_dataframe
         self.loslog_dataframe = loslog_dataframe
 
         self.delay_times = list()
-        self.rec_snd_points = dict([(str(row["FPLAN_ID_INDEX"]), [eval(row["INITIAL_LOCATION_INDEX"]), eval(row["FINAL_LOCATION_INDEX"])]) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "INITIAL_LOCATION_INDEX", "FINAL_LOCATION_INDEX").collect()])
-        self.vehicle_types = dict([(str(row["FPLAN_ID_INDEX"]), str(row["VEHICLE_INDEX"])) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "VEHICLE_INDEX").collect()])
+        self.rec_snd_points = dict([(str(row["ACID"]), [(row["Origin_LAT"],row["Origin_LON"]), (row["Dest_LAT"],row["Dest_LON"])]) for row in self.flst_log_dataframe.select("ACID", "Origin_LAT","Origin_LON", "Dest_LAT","Dest_LON").collect()])
+        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircarft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircarft_type").collect()])
         self.flight_times = dict([(str(row["ACID"]), float(row["FLIGHT_time"])) for row in self.flst_log_dataframe.select("ACID", "FLIGHT_time").collect()])
         return
         

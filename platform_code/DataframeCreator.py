@@ -108,7 +108,7 @@ class DataframeCreator():
         dataframe_cnt=0
         col_list = ["CONF_id", "Scenario_name", "CONF_detected_time", "ACID1", "ACID2", "LAT1", "LON1", "ALT1", "LAT2","LON2", "ALT2", "CPALAT", "CPALON"] 
         df = pd.DataFrame([col_list], columns=col_list)
-        conflog_data_frame =self.spark.createDataFrame(df)        
+        conflog_data_frame =self.spark.createDataFrame(df)
         
         ##Read CONFLOGs
         for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
@@ -180,7 +180,7 @@ class DataframeCreator():
         col_list = ["GEO_id", "Scenario_name", "Deletion_time", "ACID", "GEOF_ID", "GEOF_NAME", "MAX_intrusion",
                     "LAT_intrusion", "LON_intrusion", "intrusion_time"]
         df = pd.DataFrame([col_list], columns=col_list)
-        geolog_data_frame =self.spark.createDataFrame(df)             
+        geolog_data_frame =self.spark.createDataFrame(df)
         
         ##Read GEOLOGs
         for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
@@ -315,7 +315,8 @@ class DataframeCreator():
                 else:
                     flstlog_data_frame_tmp = self.spark.createDataFrame(df)
                     flstlog_data_frame=flstlog_data_frame.union(flstlog_data_frame_tmp)
-                    
+
+
         col_list = ["scenario_name2", "ACID2", "Origin_LAT","Origin_LON", "Dest_LAT","Dest_LON", "Baseline_deparure_time", "Aircarft_type",
                     "Priority"]
         dataframe_cnt=0
@@ -481,152 +482,152 @@ class DataframeCreator():
 
         return reglog_data_frame
 
-    ##time object dataframe
-    def create_time_object_dataframe(self):
-
-        col_list = ["Time_object_id", "scenario_name", "Time_stamp", "#Aircaft_Alive", "Sound_exposure_p1",
-                    "Sound_exposure_p2",
-                    "Sound_exposure_p3"]  ## add as many "Sound_exposure_p1" as the points of interest
-        dataframe_cnt=0
-        df = pd.DataFrame([col_list], columns=col_list)
-        time_data_frame  =self.spark.createDataFrame(df)
-        
-        ##Read REGLOGs
-        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
-            log_type = file_name.split("_")[0]
-            if log_type=="REGLOG":
-                if ii<len(self.centralised_log_names):
-                    log_file=path_to_logs+"Centralised/"+file_name
-                    concept="1" ##CENTRALISED
-                elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
-                    log_file=path_to_logs+"Decentralised/"+file_name
-                    concept="3" ##DECENTRALISED
-                else:
-                    log_file=path_to_logs+"Hybrid/"+file_name
-                    concept="2" ##HYBRID              
-                scenario_var = file_name.split("_")
-                if scenario_var[3]=="very": 
-                    density="very_low"
-                    distribution=scenario_var[5]
-                    repetition=scenario_var[6]
-                    uncertainty=scenario_var[7]
-                else:
-                    density=scenario_var[3]
-                    distribution=scenario_var[4]
-                    repetition=scenario_var[5]
-                    uncertainty=scenario_var[6]                    
-                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
-        
-
-                acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
-        
-                time_object_cnt = 0
-                time_list = list()
-        
-                for line in acid_lines_list:
-                    line_list = line.split(",")
-                    tmp_list = [time_object_cnt, scenario_name, float(line_list[0])]
-                    time_object_cnt = time_object_cnt + 1
-                    aircraft_counter = len(line_list) - 1
-        
-                    tmp_list.append(aircraft_counter)
-                    tmp_list.append("-")
-                    tmp_list.append("-")
-                    tmp_list.append("-")
-                    time_list.append(tmp_list)
-
-
-
-                df = pd.DataFrame(time_list, columns=col_list)
-                if dataframe_cnt==0:
-                    time_data_frame = self.spark.createDataFrame(df)
-                    dataframe_cnt=1
-                else:
-                    time_data_frame_tmp = self.spark.createDataFrame(df)
-                    time_data_frame=time_data_frame.union(time_data_frame_tmp)
-                    
-
-        #time_data_frame.show()
-        return time_data_frame
-
-    ####
-
-    ##metrics dataframe
-    def create_metrics_dataframe(self):
-        col_list = ["Scenario_name", "#Aircraft_number", "AEQ1", "AEQ1_1", "AEQ2", "AEQ2_1", "AEQ3", "AEQ4", "AEQ5",
-                    "AEQ5_1", "CAP1", "CAP2", "CAP3", "CAP4", "ENV1", "ENV2", "ENV3", "ENV4", "SAF1", "SAF2", "SAF3",
-                    "SAF4", "SAF5", "SAF6" \
-                                    "EFF1", "EFF2", "EFF3", "EFF4", "EFF5", "EFF6", "EFF7", "EFF8", "PRI1", "PRI2",
-                    "PRI3", "PRI4", "PRI5"]
-        dataframe_cnt=0
-        df = pd.DataFrame([col_list], columns=col_list)
-        metrics_data_frame =self.spark.createDataFrame(df)             
-        
-        ##Read GEOLOGs
-        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
-            log_type = file_name.split("_")[0]
-            if log_type=="GEOLOG":
-                if ii<len(self.centralised_log_names):
-                    log_file=path_to_logs+"Centralised/"+file_name
-                    concept="1" ##CENTRALISED
-                elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
-                    log_file=path_to_logs+"Decentralised/"+file_name
-                    concept="3" ##DECENTRALISED
-                else:
-                    log_file=path_to_logs+"Hybrid/"+file_name
-                    concept="2" ##HYBRID 
-                    
-                scenario_var = file_name.split("_")
-                if scenario_var[3]=="very": 
-                    density="very_low"
-                    distribution=scenario_var[5]
-                    repetition=scenario_var[6]
-                    uncertainty=scenario_var[7]
-                else:
-                    density=scenario_var[3]
-                    distribution=scenario_var[4]
-                    repetition=scenario_var[5]
-                    uncertainty=scenario_var[6]                    
-                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty                
-            
-                metrics_list = list()
-                tmp_list = [scenario_name, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-",
-                            "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]
-                metrics_list.append(tmp_list)
-        
-                df = pd.DataFrame(metrics_list, columns=col_list)
-    
-                if dataframe_cnt==0:
-                    metrics_data_frame = self.spark.createDataFrame(df)
-                    dataframe_cnt=1
-                else:
-                    metrics_data_frame_tmp = self.spark.createDataFrame(df)
-                    metrics_data_frame=metrics_data_frame.union(metrics_data_frame_tmp)        
-
-
-
-        #metrics_data_frame.show()
-        return metrics_data_frame
+    # ##time object dataframe
+    # def create_time_object_dataframe(self):
+    #
+    #     col_list = ["Time_object_id", "scenario_name", "Time_stamp", "#Aircaft_Alive", "Sound_exposure_p1",
+    #                 "Sound_exposure_p2",
+    #                 "Sound_exposure_p3"]  ## add as many "Sound_exposure_p1" as the points of interest
+    #     dataframe_cnt=0
+    #     df = pd.DataFrame([col_list], columns=col_list)
+    #     time_data_frame  =self.spark.createDataFrame(df)
+    #
+    #     ##Read REGLOGs
+    #     for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
+    #         log_type = file_name.split("_")[0]
+    #         if log_type=="REGLOG":
+    #             if ii<len(self.centralised_log_names):
+    #                 log_file=path_to_logs+"Centralised/"+file_name
+    #                 concept="1" ##CENTRALISED
+    #             elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
+    #                 log_file=path_to_logs+"Decentralised/"+file_name
+    #                 concept="3" ##DECENTRALISED
+    #             else:
+    #                 log_file=path_to_logs+"Hybrid/"+file_name
+    #                 concept="2" ##HYBRID
+    #             scenario_var = file_name.split("_")
+    #             if scenario_var[3]=="very":
+    #                 density="very_low"
+    #                 distribution=scenario_var[5]
+    #                 repetition=scenario_var[6]
+    #                 uncertainty=scenario_var[7]
+    #             else:
+    #                 density=scenario_var[3]
+    #                 distribution=scenario_var[4]
+    #                 repetition=scenario_var[5]
+    #                 uncertainty=scenario_var[6]
+    #             scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
+    #
+    #
+    #             acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
+    #
+    #             time_object_cnt = 0
+    #             time_list = list()
+    #
+    #             for line in acid_lines_list:
+    #                 line_list = line.split(",")
+    #                 tmp_list = [time_object_cnt, scenario_name, float(line_list[0])]
+    #                 time_object_cnt = time_object_cnt + 1
+    #                 aircraft_counter = len(line_list) - 1
+    #
+    #                 tmp_list.append(aircraft_counter)
+    #                 tmp_list.append("-")
+    #                 tmp_list.append("-")
+    #                 tmp_list.append("-")
+    #                 time_list.append(tmp_list)
+    #
+    #
+    #
+    #             df = pd.DataFrame(time_list, columns=col_list)
+    #             if dataframe_cnt==0:
+    #                 time_data_frame = self.spark.createDataFrame(df)
+    #                 dataframe_cnt=1
+    #             else:
+    #                 time_data_frame_tmp = self.spark.createDataFrame(df)
+    #                 time_data_frame=time_data_frame.union(time_data_frame_tmp)
+    #
+    #
+    #     #time_data_frame.show()
+    #     return time_data_frame
 
     ####
 
-    ##senario (scn file) dataframe
-    def create_fp_intention_dataframe(self, filePath):
-        schema = StructType([
-            StructField("RECEPTION_TIME_FP_INDEX", StringType(), True),
-            StructField("FPLAN_ID_INDEX", StringType(), True),
-            StructField("VEHICLE_INDEX", StringType(), True),
-            StructField("DEPARTURE_INDEX", StringType(), True),
-            StructField("INITIAL_LOCATION_INDEX", StringType(), True),
-            StructField("FINAL_LOCATION_INDEX", StringType(), True),
-            StructField("PRIORITY_INDEX", StringType(), True),
-            StructField("GEOFENCE_DURATION", StringType(), True),
-            StructField("GEOFENCE_BBOX_POINT1_lon", StringType(), True),
-            StructField("GEOFENCE_BBOX_POINT2_lon", StringType(), True),
-            StructField("GEOFENCE_BBOX_POINT1_lat", StringType(), True),
-            StructField("GEOFENCE_BBOX_POINT2_lat", StringType(), True)
-        ])
+    # ##metrics dataframe
+    # def create_metrics_dataframe(self):
+    #     col_list = ["Scenario_name", "#Aircraft_number", "AEQ1", "AEQ1_1", "AEQ2", "AEQ2_1", "AEQ3", "AEQ4", "AEQ5",
+    #                 "AEQ5_1", "CAP1", "CAP2", "CAP3", "CAP4", "ENV1", "ENV2", "ENV3", "ENV4", "SAF1", "SAF2", "SAF3",
+    #                 "SAF4", "SAF5", "SAF6" \
+    #                                 "EFF1", "EFF2", "EFF3", "EFF4", "EFF5", "EFF6", "EFF7", "EFF8", "PRI1", "PRI2",
+    #                 "PRI3", "PRI4", "PRI5"]
+    #     dataframe_cnt=0
+    #     df = pd.DataFrame([col_list], columns=col_list)
+    #     metrics_data_frame =self.spark.createDataFrame(df)
+    #
+    #     ##Read GEOLOGs
+    #     for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
+    #         log_type = file_name.split("_")[0]
+    #         if log_type=="GEOLOG":
+    #             if ii<len(self.centralised_log_names):
+    #                 log_file=path_to_logs+"Centralised/"+file_name
+    #                 concept="1" ##CENTRALISED
+    #             elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
+    #                 log_file=path_to_logs+"Decentralised/"+file_name
+    #                 concept="3" ##DECENTRALISED
+    #             else:
+    #                 log_file=path_to_logs+"Hybrid/"+file_name
+    #                 concept="2" ##HYBRID
+    #
+    #             scenario_var = file_name.split("_")
+    #             if scenario_var[3]=="very":
+    #                 density="very_low"
+    #                 distribution=scenario_var[5]
+    #                 repetition=scenario_var[6]
+    #                 uncertainty=scenario_var[7]
+    #             else:
+    #                 density=scenario_var[3]
+    #                 distribution=scenario_var[4]
+    #                 repetition=scenario_var[5]
+    #                 uncertainty=scenario_var[6]
+    #             scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
+    #
+    #             metrics_list = list()
+    #             tmp_list = [scenario_name, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-",
+    #                         "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]
+    #             metrics_list.append(tmp_list)
+    #
+    #             df = pd.DataFrame(metrics_list, columns=col_list)
+    #
+    #             if dataframe_cnt==0:
+    #                 metrics_data_frame = self.spark.createDataFrame(df)
+    #                 dataframe_cnt=1
+    #             else:
+    #                 metrics_data_frame_tmp = self.spark.createDataFrame(df)
+    #                 metrics_data_frame=metrics_data_frame.union(metrics_data_frame_tmp)
+    #
+    #
+    #
+    #     #metrics_data_frame.show()
+    #     return metrics_data_frame
 
-        fp_intention_dataframe = self.spark.read.csv(filePath, header=False, schema=schema)
-        #fp_intention_dataframe.show()
-        return fp_intention_dataframe
+    ####
+
+    # ##senario (scn file) dataframe
+    # def create_fp_intention_dataframe(self, filePath):
+    #     schema = StructType([
+    #         StructField("RECEPTION_TIME_FP_INDEX", StringType(), True),
+    #         StructField("FPLAN_ID_INDEX", StringType(), True),
+    #         StructField("VEHICLE_INDEX", StringType(), True),
+    #         StructField("DEPARTURE_INDEX", StringType(), True),
+    #         StructField("INITIAL_LOCATION_INDEX", StringType(), True),
+    #         StructField("FINAL_LOCATION_INDEX", StringType(), True),
+    #         StructField("PRIORITY_INDEX", StringType(), True),
+    #         StructField("GEOFENCE_DURATION", StringType(), True),
+    #         StructField("GEOFENCE_BBOX_POINT1_lon", StringType(), True),
+    #         StructField("GEOFENCE_BBOX_POINT2_lon", StringType(), True),
+    #         StructField("GEOFENCE_BBOX_POINT1_lat", StringType(), True),
+    #         StructField("GEOFENCE_BBOX_POINT2_lat", StringType(), True)
+    #     ])
+    #
+    #     fp_intention_dataframe = self.spark.read.csv(filePath, header=False, schema=schema)
+    #     #fp_intention_dataframe.show()
+    #     return fp_intention_dataframe

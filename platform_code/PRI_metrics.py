@@ -15,24 +15,23 @@ class PRI_metrics():
     WEIGHT_PRIO3 = 3
     WEIGHT_PRIO4 = 4
     
-    def __init__(self, fp_intention_dataframe, flst_log_dataframe):
+    def __init__(self, flst_log_dataframe):
 
         self.utils = utils.Utils()
-        self.fp_intention_dataframe = fp_intention_dataframe
         self.flst_log_dataframe = flst_log_dataframe
 
         #Extract list ACIDs of each priority type
         self.prio1_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==1").collect()]
+                     self.flst_log_dataframe.select("ACID").filter("Priority==1").collect()]
         self.num_prio1 = len(self.prio1_list)
         self.prio2_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==2").collect()]
+                     self.flst_log_dataframe.select("ACID").filter("Priority==2").collect()]
         self.num_prio2 = len(self.prio2_list)
         self.prio3_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==3").collect()]
+                     self.flst_log_dataframe.select("ACID").filter("Priority==3").collect()]
         self.num_prio3 = len(self.prio3_list)
         self.prio4_list = [str(row.FPLAN_ID_INDEX) for row in
-                     self.fp_intention_dataframe.select("FPLAN_ID_INDEX").filter("PRIORITY_INDEX==4").collect()]
+                     self.flst_log_dataframe.select("ACID").filter("Priority==4").collect()]
         self.num_prio4 = len(self.prio4_list)
         return
         
@@ -177,7 +176,7 @@ class PRI_metrics():
         # we can only calculate the delay that each flight plan mission had for each vehicle and make the sum
 
         #Extract departure_time of fplanintention of each ACID
-        departure_time_dict = dict([(str(row.FPLAN_ID_INDEX),[self.utils.get_sec(str(row.DEPARTURE_INDEX))]) for row in self.fp_intention_dataframe.select("FPLAN_ID_INDEX", "DEPARTURE_INDEX").collect()])
+        departure_time_dict = dict([(str(row.ACID),[self.utils.get_sec(str(row.Baseline_deparure_time))]) for row in self.flst_log_dataframe.select("ACID", "Baseline_deparure_time").collect()])
         #Extract spawn_time of FLSTLOG of each ACID
         spawn_time_dict = dict([(str(row["ACID"]), [int(row["SPAWN_time"])]) for row in self.flst_log_dataframe.select("ACID","SPAWN_time").collect()])
         print("len(departure_time_dict): {} and values: {}".format(len(departure_time_dict),departure_time_dict))
