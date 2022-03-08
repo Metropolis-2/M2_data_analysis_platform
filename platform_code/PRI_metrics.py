@@ -21,16 +21,16 @@ class PRI_metrics():
         self.flst_log_dataframe = flst_log_dataframe
 
         #Extract list ACIDs of each priority type
-        self.prio1_list = [str(row.FPLAN_ID_INDEX) for row in
+        self.prio1_list = [str(row["ACID"]) for row in
                      self.flst_log_dataframe.select("ACID").filter("Priority==1").collect()]
         self.num_prio1 = len(self.prio1_list)
-        self.prio2_list = [str(row.FPLAN_ID_INDEX) for row in
+        self.prio2_list = [str(row["ACID"]) for row in
                      self.flst_log_dataframe.select("ACID").filter("Priority==2").collect()]
         self.num_prio2 = len(self.prio2_list)
-        self.prio3_list = [str(row.FPLAN_ID_INDEX) for row in
+        self.prio3_list = [str(row["ACID"]) for row in
                      self.flst_log_dataframe.select("ACID").filter("Priority==3").collect()]
         self.num_prio3 = len(self.prio3_list)
-        self.prio4_list = [str(row.FPLAN_ID_INDEX) for row in
+        self.prio4_list = [str(row["ACID"]) for row in
                      self.flst_log_dataframe.select("ACID").filter("Priority==4").collect()]
         self.num_prio4 = len(self.prio4_list)
         return
@@ -95,13 +95,13 @@ class PRI_metrics():
         '''
         #Get the flight_time of each ACID and sum by type
         fptimes_prio1 = sum([float(row["FLIGHT_time"]) for row in self.flst_log_dataframe.select("FLIGHT_time").filter(
-            (self.flst_log_dataframe.ACID).isin(self.prio1_list)).collect()])
+            (self.flst_log_dataframe["ACID"]).isin(self.prio1_list)).collect()])
         fptimes_prio2= sum([float(row["FLIGHT_time"]) for row in self.flst_log_dataframe.select("FLIGHT_time").filter(
-            (self.flst_log_dataframe.ACID).isin(self.prio2_list)).collect()])
+            (self.flst_log_dataframe["ACID"]).isin(self.prio2_list)).collect()])
         fptimes_prio3 = sum([float(row["FLIGHT_time"]) for row in self.flst_log_dataframe.select("FLIGHT_time").filter(
-            (self.flst_log_dataframe.ACID).isin(self.prio3_list)).collect()])
+            (self.flst_log_dataframe["ACID"]).isin(self.prio3_list)).collect()])
         fptimes_prio4 = sum([float(row["FLIGHT_time"]) for row in self.flst_log_dataframe.select("FLIGHT_time").filter(
-            (self.flst_log_dataframe.ACID).isin(self.prio4_list)).collect()])
+            (self.flst_log_dataframe["ACID"]).isin(self.prio4_list)).collect()])
 
         #Calculate the flight_time average value with the number of each prio type vehicles
         if(self.num_prio1 >0):
@@ -197,16 +197,16 @@ class PRI_metrics():
         total_delay_prio4 = 0  # in seconds
         for k, v in merged_dict.items():
             delay = abs(v[0] - v[1]) #Calculate delay between departure_time and spawn_time
-            if(k in self.prio1_list): #flight_ids with prio1
+            if(k in self.prio1_list): #acids with prio1
                 delays_dict_prio1[k] = delay
                 total_delay_prio1 += delay
-            elif(k in self.prio1_list): #flight_ids with prio2
+            elif(k in self.prio1_list): #acids with prio2
                 delays_dict_prio2[k] = delay
                 total_delay_prio2 += delay
-            elif(k in self.prio1_list): #flight_ids with prio3
+            elif(k in self.prio1_list): #acids with prio3
                 delays_dict_prio3[k] = delay
                 total_delay_prio3 += delay
-            else: #flight_ids with prio4
+            else: #acids with prio4
                 delays_dict_prio4[k] = delay
                 total_delay_prio4 += delay
 

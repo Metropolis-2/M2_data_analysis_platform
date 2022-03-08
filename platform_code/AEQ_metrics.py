@@ -26,10 +26,10 @@ class AEQ_metrics():
 
         self.delay_times = list()
         self.rec_snd_points = dict([(str(row["ACID"]), [(row["Origin_LAT"],row["Origin_LON"]), (row["Dest_LAT"], row["Dest_LON"])]) for row in self.flst_log_dataframe.select("ACID", "Origin_LAT","Origin_LON", "Dest_LAT","Dest_LON").collect()])
-        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircarft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircarft_type").collect()])
+        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircraft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircraft_type").collect()])
         self.flight_times = dict([(str(row["ACID"]), float(row["FLIGHT_time"])) for row in self.flst_log_dataframe.select("ACID", "FLIGHT_time").collect()])
-        self.loitering_missions = [(str(row["FPLAN_ID_INDEX"])) for row in self.flst_log_dataframe.select("FPLAN_ID_INDEX","GEOFENCE_DURATION").filter("GEOFENCE_DURATION != 'None'").collect()]
-        self.emergency_missions = [(str(row["FPLAN_ID_INDEX"])) for row in self.flst_log_dataframe.select("FPLAN_ID_INDEX","PRIORITY_INDEX").filter("PRIORITY_INDEX == 4").collect()]
+        self.loitering_missions = [(str(row["ACID"])) for row in self.flst_log_dataframe.select("ACID","Geofence_duration").filter("Geofence_duration != 'None'").collect()]
+        self.emergency_missions = [(str(row["ACID"])) for row in self.flst_log_dataframe.select("ACID","Priority").filter("Priority == 4").collect()]
         return
         
     def evaluate_AEQ_metric(self, metric_id):

@@ -17,7 +17,7 @@ class EFF_metrics():
         self.flst_log_dataframe = flst_log_dataframe
 
         self.rec_snd_points = dict([(str(row["ACID"]), [(row["Origin_LAT"], row["Origin_LON"]), (row["Dest_LAT"], row["Dest_LON"])]) for row in self.flst_log_dataframe.select("ACID", "Origin_LAT", "Origin_LON", "Dest_LAT", "Dest_LON").collect()])
-        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircarft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircarft_type").collect()])
+        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircraft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircraft_type").collect()])
         return
         
     def evaluate_EFF_metric(self, metric_id):
@@ -174,12 +174,12 @@ class EFF_metrics():
         EFF-6: Departure delay
         (Time duration from the planned departure time until the actual departure time of the aircraft)
         '''
-        time_planned_departure = dict([(str(row.ACID), self.utils.get_sec(str(row.Baseline_deparure_time))) for row in self.flst_log_dataframe.select("ACID", "Baseline_deparure_time").collect()])
+        time_planned_departure = dict([(str(row["ACID"]), str(row["Baseline_deparure_time"])) for row in self.flst_log_dataframe.select("ACID", "Baseline_deparure_time").collect()])
         #TODO: time_actual_departure == SPAWN_time == take_off time??
         time_actual_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
         departure_delay = {}
         for key, value in time_actual_departure.items():
-            departure_delay[key] = time_actual_departure[key] - time_planned_departure[key]
+            departure_delay[key] = float(time_actual_departure[key]) - float(time_planned_departure[key])
         result = departure_delay
         return result
     

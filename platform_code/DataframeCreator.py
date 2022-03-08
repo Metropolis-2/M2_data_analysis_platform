@@ -9,7 +9,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 from pyspark.sql.functions import col, when
 import os
 
-path_to_logs="example_logs/"
+path_to_logs="example_logs/TINY_LOGS/"
 
 class DataframeCreator():
 
@@ -316,8 +316,7 @@ class DataframeCreator():
                     flstlog_data_frame_tmp = self.spark.createDataFrame(df)
                     flstlog_data_frame=flstlog_data_frame.union(flstlog_data_frame_tmp)
                     
-        col_list = ["scenario_name2", "ACID2", "Origin_LAT","Origin_LON", "Dest_LAT","Dest_LON", "Baseline_deparure_time", "Aircraft_type",
-                    "Priority"]
+        col_list = ["scenario_name2", "ACID2", "Origin_LAT","Origin_LON", "Dest_LAT","Dest_LON", "Baseline_deparure_time", "Aircraft_type", "Priority", "Geofence_duration"]
         dataframe_cnt=0
         df = pd.DataFrame([col_list], columns=col_list)
         flint_data_frame =self.spark.createDataFrame(df)                       
@@ -352,9 +351,10 @@ class DataframeCreator():
                 origin_lon=flight_data[4].split("(")[1]
                 dest_lon=flight_data[6].split("(")[1]
                 origin_lat=flight_data[5].split(")")[0]
-                dest_lat=flight_data[7].split(")")[0] 
+                dest_lat=flight_data[7].split(")")[0]
+                geofence_duration = flight_data[9]
                 
-                tmp_list = [scenario_name, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,aircraft_type,priority]
+                tmp_list = [scenario_name, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,aircraft_type,priority,geofence_duration]
                 flint_list.append(tmp_list)
             df = pd.DataFrame(flint_list, columns=col_list)
 

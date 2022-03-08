@@ -15,7 +15,7 @@ class CAP_metrics():
 
         self.delay_times = list()
         self.rec_snd_points = dict([(str(row["ACID"]), [(row["Origin_LAT"],row["Origin_LON"]), (row["Dest_LAT"],row["Dest_LON"])]) for row in self.flst_log_dataframe.select("ACID", "Origin_LAT","Origin_LON", "Dest_LAT","Dest_LON").collect()])
-        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircarft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircarft_type").collect()])
+        self.vehicle_types = dict([(str(row["ACID"]), str(row["Aircraft_type"])) for row in self.flst_log_dataframe.select("ACID", "Aircraft_type").collect()])
         self.flight_times = dict([(str(row["ACID"]), float(row["FLIGHT_time"])) for row in self.flst_log_dataframe.select("ACID", "FLIGHT_time").collect()])
         return
         

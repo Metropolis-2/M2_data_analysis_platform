@@ -23,6 +23,8 @@ class MainClass():
 
         ##Init    
         self.spark = SparkSession.builder.appName('Platform Analysis.com').getOrCreate()
+        self.spark.conf.set("spark.sql.debug.maxToStringFields", 1000)
+
         sparkContext = self.spark.sparkContext
         self.scenario_name = None
 
@@ -38,11 +40,12 @@ class MainClass():
         self.createDataframes()
 
        # self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
-        self.CAP_metrics = CAP_metrics.CAP_metrics(self.fp_intention_dataframe, self.flst_log_dataframe, self.loslog_dataframe)
-        self.EFF_metrics = EFF_metrics.EFF_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
+        self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.flst_log_dataframe)
+        self.CAP_metrics = CAP_metrics.CAP_metrics(self.flst_log_dataframe, self.loslog_dataframe)
+        self.EFF_metrics = EFF_metrics.EFF_metrics(self.flst_log_dataframe)
         self.ENV_metrics = ENV_metrics.ENV_metrics(self.flst_log_dataframe)
         self.SAF_metrics = SAF_metrics.SAF_metrics(self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
-        self.PRI_metrics = PRI_metrics.PRI_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
+        self.PRI_metrics = PRI_metrics.PRI_metrics(self.flst_log_dataframe)
         
 # =============================================================================
 #     def readLogFiles(self):
@@ -57,17 +60,13 @@ class MainClass():
         
 
     def createDataframes(self):
-        self.fp_intention_dataframe = self.dataframe_creator.create_fp_intention_dataframe(
-            "example_logs/Flight_intention_very_low_40_8.csv")
         self.loslog_dataframe = self.dataframe_creator.create_loslog_dataframe()
         self.conflog_dataframe = self.dataframe_creator.create_conflog_dataframe()
         self.geolog_dataframe = self.dataframe_creator.create_geolog_dataframe()
         self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe()
         self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe()
-
-        
-        time_log_dataframe=self.dataframe_creator.create_time_object_dataframe()
-        metrics_dataframe=self.dataframe_creator.create_metrics_dataframe()
+        # self.time_log_dataframe=self.dataframe_creator.create_time_object_dataframe()
+        # self.metrics_dataframe=self.dataframe_creator.create_metrics_dataframe()
 
     def main(self):
 
