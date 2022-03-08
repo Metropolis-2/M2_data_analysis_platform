@@ -29,6 +29,7 @@ class MainClass():
         #self.readLogFiles()
         self.dataframe_creator = DataframeCreator.DataframeCreator(self.scenario_name, self.spark)
 
+        self.fp_intention_dataframe = None #TODO: It was necessary a fpintention dataframe to manage the columns of the file
         self.loslog_dataframe = None
         self.conflog_dataframe = None
         self.geolog_dataframe = None
@@ -36,32 +37,37 @@ class MainClass():
         self.reglog_obj_dataframe = None
         self.createDataframes()
 
-        self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.flst_log_dataframe)
-        self.CAP_metrics = CAP_metrics.CAP_metrics(self.flst_log_dataframe, self.loslog_dataframe)
-        self.EFF_metrics = EFF_metrics.EFF_metrics(self.flst_log_dataframe)
+       # self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
+        self.CAP_metrics = CAP_metrics.CAP_metrics(self.fp_intention_dataframe, self.flst_log_dataframe, self.loslog_dataframe)
+        self.EFF_metrics = EFF_metrics.EFF_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         self.ENV_metrics = ENV_metrics.ENV_metrics(self.flst_log_dataframe)
         self.SAF_metrics = SAF_metrics.SAF_metrics(self.loslog_dataframe, self.conflog_dataframe, self.geolog_dataframe)
-        self.PRI_metrics = PRI_metrics.PRI_metrics(self.flst_log_dataframe)
+        self.PRI_metrics = PRI_metrics.PRI_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         
-    # def readLogFiles(self): #TODO: How will these parameters be received?
-    #     ##Read the log file
-    #     concept = "3"  ##DECENTRALISED
-    #     density = "very_low"
-    #     distribution = "40"
-    #     repetition = "8"
-    #     uncertainty = "W1"
-    #     self.scenario_name = concept + "_" + density + "_" + distribution + "_" + repetition + "_" + uncertainty
-
+# =============================================================================
+#     def readLogFiles(self):
+#         ##Read the log file
+#         concept = "3"  ##DECENTRALISED
+#         density = "very_low"
+#         distribution = "40"
+#         repetition = "8"
+#         uncertainty = "W1"
+#         self.scenario_name = concept + "_" + density + "_" + distribution + "_" + repetition + "_" + uncertainty
+# =============================================================================
+        
 
     def createDataframes(self):
+        self.fp_intention_dataframe = self.dataframe_creator.create_fp_intention_dataframe(
+            "example_logs/Flight_intention_very_low_40_8.csv")
         self.loslog_dataframe = self.dataframe_creator.create_loslog_dataframe()
         self.conflog_dataframe = self.dataframe_creator.create_conflog_dataframe()
         self.geolog_dataframe = self.dataframe_creator.create_geolog_dataframe()
         self.flst_log_dataframe = self.dataframe_creator.create_flstlog_dataframe()
         self.reglog_obj_dataframe = self.dataframe_creator.create_reglog_dataframe()
-        # self.time_log_dataframe=self.dataframe_creator.create_time_object_dataframe()
-        # self.metrics_dataframe=self.dataframe_creator.create_metrics_dataframe()
+
         
+        time_log_dataframe=self.dataframe_creator.create_time_object_dataframe()
+        metrics_dataframe=self.dataframe_creator.create_metrics_dataframe()
 
     def main(self):
 
@@ -218,7 +224,11 @@ class MainClass():
         # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
         #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().show()
         #
+        
+
 
 if __name__ == "__main__":
     #TODO: This call to the main() function should be repeated for each of the scenarios in a loop or option menu
     MainClass().main()
+    
+    
