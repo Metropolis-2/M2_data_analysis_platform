@@ -196,25 +196,25 @@ class MainClass():
 
 
 
-        ## Here are some filtering examples:
-        print("D1 apperances:", self.reglog_obj_dataframe.filter(self.reglog_obj_dataframe["ACID"] == "D1").count())
-        self.reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] == "D1").show()
-        ##############
-
-        print("objects from that secnario with time <210:", self.reglog_obj_dataframe.filter(
-            (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-                        self.reglog_obj_dataframe["scenario_name"] == scenario_name)).count())
-        self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-                    self.reglog_obj_dataframe["scenario_name"] == scenario_name)).show()
-        ################
-
-        print("Unique acids in the scenario:", self.reglog_obj_dataframe.filter(
-            (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-                        self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().count())
-        self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-                    self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().show()
-
-        
+        # ## Here are some filtering examples:
+        # print("D1 apperances:", self.reglog_obj_dataframe.filter(self.reglog_obj_dataframe["ACID"] == "D1").count())
+        # self.reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] == "D1").show()
+        # ##############
+        #
+        # print("objects from that secnario with time <210:", self.reglog_obj_dataframe.filter(
+        #     (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+        #                 self.reglog_obj_dataframe["scenario_name"] == scenario_name)).count())
+        # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+        #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).show()
+        # ################
+        #
+        # print("Unique acids in the scenario:", self.reglog_obj_dataframe.filter(
+        #     (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+        #                 self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().count())
+        # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+        #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().show()
+        #
+        #
 
 
 if __name__ == "__main__":
