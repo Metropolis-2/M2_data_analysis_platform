@@ -5,22 +5,13 @@ Created on Thu Feb 24 10:49:23 2022
 @author: jpedrero
 """
 import utils
+from platform_code.ctes import Ctes
+
 
 class AEQ_metrics():
 
-    # Ctes
-    #TODO: define this values
-    '''AEQ-1 Cancellation rules'''
-    CANCELLATION_DELAY_LIMIT_emergency_mission = 300
-    CANCELLATION_DELAY_LIMIT_delivery_mission = 600 #TODO: delivery_mission is the rest of missions?
-    CANCELLATION_DELAY_LIMIT_loitering_mission = 1200
-    '''AEQ-2 Vehicle autonomy'''
-    AUTONOMY_MP20 = 600
-    AUTONOMY_MP30 = 1200
-    '''AEQ-5 Threshold from the average delay in an absolute sense'''
-    THRESHOLD_DELAY = 120
-
     def __init__(self, flst_log_dataframe):
+        self.ctes = Ctes()
         self.utils = utils.Utils()
         self.flst_log_dataframe = flst_log_dataframe
 
@@ -62,6 +53,7 @@ class AEQ_metrics():
         at the requested time as if a user were alone in the system, respecting all concept airspace rules.
         Realized arrival time comes directly from the simulations)
         '''
+
         ideal_route_dist = {}  #route_path 2D distance between sending and receiving points for each vehicle ACID
         ideal_flight_time = {} #ideal flight_time based on ideal route_dist and vehicle_speed
         for key, value in self.rec_snd_points.items():
@@ -79,11 +71,11 @@ class AEQ_metrics():
 
             #Get mission type (emergency, loitering or delivery)
             if(key in self.emergency_missions):
-                cancel_value = self.CANCELLATION_DELAY_LIMIT_emergency_mission
+                cancel_value = self.ctes.CANCELLATION_DELAY_LIMIT_emergency_mission
             elif(key in self.loitering_missions):
-                cancel_value = self.CANCELLATION_DELAY_LIMIT_loitering_mission
+                cancel_value = self.ctes.CANCELLATION_DELAY_LIMIT_loitering_mission
             else:
-                cancel_value = self.CANCELLATION_DELAY_LIMIT_delivery_mission
+                cancel_value = self.ctes.CANCELLATION_DELAY_LIMIT_delivery_mission
 
             if(delay >= cancel_value):
                 list_cancelled_demands.append(key)
@@ -111,9 +103,9 @@ class AEQ_metrics():
         for key, value in self.flight_times.items():
             vehicle_type = self.vehicle_types[key]
             if(vehicle_type == 'MP20'):
-                autonomy = self.AUTONOMY_MP20
+                autonomy = self.ctes.AUTONOMY_MP20
             else: # vehicle_type == 'MP30'
-                autonomy = self.AUTONOMY_MP30
+                autonomy = self.ctes.AUTONOMY_MP30
 
             if(self.flight_times[key] >= autonomy):
                 list_inoperative_trajectories.append(key)
@@ -170,8 +162,11 @@ class AEQ_metrics():
         '''
         self.compute_AEQ1_metric()
         list_inequitable_delayed_demands = list()
+
+        #Calculate average delay
+        avergage_delay = self.utils.average_statistics(self.delay_times)
         for delay in self.delay_times:
-            if(delay > self.THRESHOLD_DELAY):
+            if((avergage_delay - self.ctes) < delay or delay > (avergage_delay + self.ctes)):
                 list_inequitable_delayed_demands.append(delay)
 
         self.number_inequitable_delayed_demands = len(list_inequitable_delayed_demands)

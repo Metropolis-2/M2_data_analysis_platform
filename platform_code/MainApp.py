@@ -4,9 +4,6 @@ Created on Fri Feb 11 16:33:17 2022
 
 @author: nipat
 """
-import os
-import pandas as pd
-from pyspark.sql import Row
 from pyspark.sql import SparkSession
 
 import DataframeCreator
@@ -24,14 +21,9 @@ class MainClass():
         ##Init    
         self.spark = SparkSession.builder.appName('Platform Analysis.com').getOrCreate()
         self.spark.conf.set("spark.sql.debug.maxToStringFields", 1000)
-
-        sparkContext = self.spark.sparkContext
+        # sparkContext = self.spark.sparkContext
         self.scenario_name = None
-
-        #self.readLogFiles()
         self.dataframe_creator = DataframeCreator.DataframeCreator(self.scenario_name, self.spark)
-
-        self.fp_intention_dataframe = None #TODO: It was necessary a fpintention dataframe to manage the columns of the file
         self.loslog_dataframe = None
         self.conflog_dataframe = None
         self.geolog_dataframe = None
@@ -39,7 +31,6 @@ class MainClass():
         self.reglog_obj_dataframe = None
         self.createDataframes()
 
-       # self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.fp_intention_dataframe, self.flst_log_dataframe)
         self.AEQ_metrics = AEQ_metrics.AEQ_metrics(self.flst_log_dataframe)
         self.CAP_metrics = CAP_metrics.CAP_metrics(self.flst_log_dataframe, self.loslog_dataframe)
         self.EFF_metrics = EFF_metrics.EFF_metrics(self.flst_log_dataframe)
@@ -143,9 +134,9 @@ class MainClass():
                     4: 'EFF-4: 3D distance route efficiency',
                     5: 'EFF-5: Route duration efficiency',
                     6: 'EFF-6: Departure delay',
-                    7: 'EFF-7: Departure sequence delay',
-                    8: 'EFF-8: Arrival sequence delay',
-                    9: "Go back"
+                    # 7: 'EFF-7: Departure sequence delay',
+                    # 8: 'EFF-8: Arrival sequence delay',
+                    7: "Go back"
                 }
                 EFF_option = selectOptionMenu(EFF_metrics_dict)
                 result = self.EFF_metrics.evaluate_EFF_metric(EFF_option)
@@ -205,24 +196,24 @@ class MainClass():
 
 
 
-        # ## Here are some filtering examples:
-        # print("D1 apperances:", self.reglog_obj_dataframe.filter(self.reglog_obj_dataframe["ACID"] == "D1").count())
-        # self.reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] == "D1").show()
-        # ##############
-        #
-        # print("objects from that secnario with time <210:", self.reglog_obj_dataframe.filter(
-        #     (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-        #                 self.reglog_obj_dataframe["scenario_name"] == scenario_name)).count())
-        # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-        #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).show()
-        # ################
-        #
-        # print("Unique acids in the scenario:", self.reglog_obj_dataframe.filter(
-        #     (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-        #                 self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().count())
-        # self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
-        #             self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().show()
-        #
+        ## Here are some filtering examples:
+        print("D1 apperances:", self.reglog_obj_dataframe.filter(self.reglog_obj_dataframe["ACID"] == "D1").count())
+        self.reglog_obj_dataframe.filter(reglog_obj_dataframe["ACID"] == "D1").show()
+        ##############
+
+        print("objects from that secnario with time <210:", self.reglog_obj_dataframe.filter(
+            (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+                        self.reglog_obj_dataframe["scenario_name"] == scenario_name)).count())
+        self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+                    self.reglog_obj_dataframe["scenario_name"] == scenario_name)).show()
+        ################
+
+        print("Unique acids in the scenario:", self.reglog_obj_dataframe.filter(
+            (self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+                        self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().count())
+        self.reglog_obj_dataframe.filter((self.reglog_obj_dataframe["Time_stamp"] < 210) & (
+                    self.reglog_obj_dataframe["scenario_name"] == scenario_name)).select("ACID").distinct().show()
+
         
 
 

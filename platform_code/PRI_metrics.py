@@ -5,18 +5,13 @@ Created on Thu Feb 24 10:49:23 2022
 @author: jpedrero
 """
 import utils
+from platform_code.ctes import Ctes
+
 
 class PRI_metrics():
-
-    '''PRI1 Weight for each priority level '''
-    #TODO: check values
-    WEIGHT_PRIO1 = 1
-    WEIGHT_PRIO2 = 2
-    WEIGHT_PRIO3 = 3
-    WEIGHT_PRIO4 = 4
     
     def __init__(self, flst_log_dataframe):
-
+        self.ctes = Ctes()
         self.utils = utils.Utils()
         self.flst_log_dataframe = flst_log_dataframe
 
@@ -65,7 +60,7 @@ class PRI_metrics():
         fptimes_prio4 = sum([float(row["FLIGHT_time"]) for row in self.flst_log_dataframe.select("FLIGHT_time").filter(
             (self.flst_log_dataframe.ACID).isin(self.prio4_list)).collect()])
 
-        result = (self.WEIGHT_PRIO1*fptimes_prio1) + (self.WEIGHT_PRIO2*fptimes_prio2) + (self.WEIGHT_PRIO3*fptimes_prio3) + (self.WEIGHT_PRIO4*fptimes_prio4)
+        result = (self.ctes.WEIGHT_PRIO1*fptimes_prio1) + (self.ctes.WEIGHT_PRIO2*fptimes_prio2) + (self.ctes.WEIGHT_PRIO3*fptimes_prio3) + (self.WEIGHT_PRIO4*fptimes_prio4)
         return result
     
     def compute_PRI2_metric(self):
@@ -85,7 +80,7 @@ class PRI_metrics():
         fpdist_prio4 = sum([float(row["3D_dist"]) for row in self.flst_log_dataframe.select("3D_dist").filter(
             (self.flst_log_dataframe.ACID).isin(self.prio4_list)).collect()])
 
-        result = (self.WEIGHT_PRIO1*fpdist_prio1) + (self.WEIGHT_PRIO2*fpdist_prio2) + (self.WEIGHT_PRIO3*fpdist_prio3) + (self.WEIGHT_PRIO4*fpdist_prio4)
+        result = (self.ctes.WEIGHT_PRIO1*fpdist_prio1) + (self.ctes.WEIGHT_PRIO2*fpdist_prio2) + (self.ctes.WEIGHT_PRIO3*fpdist_prio3) + (self.WEIGHT_PRIO4*fpdist_prio4)
         return result
     
     def compute_PRI3_metric(self):

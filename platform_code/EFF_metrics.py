@@ -6,13 +6,13 @@ Created on Thu Feb 24 10:49:23 2022
 """
 
 import utils
+from platform_code.ctes import Ctes
+
 
 class EFF_metrics():
-
-    '''EFF2,3,4 Lowest altitude of flying'''
-    HEIGHT_LOW_LAYER = 60 #feet
     
     def __init__(self, flst_log_dataframe):
+        self.ctes = Ctes()
         self.utils = utils.Utils()
         self.flst_log_dataframe = flst_log_dataframe
 
@@ -33,10 +33,10 @@ class EFF_metrics():
             return self.compute_EFF5_metric()
         elif(metric_id == 6):
             return self.compute_EFF6_metric()
-        elif(metric_id == 7):
-            return self.compute_EFF7_metric()
-        elif(metric_id == 8):
-            return self.compute_EFF8_metric()
+        # elif(metric_id == 7):
+        #     return self.compute_EFF7_metric()
+        # elif(metric_id == 8):
+        #     return self.compute_EFF8_metric()
         else:
             print("No valid metric")
     
@@ -72,7 +72,7 @@ class EFF_metrics():
         '''
 
         # Calculate lenght_ideal_vertical_route
-        ideal_vertical_dist = self.utils.feetToMeter(2*self.HEIGHT_LOW_LAYER)
+        ideal_vertical_dist = self.utils.feetToMeter(2*self.ctes.HEIGHT_LOW_LAYER)
 
         #Calculate lenght_actual_vertical_route (include ascensing_distances and descending_distances)
         alt_dist = dict([(str(row["ACID"]), float(row["ALT_dist"])) for row in self.flst_log_dataframe.select("ACID", "ALT_dist").collect()])
@@ -93,7 +93,7 @@ class EFF_metrics():
         (Ratio representing the length of the ascending distance in the ideal route to the length of the ascending distance of the actual route)
         '''
 
-        heigh_lowest_layer = self.utils.feetToMeter(self.HEIGHT_LOW_LAYER)
+        heigh_lowest_layer = self.utils.feetToMeter(self.ctes.HEIGHT_LOW_LAYER)
         # TODO: ascensing_distance is is half of ALT in the dataframe?
         alt_dist_ascending = dict([(str(row["ACID"]), float(row["ALT_dist"])/2) for row in self.flst_log_dataframe.select("ACID", "ALT_dist").collect()])
 
@@ -120,7 +120,7 @@ class EFF_metrics():
             rcv_point = value[1]
             route_dist = self.utils.distCoords(snd_point, rcv_point)
             ideal_route_dist[key] = route_dist
-            length_ideal_3D_route[key] = route_dist + 2*self.HEIGHT_LOW_LAYER
+            length_ideal_3D_route[key] = route_dist + 2*self.ctes.HEIGHT_LOW_LAYER
 
         length_actual_3D_route = dict([(str(row["ACID"]), float(row["3D_dist"])) for row in self.flst_log_dataframe.select("ACID", "3D_dist").collect()])
 
@@ -183,31 +183,31 @@ class EFF_metrics():
         result = departure_delay
         return result
     
-    def compute_EFF7_metric(self):
-        '''
-        EFF-7: Departure sequence delay
-        (Time duration from the time that the aircraft starts its flight to the time that the aircraft takes off from the origin point)
-        '''
-        #TODO: How to estimate when the drone starts to fly? FLIGHT_time is the time between takeoff and landing directly? (takeoff == SPAWN_time) and (landing == DEL_time)??
-        time_actual_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
-        time_takeoff = dict([(str(row["ACID"]), abs(float(row["SPAWN_time"])-float(row["FLIGHT_time"]))) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time", "FLIGHT_time").collect()])
-        departure_sequence_delay = {}
-        for key, value in time_actual_departure.items():
-            departure_sequence_delay[key] = abs(time_actual_departure[key] - time_takeoff[key])
-        result = departure_sequence_delay
-        return result
-    
-    def compute_EFF8_metric(self):
-        '''
-        EFF-8: Arrival sequence delay
-        (Time duration from the time that the aircraft arrived at the destination vertiport to the time that the aircraft landed at the destination point)
-        '''
-        #TODO: How to know the point of reached_landing_vertiport?? (takeoff == SPAWN_time) and (landing == DEL_time)??
-
-        time_reached_landing_vertiport = dict([(str(row["ACID"]), float(row["DEL_time"])) for row in self.flst_log_dataframe.select("ACID", "DEL_time").collect()])
-        time_landing = dict([(str(row["ACID"]), abs(float(row["DEL_time"])-float(row["FLIGHT_time"]))) for row in self.flst_log_dataframe.select("ACID", "DEL_time", "FLIGHT_time").collect()])
-        departure_sequence_delay = {}
-        for key, value in time_reached_landing_vertiport.items():
-            departure_sequence_delay[key] = abs(time_reached_landing_vertiport[key] - time_landing[key])
-        result = departure_sequence_delay
-        return result
+    # def compute_EFF7_metric(self):
+    #     '''
+    #     EFF-7: Departure sequence delay
+    #     (Time duration from the time that the aircraft starts its flight to the time that the aircraft takes off from the origin point)
+    #     '''
+    #     #TODO: How to estimate when the drone starts to fly? FLIGHT_time is the time between takeoff and landing directly? (takeoff == SPAWN_time) and (landing == DEL_time)??
+    #     time_actual_departure = dict([(str(row["ACID"]), float(row["SPAWN_time"])) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time").collect()])
+    #     time_takeoff = dict([(str(row["ACID"]), abs(float(row["SPAWN_time"])-float(row["FLIGHT_time"]))) for row in self.flst_log_dataframe.select("ACID", "SPAWN_time", "FLIGHT_time").collect()])
+    #     departure_sequence_delay = {}
+    #     for key, value in time_actual_departure.items():
+    #         departure_sequence_delay[key] = abs(time_actual_departure[key] - time_takeoff[key])
+    #     result = departure_sequence_delay
+    #     return result
+    #
+    # def compute_EFF8_metric(self):
+    #     '''
+    #     EFF-8: Arrival sequence delay
+    #     (Time duration from the time that the aircraft arrived at the destination vertiport to the time that the aircraft landed at the destination point)
+    #     '''
+    #     #TODO: How to know the point of reached_landing_vertiport?? (takeoff == SPAWN_time) and (landing == DEL_time)??
+    #
+    #     time_reached_landing_vertiport = dict([(str(row["ACID"]), float(row["DEL_time"])) for row in self.flst_log_dataframe.select("ACID", "DEL_time").collect()])
+    #     time_landing = dict([(str(row["ACID"]), abs(float(row["DEL_time"])-float(row["FLIGHT_time"]))) for row in self.flst_log_dataframe.select("ACID", "DEL_time", "FLIGHT_time").collect()])
+    #     departure_sequence_delay = {}
+    #     for key, value in time_reached_landing_vertiport.items():
+    #         departure_sequence_delay[key] = abs(time_reached_landing_vertiport[key] - time_landing[key])
+    #     result = departure_sequence_delay
+    #     return result

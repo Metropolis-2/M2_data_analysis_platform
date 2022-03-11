@@ -8,10 +8,9 @@ from pyproj import  Transformer
 
 class Utils():
 
-    def __init__(self, ):
+    def __init__(self):
         self.MINUTS_CONVERSION = 3600
         self.SECONDS_CONVERSION = 60
-        self.AIRCRAFT_PATH = "aircraft.json"
         
         input_file=open("constrained_poly.dill", 'rb')
         constrained_poly=dill.load(input_file)
@@ -38,7 +37,10 @@ class Utils():
         return dst
 
     def getVehicleMaxSpeed(self, vehicle_type): #vehicle_type will be 'MP20' or 'MP30'
-        speed = json.load(open(self.AIRCRAFT_PATH))[vehicle_type]['envelop']['v_max'] #TODO: v_max o cruising_speed
+        if(vehicle_type == 'MP20'):
+            speed = 20
+        else: #MP30
+            speed = 30
         return speed #in m/s
 
     def stdDeviation_statistics(self, data_list): #return standard deviation of data_list
