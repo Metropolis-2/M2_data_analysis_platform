@@ -2,9 +2,32 @@ from pathlib import Path
 
 from loguru import logger
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import monotonically_increasing_id, col
+from pyspark.sql.functions import monotonically_increasing_id, col, udf
+from pyspark.sql.types import DoubleType
 
+from config import settings
 from parse.parser_constants import SCENARIOS, LINE_COUNT
+
+
+def get_fp_int_name_from_scenario_name(scenario_name: str) -> str:
+    """ Method to get the flight intention file name from the scenario name.
+
+    :param scenario_name: scenario name.
+    :return: the name of the flight intention related with the scenario.
+    """
+    scenario_name_split = scenario_name.split('_')
+    if len(scenario_name_split) == 6:
+        density = f'{scenario_name_split[1]}_{scenario_name_split[2]}'
+        distribution = scenario_name_split[3]
+        repetition = scenario_name_split[4]
+        uncertainty = scenario_name_split[5]
+    else:
+        density = scenario_name_split[1]
+        distribution = scenario_name_split[2]
+        repetition = scenario_name_split[3]
+        uncertainty = scenario_name_split[4]
+
+    return f'Flight_intention_{density}_{distribution}_{repetition}_{uncertainty}'
 
 
 def build_scenario_name(file_name: Path) -> str:
