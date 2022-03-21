@@ -8,6 +8,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import lit
 
 from config import settings
+from parse.combined_flst_fp_int_parser import COMBINED_FLST_FP_INT_TRANSFORMATIONS
 from parse.flst_log_parser import parse_flst_log
 from parse.fp_int_parser import parse_fp_int
 from parse.parser_constants import FLST_LOG_PREFIX
@@ -44,6 +45,10 @@ def build_flst_log_fp_int_combined_dataframe(spark: SparkSession) -> DataFrame:
         dataframe_tmp = flst_log_dataframe.join(fp_int_dataframe,
                                                 on=ACID,
                                                 how='outer')
+
+        for transformation in COMBINED_FLST_FP_INT_TRANSFORMATIONS:
+            logger.trace('Applying data transformation: {}.', transformation)
+            dataframe_tmp = transformation(dataframe_tmp)
 
         if dataframe:
             dataframe = dataframe.union(dataframe_tmp)

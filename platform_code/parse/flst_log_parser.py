@@ -2,12 +2,13 @@ from pathlib import Path
 
 from loguru import logger
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, col
 from pyspark.sql.types import DoubleType
 
-from parse.parser_utils import build_scenario_name, remove_commented_log_lines
+from parse.parser_utils import build_scenario_name, remove_commented_log_lines, transform_location
 from schemas.flst_log_schema import COLUMNS_TO_DROP, FLST_LOG_COLUMNS, FLST_LOG_FILE_SCHEMA
-from schemas.tables_attributes import ASCEND_DIST, WORK_DONE, DEL_Y, DEL_X, SCENARIO_NAME
+from schemas.tables_attributes import (ASCEND_DIST, WORK_DONE, DEL_Y, DEL_X, SCENARIO_NAME, DEL_LATITUDE, DEL_LONGITUDE,
+                                       LATITUDE, LONGITUDE)
 
 
 def remove_flst_log_unused_columns(dataframe: DataFrame) -> DataFrame:
@@ -48,7 +49,6 @@ def calculate_work_done(dataframe: DataFrame) -> DataFrame:
     return dataframe.withColumn(WORK_DONE, lit(0).cast(DoubleType()))
 
 
-# TODO: Perform transformation
 def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
     """ Calculates the position where the drone was deleted in the axis X and Y.
     It performs the transformation from the coordinates to X and Y units.
@@ -56,12 +56,14 @@ def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the FLSTLOG data read from the file.
     :return: dataframe with the columns for the deletion of the drone in the X and Y added.
     """
-    # transformer = Transformer.from_crs('epsg:4326', 'epsg:32633')
-    # p = transformer.transform(float(line_list[8]), float(line_list[9]))
-    # del_x = p[0]
-    # del_y = p[1]
-    dataframe = dataframe.withColumn(DEL_X, lit(0).cast(DoubleType()))
-    return dataframe.withColumn(DEL_Y, lit(0).cast(DoubleType()))
+    # First we parse the location and transform the CRS with `transform_location`()`
+    dataframe = dataframe.withColumn('DEL_POS', transform_location(col(DEL_LATITUDE), col(DEL_LONGITUDE)))
+    # Recover the calculated columns and move to the first level of the table.
+    dataframe = dataframe.withColumn(DEL_X, col(f'DEL_POS.{LATITUDE}'))
+    dataframe = dataframe.withColumn(DEL_Y, col(f'DEL_POS.{LONGITUDE}'))
+    # Remove intermediate column
+    dataframe = dataframe.drop('DEL_POS')
+    return dataframe
 
 
 FLST_LOG_TRANSFORMATIONS = [remove_flst_log_unused_columns, calculate_ascending_distance, calculate_work_done,

@@ -1,6 +1,6 @@
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
-from schemas.tables_attributes import ACID, SCENARIO_NAME, DELETION_TIME, SPAWN_TIME, \
+from schemas.tables_attributes import ACID, SCENARIO_NAME, DEL_TIME, SPAWN_TIME, \
     DISTANCE_2D, FLIGHT_TIME, DISTANCE_3D, DISTANCE_ALT, WORK_DONE, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, DEL_X, \
     DEL_Y, TAS, VERTICAL_SPEED, HEADING, ASAS_ACTIVE, PILOT_ALT, PILOT_SPD, PILOT_HDG, PILOT_VS, ASCEND_DIST
 
@@ -26,7 +26,7 @@ from schemas.tables_attributes import ACID, SCENARIO_NAME, DELETION_TIME, SPAWN_
 # - Pilot VS [fpm] -> Removed
 
 FLST_LOG_FILE_SCHEMA = StructType([
-    StructField(DELETION_TIME, DoubleType(), False),
+    StructField(DEL_TIME, DoubleType(), False),
     StructField(ACID, StringType(), False),
     StructField(SPAWN_TIME, DoubleType(), False),
     StructField(FLIGHT_TIME, StringType(), False),
@@ -50,7 +50,7 @@ FLST_LOG_FILE_SCHEMA = StructType([
 FLST_LOG_SCHEMA = StructType([
     StructField(SCENARIO_NAME, StringType(), False),
     StructField(ACID, StringType(), False),
-    StructField(DELETION_TIME, DoubleType(), False),
+    StructField(DEL_TIME, DoubleType(), False),
     StructField(SPAWN_TIME, DoubleType(), False),
     StructField(FLIGHT_TIME, StringType(), False),
     StructField(DISTANCE_2D, StringType(), False),
@@ -67,7 +67,7 @@ FLST_LOG_SCHEMA = StructType([
 
 FLST_LOG_COLUMNS = [SCENARIO_NAME,
                     ACID,
-                    DELETION_TIME,
+                    DEL_TIME,
                     SPAWN_TIME,
                     FLIGHT_TIME,
                     DISTANCE_2D,

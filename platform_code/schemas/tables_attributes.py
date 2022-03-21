@@ -5,7 +5,7 @@ LATITUDE = 'LAT'
 LONGITUDE = 'LON'
 ALTITUDE = 'ALT'
 DISTANCE = 'DIST'
-DELETION_TIME = 'Deletion_Time'
+DEL_TIME = 'Deletion_Time'
 
 # LOS LOG
 LOS_ID = 'LOS_ID'
@@ -83,3 +83,9 @@ HEADING = 'Heading'
 VERTICAL_SPEED = 'Vertical_Speed'
 TAS = 'TAS'
 ASCEND_DIST = 'Ascend_dist'
+
+# COMBINED FLST LOG AND FLIGHT INTENTIONS
+ARRIVAL_DELAY = 'Arrival_delay'
+DEPARTURE_DELAY = 'Departure_delay'
+SPAWNED = 'Spawned'
+MISSION_COMPLETED = 'Mission_completed'
