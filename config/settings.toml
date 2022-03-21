@@ -3,11 +3,17 @@ data_path = "C:\\Users\\arodgril\\Repos\\Metropolis\\M2_data_analysis_platform\\
 flight_intention_path = "@format {this.data_path}\\Flight_intentions"
 
 # LOGGING
-logging.level = "TRACE"
+logging.level = "DEBUG"
 
 # SPARK CONFIG
 spark.app_name = "M2-Data-Analysis-Platform"
 
 # DRONE CONFIG
 MP30.avg_speed = 15.43 # m/s
+MP30.autonomy = 1800
 MP20.avg_speed = 10.29 # m/s
+MP20.autonomy = 1800
+
+# COORDINATE SYSTEM
+crs.origin = "epsg:4326"
+crs.desired = "epsg:32633"

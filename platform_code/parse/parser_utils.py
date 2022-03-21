@@ -1,12 +1,15 @@
 from pathlib import Path
+from typing import Tuple
 
 from loguru import logger
+from pyproj import Transformer
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import monotonically_increasing_id, col, udf
-from pyspark.sql.types import DoubleType
+from pyspark.sql.types import StructType, StructField, DoubleType
 
 from config import settings
 from parse.parser_constants import SCENARIOS, LINE_COUNT
+from schemas.tables_attributes import LATITUDE, LONGITUDE
 
 
 def get_fp_int_name_from_scenario_name(scenario_name: str) -> str:
@@ -76,3 +79,47 @@ def remove_commented_log_lines(dataframe: DataFrame) -> DataFrame:
     dataframe = add_dataframe_counter(dataframe, LINE_COUNT)
     dataframe = dataframe.filter(col(LINE_COUNT) >= 9)
     return dataframe.drop(col(LINE_COUNT))
+
+
+@udf
+def get_drone_speed(drone_model: str) -> float:
+    """ Checks in the configuration the average speed of the drone model.
+    If the drone is not found, 10 is returned.
+
+    :param drone_model: name of the drone model. For example, MP20.
+    :return: speed in meters per second.
+    """
+    if drone_model:
+        logger.trace('The drone model is {}.', drone_model)
+        speed = settings.get(f'{drone_model}.avg_speed', 10.)
+
+    else:
+        logger.warning('No drone model value was retrieved. Returning speed 0.')
+        speed = 0
+
+    return speed
+
+
+@udf(returnType=StructType([StructField(LATITUDE, DoubleType(), False),
+                            StructField(LONGITUDE, DoubleType(), False)]))
+def transform_location(latitude: float, longitude: float) -> Tuple[float, float]:
+    """ Transform the coordinates from the original coordinate reference system
+    to another one. The coordinates systems to used can be set in the
+    setting files.
+
+    :param latitude: latitude in the origin coordinate system.
+    :param longitude: longitude in the origin coordinate system.
+    :return: struct with two columns with the latitude and longitude
+     in the desired coordinate system.
+    """
+    # Change the crs
+    transformer = Transformer.from_crs(settings.crs.origin, settings.crs.desired)
+    p = transformer.transform(latitude, longitude)
+    transformed_latitude = p[0]
+    transformed_longitude = p[1]
+
+    logger.trace('Transformed from {} ({}, {}) to {}, ({}, {}).',
+                 settings.crs.origin, latitude, longitude,
+                 settings.crs.desired, transformed_latitude, transformed_longitude)
+
+    return transformed_latitude, transformed_longitude

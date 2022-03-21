@@ -41,14 +41,14 @@ def build_flst_log_fp_int_combined_dataframe(spark: SparkSession) -> DataFrame:
         fp_int_dataframe = parse_fp_int(spark, fp_int_name)
 
         # Join flst log with flight plan using the ship id
-        dataframe = flst_log_dataframe.join(fp_int_dataframe,
-                                            on=ACID,
-                                            how='outer')
+        dataframe_tmp = flst_log_dataframe.join(fp_int_dataframe,
+                                                on=ACID,
+                                                how='outer')
 
         if dataframe:
-            dataframe = dataframe.union(flst_log_dataframe)
+            dataframe = dataframe.union(dataframe_tmp)
         else:
-            dataframe = flst_log_dataframe
+            dataframe = dataframe_tmp
 
     return dataframe
 
