@@ -7,7 +7,7 @@ from pyspark.sql.types import DoubleType
 
 from config import settings
 from parse.parser_utils import add_dataframe_counter, get_drone_speed, transform_location
-from schemas.fp_int_schema import COLUMNS_TO_DROP, FP_INTENTION_COLUMNS, FP_INTENTION_FILE_SCHEMA
+from schemas.fp_int_schema import COLUMNS_TO_DROP, FP_INT_COLUMNS, FP_INT_FILE_SCHEMA
 from schemas.tables_attributes import (BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
                                        BASELINE_FLIGHT_TIME, BASELINE_ARRIVAL_TIME, BASELINE_2D_DISTANCE, DESTINATION_X,
                                        DESTINATION_Y, LOITERING, FLST_ID, CRUISING_SPEED, ORIGIN_LON, ORIGIN_LAT,
@@ -34,7 +34,7 @@ def reorder_fp_int_columns(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the flight plan intention data read from the file.
     :return: dataframe with the columns reordered.
     """
-    return dataframe.select(FP_INTENTION_COLUMNS)
+    return dataframe.select(FP_INT_COLUMNS)
 
 
 def add_fp_int_counter(dataframe: DataFrame) -> DataFrame:
@@ -132,9 +132,9 @@ def calculate_baseline_metrics(dataframe: DataFrame) -> DataFrame:
     return dataframe
 
 
-FP_INTENTION_TRANSFORMATIONS = [add_fp_int_counter, transform_timestamps_to_seconds, check_if_loitering_mission,
-                                calculate_cruising_speed, parse_locations, calculate_destination_position,
-                                calculate_baseline_metrics, remove_fp_int_unused_columns, reorder_fp_int_columns]
+FP_INT_TRANSFORMATIONS = [add_fp_int_counter, transform_timestamps_to_seconds, check_if_loitering_mission,
+                          calculate_cruising_speed, parse_locations, calculate_destination_position,
+                          calculate_baseline_metrics, remove_fp_int_unused_columns, reorder_fp_int_columns]
 
 
 def parse_fp_int(spark: SparkSession, fp_int_name: str) -> DataFrame:
@@ -145,9 +145,9 @@ def parse_fp_int(spark: SparkSession, fp_int_name: str) -> DataFrame:
     :return: parsed and processed FLST LOG.
     """
     fp_int_path = Path(settings.flight_intention_path, f'{fp_int_name}.csv')
-    fp_int_dataframe = spark.read.csv(str(fp_int_path), header=False, schema=FP_INTENTION_FILE_SCHEMA)
+    fp_int_dataframe = spark.read.csv(str(fp_int_path), header=False, schema=FP_INT_FILE_SCHEMA)
 
-    for transformation in FP_INTENTION_TRANSFORMATIONS:
+    for transformation in FP_INT_TRANSFORMATIONS:
         logger.trace('Applying data transformation: {}.', transformation)
         fp_int_dataframe = transformation(fp_int_dataframe)
 

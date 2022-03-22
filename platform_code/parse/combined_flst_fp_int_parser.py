@@ -1,11 +1,49 @@
+from typing import Dict
+
+from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when
 
 from config import settings
+from parse.parser_utils import get_fp_int_key_from_scenario_name
 from schemas.tables_attributes import DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_X, ARRIVAL_DELAY, DEPARTURE_DELAY, \
-    SPAWNED, MISSION_COMPLETED, DEL_TIME, BASELINE_ARRIVAL_TIME, SPAWN_TIME, BASELINE_DEPARTURE_TIME
+    SPAWNED, MISSION_COMPLETED, DEL_TIME, BASELINE_ARRIVAL_TIME, SPAWN_TIME, BASELINE_DEPARTURE_TIME, ACID, FLIGHT_TIME, \
+    DISTANCE_2D, DISTANCE_3D, DISTANCE_ALT, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, ASCEND_DIST, WORK_DONE, FLST_ID, \
+    SCENARIO_NAME, ORIGIN_LAT, ORIGIN_LON, DESTINATION_LAT, DESTINATION_LON, CRUISING_SPEED, PRIORITY, LOITERING, \
+    BASELINE_2D_DISTANCE, BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE, \
+    BASELINE_FLIGHT_TIME
 
 COLUMNS_TO_DROP = [DESTINATION_X, DESTINATION_Y, DEL_X, DEL_Y]
+COMBINED_COLUMNS = [
+    FLST_ID,
+    SCENARIO_NAME,
+    ACID,
+    ORIGIN_LAT,
+    ORIGIN_LON,
+    DESTINATION_LAT,
+    DESTINATION_LON,
+    BASELINE_DEPARTURE_TIME,
+    CRUISING_SPEED,
+    PRIORITY,
+    LOITERING,
+    BASELINE_2D_DISTANCE,
+    BASELINE_VERTICAL_DISTANCE,
+    BASELINE_ASCENDING_DISTANCE,
+    BASELINE_3D_DISTANCE,
+    BASELINE_FLIGHT_TIME,
+    BASELINE_ARRIVAL_TIME,
+    DEL_TIME,
+    SPAWN_TIME,
+    FLIGHT_TIME,
+    DISTANCE_2D,
+    DISTANCE_3D,
+    DISTANCE_ALT,
+    DEL_LATITUDE,
+    DEL_LONGITUDE,
+    DEL_ALTITUDE,
+    ASCEND_DIST,
+    WORK_DONE
+]
 
 
 def remove_combined_unused_columns(dataframe: DataFrame) -> DataFrame:
@@ -15,6 +53,15 @@ def remove_combined_unused_columns(dataframe: DataFrame) -> DataFrame:
     :return: dataframe with the columns removed.
     """
     return dataframe.drop(*COLUMNS_TO_DROP)
+
+
+def reorder_combined_columns(dataframe: DataFrame) -> DataFrame:
+    """ Reorder the columns of the combined FLST log and flight intentions dataframe.
+
+    :param dataframe: dataframe with the combined FLST log and flight intentions dataframe.
+    :return: dataframe with the columns reordered.
+    """
+    return dataframe.select(COMBINED_COLUMNS)
 
 
 def calculate_arrival_delay(dataframe: DataFrame) -> DataFrame:
@@ -57,4 +104,32 @@ def was_mission_completed(dataframe: DataFrame) -> DataFrame:
 
 
 COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_arrival_delay, calculate_departure_delay, was_spawned,
-                                        was_mission_completed, remove_combined_unused_columns]
+                                        was_mission_completed, remove_combined_unused_columns, reorder_combined_columns]
+
+
+@logger.catch
+def generate_combined_dataframe(scenario_name: str,
+                                flst_log_dataframe: DataFrame,
+                                flight_intentions: Dict[str, DataFrame]) -> DataFrame:
+    """
+
+    :param scenario_name: scenario name of the file being processed.
+    :param flst_log_dataframe: parsed flst log dataframe.
+    :param flight_intentions: set of flight intentions dataframes.
+    :return: joined flst log and flight intention dataframe.
+    """
+    fp_int_key = get_fp_int_key_from_scenario_name(scenario_name)
+    fp_int_dataframe = flight_intentions.get(fp_int_key, None)
+    if fp_int_dataframe:
+        # Join flst log with flight plan using the ship id
+        dataframe_tmp = flst_log_dataframe.join(fp_int_dataframe,
+                                                on=ACID,
+                                                how='outer')
+
+        for transformation in COMBINED_FLST_FP_INT_TRANSFORMATIONS:
+            logger.trace('Applying data transformation: {}.', transformation)
+            dataframe_tmp = transformation(dataframe_tmp)
+    else:
+        raise KeyError('The flight intention file `Flight_intention_{}` was not parsed.', fp_int_key)
+
+    return dataframe_tmp

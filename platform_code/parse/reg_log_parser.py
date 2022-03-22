@@ -3,10 +3,14 @@ from pathlib import Path
 from typing import Tuple, List, Union
 
 from loguru import logger
+from pyspark.pandas import DataFrame
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType
 
 from parse.parser_utils import build_scenario_name
-from schemas.reg_log_schema import REG_LOG_SCHEMA
+
+# There are no transformations yet for the REGLOG dataframe
+REG_LOG_TRANSFORMATIONS = list()
 
 
 def read_reglog(log_file: Union[str, Path]) -> Tuple[List[float], List[str], List[str], List[str], List[str]]:
@@ -52,12 +56,20 @@ def read_reglog(log_file: Union[str, Path]) -> Tuple[List[float], List[str], Lis
     return timestamp_list, acid_lines_list, alt_lines_list, lat_lines_list, lon_lines_list
 
 
-def generate_reg_log_dataframe(spark, log_files: List[Path]):
-    """
+def generate_reg_log_dataframe(log_files: List[Path],
+                               schema: StructType,
+                               transformations: List,
+                               spark: SparkSession) -> DataFrame:
+    """ Parses the REGLOG files. This kind of log file is more complex
+    as every four lines of the file contains the information of a set
+    of rows of the final dataframe.
 
-    :param log_files:
-    :param schema:
-    :return:
+    :param log_files: list of log files paths of the same type.
+    :param schema: file schema of the log files to read.
+    :param transformations: set of functions that perform a
+     transformation in the dataframe.
+    :param spark: Spark session of the execution.
+    :return: final dataframe.
     """
     dataframe = None
 
@@ -77,18 +89,14 @@ def generate_reg_log_dataframe(spark, log_files: List[Path]):
                 reg_log_object_counter += 1
                 reg_log_list.append(data_line)
 
-        dataframe_tmp = spark.createDataFrame(reg_log_list, REG_LOG_SCHEMA)
+        dataframe_tmp = spark.createDataFrame(reg_log_list, schema)
+        for transformation in transformations:
+            logger.trace('Applying data transformation: {}.', transformation)
+            dataframe_tmp = transformation(dataframe_tmp)
+
         if dataframe:
             dataframe = dataframe.union(dataframe_tmp)
         else:
             dataframe = dataframe_tmp
 
     return dataframe
-
-
-if __name__ == '__main__':
-    file = Path(
-        "C:\\Users\\arodgril\\Repos\\Metropolis\\M2_data_analysis_platform\\platform_code\\example_logs\\Centralised\\REGLOG_Flight_intention_very_low_40_8_W1_20220201_17-13-56.log")
-
-    spark = SparkSession.builder.appName('Platform Analysis.com').getOrCreate()
-    generate_reg_log_dataframe(spark, [file])

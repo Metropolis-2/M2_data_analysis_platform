@@ -12,7 +12,7 @@ from parse.parser_constants import SCENARIOS, LINE_COUNT
 from schemas.tables_attributes import LATITUDE, LONGITUDE
 
 
-def get_fp_int_name_from_scenario_name(scenario_name: str) -> str:
+def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:
     """ Method to get the flight intention file name from the scenario name.
 
     :param scenario_name: scenario name.
@@ -30,7 +30,31 @@ def get_fp_int_name_from_scenario_name(scenario_name: str) -> str:
         repetition = scenario_name_split[3]
         uncertainty = scenario_name_split[4]
 
-    return f'Flight_intention_{density}_{distribution}_{repetition}_{uncertainty}'
+    return f'{density}_{distribution}_{repetition}_{uncertainty}'
+
+
+def get_scenario_data_from_fp_int(file_name: Path) -> str:
+    """ Generates the scenario name for the file to process.
+
+    :param file_name: Path to the log file to parse.
+    :return: the scenario name generated from the file.
+    """
+    logger.trace('Obtaining the scenario data for file: {}.', file_name)
+
+    fp_intention = file_name.stem.split("_")[2:]
+    distribution = fp_intention[-3]
+    repetition = fp_intention[-2]
+    uncertainty = fp_intention[-1]
+
+    # If the flight intention is very low, the split generates 5 elements, otherwise 4.
+    if len(fp_intention) == 5:
+        density = "very_low"
+    else:
+        density = fp_intention[0]
+
+    scenario_data = density + "_" + distribution + "_" + repetition + "_" + uncertainty
+    logger.debug('Scenario data string obtained: {}.', scenario_data)
+    return scenario_data
 
 
 def build_scenario_name(file_name: Path) -> str:
