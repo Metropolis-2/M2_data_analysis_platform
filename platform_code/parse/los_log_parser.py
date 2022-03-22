@@ -34,7 +34,7 @@ def generate_crash_column(los_log_dataframe):
     return los_log_dataframe.withColumn(
         CRASH,
         when((col(DISTANCE) <= 1.7) &
-             (abs(col(f'{ALTITUDE}_1') - col(f'{ALTITUDE}_2')) < 0.75), True).otherwise(False)
+             (abs(col(f'{ALTITUDE}_1') - col(f'{ALTITUDE}_2')) < 2.46), True).otherwise(False)
     )
 
 

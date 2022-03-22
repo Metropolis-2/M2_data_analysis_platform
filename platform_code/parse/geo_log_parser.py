@@ -4,7 +4,7 @@ from pyspark.sql.functions import when, col
 from parse.parser_utils import add_dataframe_counter
 from schemas.geo_log_schema import GEO_LOG_COLUMNS, COLUMNS_TO_DROP
 from schemas.tables_attributes import (CONF_ID, VIOLATION_SEVERITY,
-                                       MAX_INTRUSION, GEOFENCE_NAME, OPEN_AIRSPACE, GEO_ID)
+                                       MAX_INTRUSION, GEOFENCE_NAME, OPEN_AIRSPACE, GEO_ID, LOITERING_NFZ)
 
 
 def add_geo_log_counter(dataframe: DataFrame) -> DataFrame:
@@ -43,8 +43,14 @@ def check_geofence_location(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the GEOLOG data read from the file.
     :return: dataframe with the columns indicating if the geofence is in the open space.
     """
-    return dataframe.withColumn(OPEN_AIRSPACE,
+
+    dataframe = dataframe.withColumn(OPEN_AIRSPACE,
                                 when(col(GEOFENCE_NAME).startswith('G'), True).otherwise(False))
+
+    dataframe = dataframe.withColumn(LOITERING_NFZ,
+                                when(col(GEOFENCE_NAME).startswith('L'), True).otherwise(False))
+
+    return dataframe
 
 
 def reorder_geo_log_columns(dataframe: DataFrame) -> DataFrame:
