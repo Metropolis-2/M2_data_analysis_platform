@@ -102,9 +102,9 @@ class DataframeCreator():
         
         
                     crash=False
-                    #If the aircarft are closer than 1.7 in the horizontal diraction and 0.75 in the vetrical teh LOS is considere a crash
+                    #If the aircarft are closer than 1.7 in the horizontal diraction and 0. meters(2.46 feet) in the vetrical teh LOS is considere a crash
                     #Aircraft dimmensions from https://www.dji.com/gr/matrice600-pro/info#specs
-                    if float(line_list[11][:-2])<=1.7 and abs(float(line_list[7])-float(line_list[10]))<0.75:
+                    if float(line_list[11][:-2])<=1.7 and abs(float(line_list[7])-float(line_list[10]))<2.46:
                         crash=True
                     tmp_list.append(crash)
                     loslog_list.append(tmp_list)
@@ -202,7 +202,7 @@ class DataframeCreator():
     def create_geolog_dataframe(self):
         
         dataframe_cnt=0
-        col_list = ["GEO_id", "Scenario_name", "GEOF_NAME", "MAX_intrusion", "Violation_severity","Open_airspace"]
+        col_list = ["GEO_id", "Scenario_name", "GEOF_NAME", "MAX_intrusion", "Violation_severity","Open_airspace","Loitering_nfz"]
         df = pd.DataFrame([col_list], columns=col_list)
         geolog_data_frame =self.spark.createDataFrame(df)   
         geo_id=0          
@@ -263,7 +263,11 @@ class DataframeCreator():
                     #If the geofence name starts with g it is in open airspace
                     if line_list[3][0]=="G":
                         open_airspace=True
+                    loitering_nfz=False
+                    if line_list[3][0]=="L":
+                        loitering_nfz=True
                     tmp_list.append(open_airspace)
+                    tmp_list.append(loitering_nfz)
                     geolog_list.append(tmp_list)
         
         
