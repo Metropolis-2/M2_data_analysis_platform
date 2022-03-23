@@ -1,8 +1,7 @@
 import sys
-from typing import Dict
 
 from loguru import logger
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import SparkSession
 
 from SAF_metrics import *
 from config import settings
@@ -17,13 +16,14 @@ from platform_code.parse.parser_constants import (CONF_LOG_PREFIX, GEO_LOG_PREFI
 from platform_code.schemas.conf_log_schema import CONF_LOG_FILE_SCHEMA
 from platform_code.schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
 from platform_code.schemas.los_log_schema import LOS_LOG_FILE_SCHEMA
+from results.result_dataframes import build_results_dataframes
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.reg_log_schema import REG_LOG_SCHEMA
-from schemas.tables_attributes import SCENARIO_NAME
 
 # Configuration for the log names with the schema associated and the transformations
 # required after the read of the log file.
 # Prefix: (schema, transformations)
+
 PARSE_CONFIG = {
     CONF_LOG_PREFIX: (CONF_LOG_FILE_SCHEMA, CONF_LOG_TRANSFORMATIONS),
     LOS_LOG_PREFIX: (LOS_LOG_FILE_SCHEMA, LOS_LOG_TRANSFORMATIONS),
@@ -31,21 +31,6 @@ PARSE_CONFIG = {
     FLST_LOG_PREFIX: (FLST_LOG_FILE_SCHEMA, FLST_LOG_TRANSFORMATIONS),
     REG_LOG_PREFIX: (REG_LOG_SCHEMA, REG_LOG_TRANSFORMATIONS)
 }
-
-
-def build_results_dataframes(log_dataframes: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
-    """ Generates a dictionary with the dataframes that will save the results.
-
-    :param log_dataframes: dataframes of the parsed log files to analyze.
-    :return: dataframes where the results of the metrics will be calculated.
-    """
-    output_dataframes = dict()
-    # Take a dataframe that includes data for all the scenarios
-    dataframe = log_dataframes[FLST_LOG_PREFIX]
-    output_dataframes['OUTPUT'] = dataframe.select(SCENARIO_NAME).distinct()
-    # TODO: generate sound output dataframe
-
-    return output_dataframes
 
 
 def calculate_AEQ_metrics():

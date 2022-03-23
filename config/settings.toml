@@ -1,5 +1,6 @@
 # PATH
 data_path = "/mnt/shared/repos/metropolis/M2_data_analysis_platform/data"
+saving_path = "/mnt/shared/repos/metropolis/M2_data_analysis_platform/output"
 flight_intention_path = "@format {this.data_path}/Flight_intentions"
 
 # LOGGING
