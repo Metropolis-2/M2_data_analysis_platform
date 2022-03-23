@@ -4,7 +4,7 @@ from pyspark.sql.functions import lit, col
 import pyspark.sql.functions as F
 
 
-def compute_SAF1_metric(spark, input_df, output_df):
+def compute_SAF1_metric(input_df, output_df):
     '''
     SAF-1: Number of conflicts
     (Number of aircraft pairs that will experience a loss of separation within the look-ahead time)
@@ -14,7 +14,7 @@ def compute_SAF1_metric(spark, input_df, output_df):
     df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
     return df
 
-def compute_SAF2_metric(spark, input_df, output_df):
+def compute_SAF2_metric(input_df, output_df):
     '''
     SAF-2: Number of intrusions
     (Number of aircraft pairs that experience loss of separation)
@@ -24,7 +24,7 @@ def compute_SAF2_metric(spark, input_df, output_df):
     df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
     return df
 
-def compute_SAF3_metric(spark, input_df, output_df):
+def compute_SAF3_metric(input_df, output_df):
     '''
     SAF-3: Intrusion prevention rate
     (Ratio representing the proportion of conflicts that did not result in a loss of separation)
@@ -33,7 +33,7 @@ def compute_SAF3_metric(spark, input_df, output_df):
     df = df.withColumn(SAF3, df.SAF1/df.SAF2)
     return df
 
-def compute_SAF4_metric(spark, input_df, output_df):
+def compute_SAF4_metric(input_df, output_df):
     '''
     SAF-4: Minimum separation
     (The minimum separation between aircraft during conflicts)
@@ -43,7 +43,7 @@ def compute_SAF4_metric(spark, input_df, output_df):
     df = df.join(tmp_df, on=[SCENARIO_NAME], how='outer')
     return df
 
-def compute_SAF5_metric(spark, input_df, output_df):
+def compute_SAF5_metric(input_df, output_df):
     '''
     SAF-5: Time spent in LOS
     (Total time spent in a state of intrusion)
@@ -53,7 +53,7 @@ def compute_SAF5_metric(spark, input_df, output_df):
     df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
     return df
 
-def compute_SAF6_metric(spark, input_df, output_df):
+def compute_SAF6_metric(input_df, output_df):
     '''
     SAF-6: Geofence violations
     (The number of geofence/building area violations)

@@ -10,6 +10,7 @@ from pyspark.sql.types import StructType, StructField, DoubleType
 from config import settings
 from parse.parser_constants import SCENARIOS, LINE_COUNT
 from schemas.tables_attributes import LATITUDE, LONGITUDE
+import geopy.distance
 
 
 def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:
@@ -147,3 +148,11 @@ def transform_location(latitude: float, longitude: float) -> Tuple[float, float]
                  settings.crs.desired, transformed_latitude, transformed_longitude)
 
     return transformed_latitude, transformed_longitude
+
+
+@udf
+def distCoords(origin_LAT, origin_LON, destination_LAT, destination_LON): #coords_1=(x1,y1) and coords_2=(x2,y2)
+    origin_tuple = (origin_LAT, origin_LON)
+    destination_tuple = (destination_LAT, destination_LON)
+    dst = geopy.distance.distance(origin_tuple, destination_tuple).m #TODO: direct distance calculation (in meters) between two points, is this approach correct?
+    return dst

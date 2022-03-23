@@ -2,7 +2,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import lit, col, when, hour, minute, second, split, regexp_replace
 from pyspark.sql.types import DoubleType
 
-from parse.parser_utils import add_dataframe_counter, get_drone_speed, transform_location
+from parse.parser_utils import add_dataframe_counter, get_drone_speed, transform_location, distCoords
 from schemas.fp_int_schema import COLUMNS_TO_DROP, FP_INT_COLUMNS
 from schemas.tables_attributes import (BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
                                        BASELINE_FLIGHT_TIME, BASELINE_ARRIVAL_TIME, BASELINE_2D_DISTANCE, DESTINATION_X,
@@ -118,11 +118,15 @@ def calculate_baseline_metrics(dataframe: DataFrame) -> DataFrame:
     :param dataframe:
     :return:
     """
-    dataframe = dataframe.withColumn(BASELINE_2D_DISTANCE, lit(0).cast(DoubleType()))
+
+    dataframe = dataframe.withColumn(BASELINE_2D_DISTANCE, distCoords(col(ORIGIN_LAT),col(ORIGIN_LON),col(DESTINATION_LAT),col(DESTINATION_LON)))
     dataframe = dataframe.withColumn(BASELINE_VERTICAL_DISTANCE, lit(0).cast(DoubleType()))
     dataframe = dataframe.withColumn(BASELINE_ASCENDING_DISTANCE, lit(0).cast(DoubleType()))
     dataframe = dataframe.withColumn(BASELINE_3D_DISTANCE, lit(0).cast(DoubleType()))
-    dataframe = dataframe.withColumn(BASELINE_FLIGHT_TIME, lit(0).cast(DoubleType()))
+    #TODO: Set VERTICAL_DISTANCE (60??) and VERTICAL_SPEED (5??)
+    dataframe = dataframe.withColumn(BASELINE_FLIGHT_TIME,
+                                     when(col(LOITERING), col(BASELINE_2D_DISTANCE) / col(CRUISING_SPEED) + 60 / 5)
+                                     .otherwise(col(BASELINE_2D_DISTANCE) / col(CRUISING_SPEED)))
     dataframe = dataframe.withColumn(BASELINE_DEPARTURE_TIME, lit(0).cast(DoubleType()))
     dataframe = dataframe.withColumn(BASELINE_ARRIVAL_TIME, lit(0).cast(DoubleType()))
     return dataframe

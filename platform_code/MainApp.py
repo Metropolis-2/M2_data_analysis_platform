@@ -3,6 +3,8 @@ import sys
 from loguru import logger
 from pyspark.sql import SparkSession
 
+from PRI_metrics import compute_PRI1_metric, compute_PRI2_metric, compute_PRI3_metric, compute_PRI4_metric, \
+    compute_PRI5_metric
 from SAF_metrics import *
 from config import settings
 from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
@@ -34,54 +36,54 @@ PARSE_CONFIG = {
 
 
 def calculate_AEQ_metrics():
-    compute_AEQ1_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ1_1_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ2_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ2_1_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ3_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ4_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ5_metric(spark, input_dataframes, output_dataframes)
-    compute_AEQ5_1_metric(spark, input_dataframes, output_dataframes)
+    compute_AEQ1_metric(input_dataframes, output_dataframes)
+    compute_AEQ1_1_metric(input_dataframes, output_dataframes)
+    compute_AEQ2_metric(input_dataframes, output_dataframes)
+    compute_AEQ2_1_metric(input_dataframes, output_dataframes)
+    compute_AEQ3_metric(input_dataframes, output_dataframes)
+    compute_AEQ4_metric(input_dataframes, output_dataframes)
+    compute_AEQ5_metric(input_dataframes, output_dataframes)
+    compute_AEQ5_1_metric(input_dataframes, output_dataframes)
 
 
 def calculate_CAP_metrics():
-    compute_CAP1_metric(spark, input_dataframes, output_dataframes)
-    compute_CAP2_metric(spark, input_dataframes, output_dataframes)
-    compute_CAP3_metric(spark, input_dataframes, output_dataframes)
-    compute_CAP4_metric(spark, input_dataframes, output_dataframes)
+    compute_CAP1_metric(input_dataframes, output_dataframes)
+    compute_CAP2_metric(input_dataframes, output_dataframes)
+    compute_CAP3_metric(input_dataframes, output_dataframes)
+    compute_CAP4_metric(input_dataframes, output_dataframes)
 
 
 def calculate_EFF_metrics():
-    compute_EFF1_metric(spark, input_dataframes, output_dataframes)
-    compute_EFF2_metric(spark, input_dataframes, output_dataframes)
-    compute_EFF3_metric(spark, input_dataframes, output_dataframes)
-    compute_EFF4_metric(spark, input_dataframes, output_dataframes)
-    compute_EFF5_metric(spark, input_dataframes, output_dataframes)
-    compute_EFF6_metric(spark, input_dataframes, output_dataframes)
+    compute_EFF1_metric(input_dataframes, output_dataframes)
+    compute_EFF2_metric(input_dataframes, output_dataframes)
+    compute_EFF3_metric(input_dataframes, output_dataframes)
+    compute_EFF4_metric(input_dataframes, output_dataframes)
+    compute_EFF5_metric(input_dataframes, output_dataframes)
+    compute_EFF6_metric(input_dataframes, output_dataframes)
 
 
 def calculate_ENV_metrics():
-    compute_ENV1_metric(spark, input_dataframes, output_dataframes)
-    compute_ENV2_metric(spark, input_dataframes, output_dataframes)
-    compute_ENV3_metric(spark, input_dataframes, output_dataframes)
-    compute_ENV4_metric(spark, input_dataframes, output_dataframes)
+    compute_ENV1_metric(input_dataframes, output_dataframes)
+    compute_ENV2_metric(input_dataframes, output_dataframes)
+    compute_ENV3_metric(input_dataframes, output_dataframes)
+    compute_ENV4_metric(input_dataframes, output_dataframes)
 
 
 def calculate_SAF_metrics():
-    compute_SAF1_metric(spark, input_dataframes, output_dataframes)
-    compute_SAF2_metric(spark, input_dataframes, output_dataframes)
-    compute_SAF3_metric(spark, input_dataframes, output_dataframes)
-    compute_SAF4_metric(spark, input_dataframes, output_dataframes)
-    compute_SAF5_metric(spark, input_dataframes, output_dataframes)
-    compute_SAF6_metric(spark, input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_SAF1_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_SAF2_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_SAF3_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_SAF4_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_SAF5_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_SAF6_metric(input_dataframes, output_dataframes)
 
 
 def calculate_PRI_metrics():
-    compute_PRI1_metric(spark, input_dataframes, output_dataframes)
-    compute_PRI2_metric(spark, input_dataframes, output_dataframes)
-    compute_PRI3_metric(spark, input_dataframes, output_dataframes)
-    compute_PRI4_metric(spark, input_dataframes, output_dataframes)
-    compute_PRI5_metric(spark, input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_PRI1_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_PRI2_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_PRI3_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_PRI4_metric(input_dataframes, output_dataframes)
+    output_dataframes["OUTPUT"] = compute_PRI5_metric(input_dataframes, output_dataframes)
 
 
 def calculate_ALL_metrics():
@@ -103,8 +105,6 @@ if __name__ == "__main__":
     input_dataframes = parse_log_files(PARSE_CONFIG, fp_intentions_dfs, spark)
     output_dataframes = build_results_dataframes(input_dataframes)
 
-    output_dataframes["OUTPUT"] = compute_SAF1_metric(spark, input_dataframes, output_dataframes)
-    output_dataframes["OUTPUT"] = compute_SAF2_metric(spark, input_dataframes, output_dataframes)
-    output_dataframes["OUTPUT"] = compute_SAF3_metric(spark, input_dataframes, output_dataframes)
-    output_dataframes["OUTPUT"] = compute_SAF4_metric(spark, input_dataframes, output_dataframes)
+    calculate_SAF_metrics()
+    calculate_PRI_metrics()
     output_dataframes["OUTPUT"].show()
