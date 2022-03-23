@@ -1,4 +1,3 @@
-from win32comext.axscript.client.framework import SafeOutput
 
 from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX
 from schemas.tables_attributes import SCENARIO_NAME, SAF1, SAF2, SAF3, DISTANCE, SAF4
