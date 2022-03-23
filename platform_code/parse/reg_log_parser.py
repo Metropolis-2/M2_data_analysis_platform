@@ -78,7 +78,7 @@ def generate_reg_log_dataframe(log_files: List[Path],
         reg_log_object_counter = 0
         reg_log_data = read_reglog(log_file)
         scenario_name = build_scenario_name(log_file)
-        logger.info('Processing file: `{}` with scenario name: {}.', log_file.name, scenario_name)
+        logger.debug('Processing file: `{}` with scenario name: {}.', log_file.name, scenario_name)
 
         for timestamp, acids, alts, lats, lons in zip(*reg_log_data):
             for acid, alt, lat, lon in zip(acids, alts, lats, lons):

@@ -9,32 +9,24 @@ from pyspark.sql.functions import lit
 
 from config import settings
 from parse.combined_flst_fp_int_parser import generate_combined_dataframe
-from parse.conf_log_parser import CONF_LOG_TRANSFORMATIONS
 from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
 from parse.fp_int_parser import FP_INT_TRANSFORMATIONS
-from parse.geo_log_parser import GEO_LOG_TRANSFORMATIONS
-from parse.los_log_parser import LOS_LOG_TRANSFORMATIONS
-from parse.parser_constants import FLST_LOG_PREFIX, FP_INT_PREFIX, CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX, \
-    REG_LOG_PREFIX
+from parse.parser_constants import FLST_LOG_PREFIX, FP_INT_PREFIX, REG_LOG_PREFIX
 from parse.parser_utils import (build_scenario_name, remove_commented_log_lines, get_scenario_data_from_fp_int)
-from parse.reg_log_parser import REG_LOG_TRANSFORMATIONS, generate_reg_log_dataframe
-from schemas.conf_log_schema import CONF_LOG_FILE_SCHEMA
+from parse.reg_log_parser import generate_reg_log_dataframe
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.fp_int_schema import FP_INT_FILE_SCHEMA
-from schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
-from schemas.los_log_schema import LOS_LOG_FILE_SCHEMA
-from schemas.reg_log_schema import REG_LOG_SCHEMA
 from schemas.tables_attributes import SCENARIO_NAME
 
 # Configuration for the log names with the schema associated and the transformations
 # required after the read of the log file.
 # Prefix: (schema, transformations)
 PARSE_CONFIG = {
-    CONF_LOG_PREFIX: (CONF_LOG_FILE_SCHEMA, CONF_LOG_TRANSFORMATIONS),
-    LOS_LOG_PREFIX: (LOS_LOG_FILE_SCHEMA, LOS_LOG_TRANSFORMATIONS),
-    GEO_LOG_PREFIX: (GEO_LOG_FILE_SCHEMA, GEO_LOG_TRANSFORMATIONS),
+    # CONF_LOG_PREFIX: (CONF_LOG_FILE_SCHEMA, CONF_LOG_TRANSFORMATIONS),
+    # LOS_LOG_PREFIX: (LOS_LOG_FILE_SCHEMA, LOS_LOG_TRANSFORMATIONS),
+    # GEO_LOG_PREFIX: (GEO_LOG_FILE_SCHEMA, GEO_LOG_TRANSFORMATIONS),
     FLST_LOG_PREFIX: (FLST_LOG_FILE_SCHEMA, FLST_LOG_TRANSFORMATIONS),
-    REG_LOG_PREFIX: (REG_LOG_SCHEMA, REG_LOG_TRANSFORMATIONS)
+    # REG_LOG_PREFIX: (REG_LOG_SCHEMA, REG_LOG_TRANSFORMATIONS)
 }
 
 
@@ -48,7 +40,8 @@ def parse_flight_intentions(spark: SparkSession) -> Dict[str, DataFrame]:
      scenario data as key.
     """
     fp_int_dataframes = dict()
-    fp_int_paths = list(path.rglob(f"{FP_INT_PREFIX}*.csv"))
+    fp_int_folder = Path(settings.flight_intention_path)
+    fp_int_paths = list(fp_int_folder.rglob(f"{FP_INT_PREFIX}*.csv"))
 
     for fp_int_path in fp_int_paths:
         logger.trace('Reading file: `{}`.', fp_int_path)
@@ -76,12 +69,13 @@ def parse_log_files(parse_config: Dict[str, Tuple],
     :return: dictionary of the dataframes for each log type.
     """
     dataframes = dict()
+    data_path = Path(settings.data_path)
 
     for log_type_config in parse_config.items():
         log_prefix, (schema, transformations) = log_type_config
         logger.info('Processing {} log files.', log_prefix)
 
-        log_paths = list(path.rglob(f"{log_prefix}*.log"))
+        log_paths = list(data_path.rglob(f"{log_prefix}*.log"))
 
         if log_prefix is not REG_LOG_PREFIX:
             dataframe = parse_log_file(log_paths, schema, transformations, flight_intentions, spark)
@@ -116,11 +110,10 @@ def parse_log_file(log_files: List[Path],
     dataframe = None
 
     for log_file in log_files:
-        logger.trace('Reading file: `{}`.', log_file)
+        scenario_name = build_scenario_name(log_file)
+        logger.debug('Processing file: `{}` with scenario name: {}.', log_file.name, scenario_name)
 
         dataframe_tmp = spark.read.csv(str(log_file), header=False, schema=schema)
-
-        scenario_name = build_scenario_name(log_file)
         dataframe_tmp = remove_commented_log_lines(dataframe_tmp)
         dataframe_tmp = dataframe_tmp.withColumn(SCENARIO_NAME, lit(scenario_name))
 
@@ -144,7 +137,6 @@ if __name__ == '__main__':
     logger.remove()
     logger.add(sys.stderr, level=settings.logging.level)
 
-    path = Path(settings.data_path)
     spark = SparkSession.builder.appName(settings.spark.app_name).getOrCreate()
 
     fp_intentions_dfs = parse_flight_intentions(spark)

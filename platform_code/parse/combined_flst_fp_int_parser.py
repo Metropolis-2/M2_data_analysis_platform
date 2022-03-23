@@ -124,7 +124,7 @@ def generate_combined_dataframe(scenario_name: str,
         # Join flst log with flight plan using the ship id
         dataframe_tmp = flst_log_dataframe.join(fp_int_dataframe,
                                                 on=ACID,
-                                                how='outer')
+                                                how='left')
 
         for transformation in COMBINED_FLST_FP_INT_TRANSFORMATIONS:
             logger.trace('Applying data transformation: {}.', transformation)
