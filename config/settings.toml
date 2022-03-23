@@ -1,6 +1,6 @@
 # PATH
-data_path = "C:\\Users\\arodgril\\Repos\\Metropolis\\M2_data_analysis_platform\\platform_code\\example_logs\\input"
-flight_intention_path = "@format {this.data_path}\\Flight_intentions"
+data_path = "/mnt/shared/repos/metropolis/M2_data_analysis_platform/data"
+flight_intention_path = "@format {this.data_path}/Flight_intentions"
 
 # LOGGING
 logging.level = "DEBUG"
