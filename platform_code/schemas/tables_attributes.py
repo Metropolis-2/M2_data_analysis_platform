@@ -6,6 +6,7 @@ LONGITUDE = 'LON'
 ALTITUDE = 'ALT'
 DISTANCE = 'DIST'
 DEL_TIME = 'Deletion_Time'
+VERTICAL_SPEED = 'Vertical_Speed'
 
 # LOS LOG
 LOS_ID = 'LOS_ID'
@@ -81,7 +82,6 @@ PILOT_SPD = 'Pilot_SPD'
 PILOT_ALT = 'Pilot_ALT'
 ASAS_ACTIVE = 'ASAS_Active'
 HEADING = 'Heading'
-VERTICAL_SPEED = 'Vertical_Speed'
 TAS = 'TAS'
 ASCEND_DIST = 'Ascend_dist'
 

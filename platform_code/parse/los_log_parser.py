@@ -1,10 +1,10 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import when, col, abs
 
-from parse.parser_utils import add_dataframe_counter
 from schemas.los_log_schema import LOS_LOG_COLUMNS
 from schemas.tables_attributes import (CRASH, DISTANCE, ALTITUDE, LOS_DURATION_TIME,
                                        LOS_EXIT_TIME, LOS_START_TIME, LOS_ID)
+from utils.parser_utils import add_dataframe_counter
 
 
 def add_loss_log_counter(los_log_dataframe: DataFrame):

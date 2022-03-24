@@ -7,7 +7,7 @@ from schemas.tables_attributes import (ACID, FLST_ID, RECEPTION_TIME, VEHICLE, D
                                        BASELINE_DEPARTURE_TIME, CRUISING_SPEED, LOITERING, BASELINE_2D_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
                                        BASELINE_FLIGHT_TIME, BASELINE_ARRIVAL_TIME, DESTINATION_Y, ORIGIN_LAT,
-                                       ORIGIN_LON, DESTINATION_X)
+                                       ORIGIN_LON, DESTINATION_X, VERTICAL_SPEED)
 
 FP_INT_FILE_SCHEMA = StructType([
     StructField(RECEPTION_TIME, StringType(), False),
@@ -33,6 +33,7 @@ FP_INT_SCHEMA = StructType([
     StructField(DESTINATION_LON, DoubleType(), False),
     StructField(BASELINE_DEPARTURE_TIME, DoubleType(), False),
     StructField(CRUISING_SPEED, DoubleType(), False),
+    StructField(VERTICAL_SPEED, DoubleType(), False),
     StructField(PRIORITY, DoubleType(), False),
     StructField(LOITERING, BooleanType(), False),
     StructField(BASELINE_2D_DISTANCE, DoubleType(), False),
@@ -53,6 +54,7 @@ FP_INT_COLUMNS = [FLST_ID,
                   DESTINATION_LON,
                   BASELINE_DEPARTURE_TIME,
                   CRUISING_SPEED,
+                  VERTICAL_SPEED,
                   PRIORITY,
                   LOITERING,
                   BASELINE_2D_DISTANCE,

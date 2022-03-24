@@ -1,10 +1,10 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import when, col
 
-from parse.parser_utils import add_dataframe_counter
 from schemas.geo_log_schema import GEO_LOG_COLUMNS, COLUMNS_TO_DROP
 from schemas.tables_attributes import (VIOLATION_SEVERITY, MAX_INTRUSION, GEOFENCE_NAME, OPEN_AIRSPACE, GEO_ID,
                                        LOITERING_NFZ)
+from utils.parser_utils import add_dataframe_counter
 
 
 def add_geo_log_counter(dataframe: DataFrame) -> DataFrame:

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Tuple
 
+import geopy.distance
 from loguru import logger
 from pyproj import Transformer
 from pyspark.sql import DataFrame
@@ -9,8 +10,7 @@ from pyspark.sql.types import StructType, StructField, DoubleType
 
 from config import settings
 from parse.parser_constants import SCENARIOS, LINE_COUNT
-from schemas.tables_attributes import LATITUDE, LONGITUDE
-import geopy.distance
+from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
 
 
 def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:
@@ -106,8 +106,7 @@ def remove_commented_log_lines(dataframe: DataFrame) -> DataFrame:
     return dataframe.drop(col(LINE_COUNT))
 
 
-@udf
-def get_drone_speed(drone_model: str) -> float:
+def get_drone_avg_speed(drone_model: str) -> float:
     """ Checks in the configuration the average speed of the drone model.
     If the drone is not found, 10 is returned.
 
@@ -115,7 +114,6 @@ def get_drone_speed(drone_model: str) -> float:
     :return: speed in meters per second.
     """
     if drone_model:
-        logger.trace('The drone model is {}.', drone_model)
         speed = settings.get(f'{drone_model}.avg_speed', 10.)
 
     else:
@@ -125,8 +123,46 @@ def get_drone_speed(drone_model: str) -> float:
     return speed
 
 
-@udf(returnType=StructType([StructField(LATITUDE, DoubleType(), False),
-                            StructField(LONGITUDE, DoubleType(), False)]))
+def get_drone_vertical_speed(drone_model: str) -> float:
+    """ Checks in the configuration the vertical speed of the drone model.
+    If the drone is not found, 5 is returned.
+
+    :param drone_model: name of the drone model. For example, MP20.
+    :return: speed in meters per second.
+    """
+    if drone_model:
+        speed = settings.get(f'{drone_model}.vertical_speed', 5.)
+
+    else:
+        logger.warning('No drone model value was retrieved. Returning speed 0.')
+        speed = 0
+
+    return speed
+
+
+@udf(returnType=StructType([
+    StructField(CRUISING_SPEED, DoubleType(), False),
+    StructField(VERTICAL_SPEED, DoubleType(), False)
+]))
+def get_drone_speed(drone_model: str) -> Tuple[float, float]:
+    """ Checks in the configuration the average and vertical
+    speeds of the drone model.
+    If the drone is not found, the speeds are set to 0.
+
+    :param drone_model: name of the drone model. For example, MP20.
+    :return: avg_speed in meters per second.
+    """
+    logger.trace('The drone model is {}.', drone_model)
+    avg_speed = get_drone_avg_speed(drone_model)
+    vertical_speed = get_drone_vertical_speed(drone_model)
+
+    return avg_speed, vertical_speed
+
+
+@udf(returnType=StructType([
+    StructField(LATITUDE, DoubleType(), False),
+    StructField(LONGITUDE, DoubleType(), False)
+]))
 def transform_location(latitude: float, longitude: float) -> Tuple[float, float]:
     """ Transform the coordinates from the original coordinate reference system
     to another one. The coordinates systems to used can be set in the
@@ -151,8 +187,17 @@ def transform_location(latitude: float, longitude: float) -> Tuple[float, float]
 
 
 @udf
-def distCoords(origin_LAT, origin_LON, destination_LAT, destination_LON): #coords_1=(x1,y1) and coords_2=(x2,y2)
-    origin_tuple = (origin_LAT, origin_LON)
-    destination_tuple = (destination_LAT, destination_LON)
-    dst = geopy.distance.distance(origin_tuple, destination_tuple).m #TODO: direct distance calculation (in meters) between two points, is this approach correct?
-    return dst
+def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
+                             destination_latitude: float, destination_longitude: float) -> float:
+    """ Calculates the distance in meters between two world coordinates.
+
+    :param origin_latitude: origin latitude point.
+    :param origin_longitude: origin longitude point.
+    :param destination_latitude: destination latitude point.
+    :param destination_longitude: destination longitude point.
+    :return: distance in meters.
+    """
+    origin_tuple = (origin_latitude, origin_longitude)
+    destination_tuple = (destination_latitude, destination_longitude)
+    # TODO: direct distance calculation (in meters) between two points, is this approach correct?
+    return geopy.distance.distance(origin_tuple, destination_tuple).m

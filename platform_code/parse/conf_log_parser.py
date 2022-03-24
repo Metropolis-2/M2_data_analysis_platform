@@ -1,8 +1,8 @@
 from pyspark.sql import DataFrame
 
-from parse.parser_utils import add_dataframe_counter
 from schemas.conf_log_schema import COLUMNS_TO_DROP, CONF_LOG_COLUMNS
 from schemas.tables_attributes import CONF_ID
+from utils.parser_utils import add_dataframe_counter
 
 
 def add_conf_log_counter(dataframe: DataFrame) -> DataFrame:

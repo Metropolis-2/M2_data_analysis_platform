@@ -7,7 +7,7 @@ from pyspark.pandas import DataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
 
-from parse.parser_utils import build_scenario_name
+from utils.parser_utils import build_scenario_name
 
 # There are no transformations yet for the REGLOG dataframe
 REG_LOG_TRANSFORMATIONS = list()

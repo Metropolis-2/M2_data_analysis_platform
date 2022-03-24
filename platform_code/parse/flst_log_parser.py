@@ -5,10 +5,10 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import lit, col
 from pyspark.sql.types import DoubleType
 
-from parse.parser_utils import build_scenario_name, remove_commented_log_lines, transform_location
 from schemas.flst_log_schema import COLUMNS_TO_DROP, FLST_LOG_COLUMNS, FLST_LOG_FILE_SCHEMA
 from schemas.tables_attributes import (ASCEND_DIST, WORK_DONE, DEL_Y, DEL_X, SCENARIO_NAME, DEL_LATITUDE, DEL_LONGITUDE,
                                        LATITUDE, LONGITUDE)
+from utils.parser_utils import build_scenario_name, remove_commented_log_lines, transform_location
 
 
 def remove_flst_log_unused_columns(dataframe: DataFrame) -> DataFrame:

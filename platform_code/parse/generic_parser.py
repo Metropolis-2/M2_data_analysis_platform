@@ -12,11 +12,11 @@ from parse.combined_flst_fp_int_parser import generate_combined_dataframe
 from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
 from parse.fp_int_parser import FP_INT_TRANSFORMATIONS
 from parse.parser_constants import FLST_LOG_PREFIX, FP_INT_PREFIX, REG_LOG_PREFIX
-from parse.parser_utils import (build_scenario_name, remove_commented_log_lines, get_scenario_data_from_fp_int)
 from parse.reg_log_parser import generate_reg_log_dataframe
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.fp_int_schema import FP_INT_FILE_SCHEMA
 from schemas.tables_attributes import SCENARIO_NAME
+from utils.parser_utils import (build_scenario_name, remove_commented_log_lines, get_scenario_data_from_fp_int)
 
 # Configuration for the log names with the schema associated and the transformations
 # required after the read of the log file.
