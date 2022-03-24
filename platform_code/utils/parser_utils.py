@@ -9,7 +9,7 @@ from pyspark.sql.functions import monotonically_increasing_id, col, udf
 from pyspark.sql.types import StructType, StructField, DoubleType
 
 from config import settings
-from parse.parser_constants import SCENARIOS, LINE_COUNT
+from parse.parser_constants import SCENARIOS, LINE_COUNT, FEET_TO_METERS_SCALE
 from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
 
 
@@ -104,6 +104,16 @@ def remove_commented_log_lines(dataframe: DataFrame) -> DataFrame:
     dataframe = add_dataframe_counter(dataframe, LINE_COUNT)
     dataframe = dataframe.filter(col(LINE_COUNT) >= 9)
     return dataframe.drop(col(LINE_COUNT))
+
+
+def convert_feet_to_meters(dataframe: DataFrame, column_name: str) -> DataFrame:
+    """ Converts a given column that contains the altitude in feets to meters.
+
+    :param dataframe: dataframe to perform the transformation.
+    :param column_name: attribute name of the column.
+    :return: dataframe with the altitude column in meters.
+    """
+    return dataframe.withColumn(column_name, col(column_name) * FEET_TO_METERS_SCALE)
 
 
 def get_drone_avg_speed(drone_model: str) -> float:

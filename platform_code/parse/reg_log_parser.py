@@ -7,10 +7,21 @@ from pyspark.pandas import DataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
 
-from utils.parser_utils import build_scenario_name
+from schemas.tables_attributes import ALTITUDE
+from utils.parser_utils import build_scenario_name, convert_feet_to_meters
 
-# There are no transformations yet for the REGLOG dataframe
-REG_LOG_TRANSFORMATIONS = list()
+
+def convert_altitude_to_meter(dataframe: DataFrame) -> DataFrame:
+    """ Converts all the altitudes fields from feet to meters.
+
+    :param dataframe: dataframe with the REG log data read from the file.
+    :return: dataframe with the columns in feet transformed to meter.
+    """
+    # The altitude distance comprises both up and down movements
+    return convert_feet_to_meters(dataframe, ALTITUDE)
+
+
+REG_LOG_TRANSFORMATIONS = [convert_altitude_to_meter]
 
 
 def read_reglog(log_file: Union[str, Path]) -> Tuple[List[float], List[str], List[str], List[str], List[str]]:

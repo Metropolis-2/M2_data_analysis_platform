@@ -91,6 +91,10 @@ DEPARTURE_DELAY = 'Departure_delay'
 SPAWNED = 'Spawned'
 MISSION_COMPLETED = 'Mission_completed'
 
+# REGLOG
+REG_ID = "REG_ID"
+SIMULATION_TIME = "Simulation_time"
+
 # METRICS RESULT DATAFRAME
 OUTPUT_ID = 'Output_id'
 SUCCESS_AIRCRAFTS = 'Succeful_aircraft_number'

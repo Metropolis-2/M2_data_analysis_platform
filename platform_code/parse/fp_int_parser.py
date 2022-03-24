@@ -1,6 +1,5 @@
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import lit, col, when, hour, minute, second, split, regexp_replace
-from pyspark.sql.types import DoubleType
+from pyspark.sql.functions import col, when, hour, minute, second, split, regexp_replace
 
 from config import settings
 from schemas.fp_int_schema import COLUMNS_TO_DROP, FP_INT_COLUMNS
@@ -131,16 +130,15 @@ def calculate_baseline_metrics(dataframe: DataFrame) -> DataFrame:
 
     # TODO: Ask for the loitering flight altitude
     dataframe = dataframe.withColumn(BASELINE_ASCENDING_DISTANCE,
-                                     when(col(LOITERING), settings.loitering.flight_altitude)
-                                     .otherwise(lit(0).cast(DoubleType())))
+                                     when(col(LOITERING), settings.flight_altitude.loitering)
+                                     .otherwise(settings.flight_altitude.lowest))
     dataframe = dataframe.withColumn(BASELINE_VERTICAL_DISTANCE,
-                                     when(col(LOITERING), col(BASELINE_ASCENDING_DISTANCE) * 2)
-                                     .otherwise(lit(0).cast(DoubleType())))
+                                     col(BASELINE_ASCENDING_DISTANCE) * 2)
 
     dataframe = dataframe.withColumn(BASELINE_3D_DISTANCE,
                                      col(BASELINE_2D_DISTANCE) + col(BASELINE_VERTICAL_DISTANCE))
 
-    # TODO: Ask for the vertical speed for loitering
+    # TODO: Ask for the vertical speed for loitering and for normal flights
     dataframe = dataframe.withColumn(BASELINE_FLIGHT_TIME,
                                      when(col(LOITERING), (col(BASELINE_2D_DISTANCE) / col(CRUISING_SPEED) +
                                                            col(BASELINE_2D_DISTANCE) / col(VERTICAL_SPEED)))

@@ -1,14 +1,11 @@
-from pathlib import Path
-
-from loguru import logger
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql.functions import lit, col
 from pyspark.sql.types import DoubleType
 
-from schemas.flst_log_schema import COLUMNS_TO_DROP, FLST_LOG_COLUMNS, FLST_LOG_FILE_SCHEMA
-from schemas.tables_attributes import (ASCEND_DIST, WORK_DONE, DEL_Y, DEL_X, SCENARIO_NAME, DEL_LATITUDE, DEL_LONGITUDE,
-                                       LATITUDE, LONGITUDE)
-from utils.parser_utils import build_scenario_name, remove_commented_log_lines, transform_location
+from schemas.flst_log_schema import COLUMNS_TO_DROP, FLST_LOG_COLUMNS
+from schemas.tables_attributes import (ASCEND_DIST, WORK_DONE, DEL_Y, DEL_X, DEL_LATITUDE, DEL_LONGITUDE,
+                                       LATITUDE, LONGITUDE, DISTANCE_ALT, DEL_ALTITUDE)
+from utils.parser_utils import transform_location, convert_feet_to_meters
 
 
 def remove_flst_log_unused_columns(dataframe: DataFrame) -> DataFrame:
@@ -29,14 +26,28 @@ def reorder_flst_log_columns(dataframe: DataFrame) -> DataFrame:
     return dataframe.select(FLST_LOG_COLUMNS)
 
 
-# TODO : create a function to compute that with inputs ALT_dist=float(line_list[6]) and DEL_ALT=float(line_list[10])
+def convert_altitudes_to_meter(dataframe: DataFrame) -> DataFrame:
+    """ Converts all the altitudes fields from feet to meters.
+
+    :param dataframe: dataframe with the FLSTLOG data read from the file.
+    :return: dataframe with the columns in feet transformed to meter.
+    """
+    # The altitude distance comprises both up and down movements
+    dataframe = convert_feet_to_meters(dataframe, DISTANCE_ALT)
+    dataframe = convert_feet_to_meters(dataframe, DEL_ALTITUDE)
+    return dataframe
+
+
 def calculate_ascending_distance(dataframe: DataFrame) -> DataFrame:
     """ Calculates the ascending distance navigated by the drone.
+    This distance is calculated by halving the altitude distance, to take
+    only the up movements, and subtracting the deletion altitude.
 
     :param dataframe: dataframe with the FLSTLOG data read from the file.
     :return: dataframe with the column ascending distance added.
     """
-    return dataframe.withColumn(ASCEND_DIST, lit(0).cast(DoubleType()))
+    return dataframe.withColumn(ASCEND_DIST,
+                                col(DISTANCE_ALT) / 2 - col(DEL_ALTITUDE))
 
 
 # TODO : create a function to compute that with inputs ascend_dist and FLIGHT_time=float(line_list[3])
@@ -66,26 +77,5 @@ def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
     return dataframe
 
 
-FLST_LOG_TRANSFORMATIONS = [remove_flst_log_unused_columns, calculate_ascending_distance, calculate_work_done,
-                            calculate_deletion_position, reorder_flst_log_columns]
-
-
-def parse_flst_log(spark: SparkSession, log_path: Path) -> DataFrame:
-    """ Parses and process the FLSTLOG of the given file.
-
-    :param spark: spark session.
-    :param log_path: path to the FLST LOG.
-    :return: parsed and processed FLST LOG.
-    """
-    # First load the FLSTLOG
-    scenario_name = build_scenario_name(log_path)
-
-    flst_log_dataframe = spark.read.csv(str(log_path), header=False, schema=FLST_LOG_FILE_SCHEMA)
-    flst_log_dataframe = remove_commented_log_lines(flst_log_dataframe)
-    flst_log_dataframe = flst_log_dataframe.withColumn(SCENARIO_NAME, lit(scenario_name))
-
-    for transformation in FLST_LOG_TRANSFORMATIONS:
-        logger.trace('Applying data transformation: {}.', transformation)
-        flst_log_dataframe = transformation(flst_log_dataframe)
-
-    return flst_log_dataframe
+FLST_LOG_TRANSFORMATIONS = [remove_flst_log_unused_columns, convert_altitudes_to_meter, calculate_ascending_distance,
+                            calculate_work_done, calculate_deletion_position, reorder_flst_log_columns]

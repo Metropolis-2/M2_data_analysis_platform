@@ -31,5 +31,3 @@ CONF_LOG_COLUMNS = [CONF_ID,
                     CONF_DETECTED_TIME,
                     CPALAT,
                     CPALON]
-COLUMNS_TO_DROP = [f'{ACID}_1', f'{ACID}_2', f'{LATITUDE}_1', f'{LONGITUDE}_1',
-                   f'{ALTITUDE}_1', f'{LATITUDE}_2', f'{LONGITUDE}_2', f'{ALTITUDE}_2']

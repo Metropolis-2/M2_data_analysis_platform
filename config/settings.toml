@@ -17,7 +17,8 @@ MP20.avg_speed = 10.29 # m/s
 MP20.autonomy = 1800
 MP20.vertical_speed = 5 # m/s, only loitering
 
-loitering.flight_altitude = 60
+flight_altitude.loitering = 18.288 # 60 feets
+flight_altitude.lowest = 9.144 # 30 feets
 
 # THRESHOLDS
 thresholds.destination_distance = 400
