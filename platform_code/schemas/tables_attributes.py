@@ -83,7 +83,7 @@ PILOT_ALT = 'Pilot_ALT'
 ASAS_ACTIVE = 'ASAS_Active'
 HEADING = 'Heading'
 TAS = 'TAS'
-ASCEND_DIST = 'Ascend_dist'
+DISTANCE_ASCEND = 'Distance_ascend'
 
 # COMBINED FLST LOG AND FLIGHT INTENTIONS
 ARRIVAL_DELAY = 'Arrival_delay'

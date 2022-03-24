@@ -8,7 +8,8 @@ from config import settings
 from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_X, ARRIVAL_DELAY, DEPARTURE_DELAY,
                                        SPAWNED, MISSION_COMPLETED, DEL_TIME, BASELINE_ARRIVAL_TIME, SPAWN_TIME,
                                        BASELINE_DEPARTURE_TIME, ACID, FLIGHT_TIME, DISTANCE_2D, DISTANCE_3D,
-                                       DISTANCE_ALT, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, ASCEND_DIST, WORK_DONE,
+                                       DISTANCE_ALT, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, DISTANCE_ASCEND,
+                                       WORK_DONE,
                                        FLST_ID, SCENARIO_NAME, ORIGIN_LAT, ORIGIN_LON, DESTINATION_LAT, DESTINATION_LON,
                                        CRUISING_SPEED, PRIORITY, LOITERING, BASELINE_2D_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
@@ -44,7 +45,7 @@ COMBINED_COLUMNS = [
     DEL_LATITUDE,
     DEL_LONGITUDE,
     DEL_ALTITUDE,
-    ASCEND_DIST,
+    DISTANCE_ASCEND,
     WORK_DONE
 ]
 
