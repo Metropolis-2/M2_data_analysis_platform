@@ -48,6 +48,7 @@ FP_INT_SCHEMA = StructType([
 
 FP_INT_COLUMNS = [FLST_ID,
                   ACID,
+                  VEHICLE,
                   ORIGIN_LAT,
                   ORIGIN_LON,
                   DESTINATION_LAT,
@@ -66,8 +67,7 @@ FP_INT_COLUMNS = [FLST_ID,
                   DESTINATION_X,
                   DESTINATION_Y]
 
-COLUMNS_TO_DROP = [VEHICLE,
-                   DEPARTURE_TIME,
+COLUMNS_TO_DROP = [DEPARTURE_TIME,
                    INITIAL_LOCATION,
                    FINAL_LOCATION,
                    GEOFENCE_DURATION,

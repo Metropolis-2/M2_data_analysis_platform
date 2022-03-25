@@ -13,7 +13,7 @@ from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_
                                        FLST_ID, SCENARIO_NAME, ORIGIN_LAT, ORIGIN_LON, DESTINATION_LAT, DESTINATION_LON,
                                        CRUISING_SPEED, PRIORITY, LOITERING, BASELINE_2D_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
-                                       BASELINE_FLIGHT_TIME, VERTICAL_SPEED)
+                                       BASELINE_FLIGHT_TIME, VERTICAL_SPEED, VEHICLE)
 from utils.parser_utils import get_fp_int_key_from_scenario_name
 
 COLUMNS_TO_DROP = [DESTINATION_X, DESTINATION_Y, DEL_X, DEL_Y]
@@ -21,6 +21,7 @@ COMBINED_COLUMNS = [
     FLST_ID,
     SCENARIO_NAME,
     ACID,
+    VEHICLE,
     ORIGIN_LAT,
     ORIGIN_LON,
     DESTINATION_LAT,

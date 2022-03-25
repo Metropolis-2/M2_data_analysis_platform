@@ -1,6 +1,6 @@
 # PATH
-data_path = "/mnt/shared/repos/metropolis/M2_data_analysis_platform/data"
-saving_path = "/mnt/shared/repos/metropolis/M2_data_analysis_platform/output"
+data_path = "../data"
+saving_path = "../output"
 flight_intention_path = "@format {this.data_path}/Flight_intentions"
 
 # LOGGING
@@ -26,6 +26,7 @@ thresholds.delay = 5
 thresholds.emergency_mission_delay = 300
 thresholds.delivery_mission_delay = 600
 thresholds.loitering_mission_delay = 1200
+threshold.AEQ5 = 50
 
 # WEIGHTS
 weights.priority_1 = 1
