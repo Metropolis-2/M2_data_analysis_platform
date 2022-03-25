@@ -6,13 +6,14 @@ from pyspark.sql.functions import col
 
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario_and_acid
-from results.results_constants import EFF_RESULTS
+from results.results_constants import EFF_METRICS_RESULTS
 from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, EFF1, DISTANCE_ALT,
                                        BASELINE_VERTICAL_DISTANCE, EFF2, DISTANCE_ASCEND, BASELINE_ASCENDING_DISTANCE,
                                        EFF3, DISTANCE_3D, BASELINE_3D_DISTANCE, EFF4, FLIGHT_TIME, BASELINE_FLIGHT_TIME,
                                        EFF5, SPAWN_TIME, BASELINE_DEPARTURE_TIME, EFF6)
 
 
+@logger.catch()
 def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-1: Number of conflicts
 
@@ -28,6 +29,7 @@ def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
         .drop(BASELINE_2D_DISTANCE).drop(DISTANCE_2D)
 
 
+@logger.catch()
 def compute_eff2_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-2: Vertical distance route efficiency
 
@@ -43,6 +45,7 @@ def compute_eff2_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF2)
 
 
+@logger.catch()
 def compute_eff3_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-3: Ascending route efficiency
 
@@ -58,6 +61,7 @@ def compute_eff3_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF3)
 
 
+@logger.catch()
 def compute_eff4_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-4: 3D distance route efficiency
 
@@ -73,6 +77,7 @@ def compute_eff4_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF4)
 
 
+@logger.catch()
 def compute_eff5_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-5: Route duration efficiency
 
@@ -88,6 +93,7 @@ def compute_eff5_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF5)
 
 
+@logger.catch()
 def compute_eff6_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-6: Departure delay
 
@@ -125,8 +131,7 @@ def compute_efficiency_metrics(input_dataframes: Dict[str, DataFrame],
         query_result = metric(dataframe)
         result_dataframe = result_dataframe.join(query_result,
                                                  on=[SCENARIO_NAME, ACID],
-                                                 how='right')
+                                                 how='left')
 
-    result_dataframe.show()
-    output_dataframes[EFF_RESULTS] = result_dataframe
+    output_dataframes[EFF_METRICS_RESULTS] = result_dataframe
     return output_dataframes
