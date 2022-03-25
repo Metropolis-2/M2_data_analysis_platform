@@ -1,4 +1,4 @@
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
 from schemas.tables_attributes import (CONF_DETECTED_TIME, ACID, LATITUDE,
                                        ALTITUDE, LONGITUDE, CPALON, CPALAT,
@@ -18,16 +18,11 @@ CONF_LOG_FILE_SCHEMA = StructType([
     StructField(CPALON, DoubleType(), False)
 ])
 
-CONF_LOG_SCHEMA = StructType([
-    StructField(CONF_ID, IntegerType(), False),
-    StructField(SCENARIO_NAME, StringType(), False),
-    StructField(CONF_DETECTED_TIME, DoubleType(), False),
-    StructField(CPALAT, DoubleType(), False),
-    StructField(CPALON, DoubleType(), False)
-])
-
-CONF_LOG_COLUMNS = [CONF_ID,
-                    SCENARIO_NAME,
-                    CONF_DETECTED_TIME,
-                    CPALAT,
-                    CPALON]
+# Final CONF LOG columns in dataframe
+CONF_LOG_COLUMNS = [
+    CONF_ID,
+    SCENARIO_NAME,
+    CONF_DETECTED_TIME,
+    CPALAT,
+    CPALON
+]
