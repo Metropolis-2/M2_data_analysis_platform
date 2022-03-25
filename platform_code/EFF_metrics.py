@@ -26,7 +26,7 @@ def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D) \
         .withColumn(EFF1, col(BASELINE_2D_DISTANCE) / col(DISTANCE_2D)) \
-        .drop(BASELINE_2D_DISTANCE).drop(DISTANCE_2D)
+        .select(SCENARIO_NAME, ACID, EFF1)
 
 
 @logger.catch()
@@ -103,6 +103,7 @@ def compute_eff6_metric(dataframe: DataFrame) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the EFF6 per scenario and drone id.
     """
+    # TODO: The departure delay per ACID is calculated here, check optimization
     return dataframe \
         .select(SCENARIO_NAME, ACID, SPAWN_TIME, BASELINE_DEPARTURE_TIME) \
         .withColumn(EFF6, col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)) \

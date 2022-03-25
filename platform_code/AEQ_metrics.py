@@ -56,7 +56,7 @@ def compute_aeq1_1_metric(dataframe: DataFrame,
     Calculated as the ratio of AEQ-1 and the total number of flight intentions
     in the given scenario.
     """
-    # TODO: Optimize using previous calculations in metrics
+    # TODO: The number of flights per scenario is calculated here, check optimization
     flights_per_scenario = dataframe.select(SCENARIO_NAME, ACID) \
         .groupby(SCENARIO_NAME) \
         .count() \

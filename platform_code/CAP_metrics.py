@@ -16,13 +16,14 @@ from schemas.tables_attributes import (SCENARIO_NAME, ACID, DISTANCE_ASCEND, BAS
 def compute_cap1_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs) -> DataFrame:
     """ CAP-1: Average demand delay
 
-    Average demand delay is computed as the arithmetic mean of the delays
-    of all flight intentions in a scenario.
+        Average demand delay is computed as the arithmetic mean of the delays
+        of all flight intentions in a scenario.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the CAP1 metric per scenario.
-    """
+        :param input_dataframes: dataframes with the logs data.
+        :return: query result with the CAP1 metric per scenario.
+        """
     dataframe = input_dataframes[FLST_LOG_PREFIX]
+    # TODO: the average arrival delay is calculated, check optimization
     return dataframe \
         .select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .groupby(SCENARIO_NAME) \
@@ -46,6 +47,7 @@ def compute_cap2_metric(input_dataframes: Dict[str, DataFrame],
     saf2_data = output_dataframes[SAF_METRICS_RESULTS].select(SCENARIO_NAME, SAF2)
 
     # Calculate the total number of flights executed
+    # TODO: The number of flights per scenario is calculated here, check optimization
     flst_log_df = input_dataframes[FLST_LOG_PREFIX]
     number_of_flights = flst_log_df \
         .groupby(SCENARIO_NAME) \

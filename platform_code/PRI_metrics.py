@@ -62,6 +62,7 @@ def compute_pri3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         groupby(SCENARIO_NAME, PRIORITY) \
         .agg(sum(FLIGHT_TIME).alias(TIME_PER_PRIORITY))
 
+    # TODO: The flight time per priority is calculated here, check optimization
     flights_per_priority = dataframe \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .count() \
@@ -85,6 +86,7 @@ def compute_pri4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .groupby(SCENARIO_NAME, PRIORITY) \
         .agg(sum(DISTANCE_3D).alias(DISTANCE_PER_PRIORITY))
 
+    # TODO: The flight time per priority is calculated here, check optimization
     total_flights_per_priority = dataframe \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .count() \
@@ -105,11 +107,13 @@ def compute_pri5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the PRI5 per scenario and priority.
     """
+    # TODO: The departure delay per ACID is calculated here, check optimization
     departure_delay = dataframe \
         .withColumn(DEPARTURE_DELAY, col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)) \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .agg(F.sum(DEPARTURE_DELAY).alias(DEPARTURE_DELAY))
 
+    # TODO: The flight time delay per ACID is calculated here, check optimization
     flight_time_delay = dataframe \
         .withColumn(FLIGHT_TIME_DELAY, col(FLIGHT_TIME) - col(BASELINE_FLIGHT_TIME)) \
         .groupby(SCENARIO_NAME, PRIORITY) \
