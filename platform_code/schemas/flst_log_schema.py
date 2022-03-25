@@ -48,24 +48,7 @@ FLST_LOG_FILE_SCHEMA = StructType([
     StructField(PILOT_VS, DoubleType(), False)
 ])
 
-FLST_LOG_SCHEMA = StructType([
-    StructField(SCENARIO_NAME, StringType(), False),
-    StructField(ACID, StringType(), False),
-    StructField(DEL_TIME, DoubleType(), False),
-    StructField(SPAWN_TIME, DoubleType(), False),
-    StructField(FLIGHT_TIME, StringType(), False),
-    StructField(DISTANCE_2D, StringType(), False),
-    StructField(DISTANCE_3D, DoubleType(), False),
-    StructField(DISTANCE_ALT, DoubleType(), False),
-    StructField(DEL_LATITUDE, DoubleType(), False),
-    StructField(DEL_LONGITUDE, DoubleType(), False),
-    StructField(DEL_ALTITUDE, DoubleType(), False),
-    StructField(DISTANCE_ASCEND, DoubleType(), False),
-    StructField(WORK_DONE, DoubleType(), False),
-    StructField(DEL_X, DoubleType(), False),
-    StructField(DEL_Y, DoubleType(), False),
-])
-
+# Final FLST LOG columns in dataframe
 FLST_LOG_COLUMNS = [
     SCENARIO_NAME,
     ACID,
@@ -84,6 +67,7 @@ FLST_LOG_COLUMNS = [
     DEL_Y
 ]
 
+# Removed FLST LOG columns from file
 COLUMNS_TO_DROP = [
     TAS,
     VERTICAL_SPEED,

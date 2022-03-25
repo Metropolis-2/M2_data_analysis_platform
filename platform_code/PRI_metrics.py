@@ -1,70 +1,170 @@
-from parse.parser_constants import FLST_LOG_PREFIX
-from schemas.tables_attributes import FLIGHT_TIME, SCENARIO_NAME, PRIORITY, PRI1, BASELINE_3D_DISTANCE, PRI2, \
-    DISTANCE_3D, ACID, SPAWN_TIME, BASELINE_DEPARTURE_TIME, BASELINE_FLIGHT_TIME, PRI5, PRI3, PRI4
+from typing import Dict
+
 import pyspark.sql.functions as F
-from pyspark.sql.functions import lit, col
+from loguru import logger
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, sum
 
-def compute_PRI1_metric(input_df, output_df):
-    '''
-    PRI-1: Weighted mission duration
-    (Total duration of missions weighted in function of priority level)
-    '''
-    df = output_df["OUTPUT"]
-    query_rows = input_df[FLST_LOG_PREFIX].groupby(SCENARIO_NAME, PRIORITY).agg((F.sum(FLIGHT_TIME) * col(PRIORITY)).alias(PRI1)).groupby(SCENARIO_NAME).agg(F.sum(PRI1).alias(PRI1))
-    df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
-    return df
+from parse.parser_constants import FLST_LOG_PREFIX
+from results.result_dataframes import build_result_df_by_scenario_and_priority, build_result_df_by_scenario
+from results.results_constants import PRI_METRICS_RESULTS_SCENARIO, PRI_METRICS_RESULTS_SCENARIO_PRIORITY
+from schemas.tables_attributes import (FLIGHT_TIME, SCENARIO_NAME, PRIORITY, PRI1, PRI2, DISTANCE_3D, SPAWN_TIME,
+                                       BASELINE_DEPARTURE_TIME, BASELINE_FLIGHT_TIME, PRI5, PRI3, PRI4)
 
-def compute_PRI2_metric(input_df, output_df):
-    '''
-    PRI-2: Weighted mission track length
-    (Total distance travelled weighted in function of priority level)
-    '''
-    df = output_df["OUTPUT"]
-    query_rows = input_df[FLST_LOG_PREFIX].groupby(SCENARIO_NAME, PRIORITY).agg((F.sum(DISTANCE_3D) * col(PRIORITY)).alias(PRI2)).groupby(SCENARIO_NAME).agg(F.sum(PRI2).alias(PRI2))
-    df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
-    return df
+FLIGHT_TIME_DELAY = "flight_time_delay"
+DEPARTURE_DELAY = "departure_delay"
+DISTANCE_PER_PRIORITY = 'Dprio'
+MISSIONS_PER_PRIORITY = 'Nprio'
+TIME_PER_PRIORITY = 'Tprio'
 
-def compute_PRI3_metric(input_df, output_df):
-    '''
-    PRI-3: Average mission duration per priority level
-    (The average mission duration for each priority level per aircraft)
-    '''
-    df = output_df["OUTPUT"]
-    df1 = input_df[FLST_LOG_PREFIX].groupby(SCENARIO_NAME, PRIORITY).agg(F.sum(FLIGHT_TIME).alias("Tprio"))
-    df2 = input_df[FLST_LOG_PREFIX].groupby(SCENARIO_NAME, PRIORITY).count().withColumnRenamed("count", "Nprio")
-    df3 = df1.join(df2, on=[SCENARIO_NAME, PRIORITY], how='outer')
-    df3 = df3.withColumn(PRI3, col("Tprio") / col("Nprio")).select(SCENARIO_NAME, PRIORITY, PRI3)
-    df3.show()
-    #TODO: Ask Niki: df = df.join(df3, on=[SCENARIO_NAME], how='outer')
-    return df
+@logger.catch()
+def compute_pri1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+    """ PRI-1: Weighted mission duration
 
-def compute_PRI4_metric(input_df, output_df):
-    '''
-    PRI-4: Average mission track length per priority level
-    (The average distance travelled for each priority level per aircraft)
-    '''
-    df = output_df["OUTPUT"]
-    df1 = input_df[FLST_LOG_PREFIX].groupby(SCENARIO_NAME, PRIORITY).agg(F.sum(DISTANCE_3D).alias("Dprio"))
-    df2 = input_df[FLST_LOG_PREFIX].groupby(SCENARIO_NAME, PRIORITY).count().withColumnRenamed("count", "Nprio")
-    df3 = df1.join(df2, on=[SCENARIO_NAME, PRIORITY], how='outer')
-    df3 = df3.withColumn(PRI4, col("Dprio") / col("Nprio")).select(SCENARIO_NAME, PRIORITY, PRI4)
-    df3.show()
-    #TODO: Ask Niki: df = df.join(df3, on=[SCENARIO_NAME], how='outer')
-    return df
+    Total duration of missions weighted in function of priority level.
 
-def compute_PRI5_metric(input_df, output_df):
-    '''
-    PRI-5: Total delay per priority level
-    (The total delay experienced by aircraft in a certain priority category relative to ideal conditions)
-    '''
-    df = output_df["OUTPUT"]
-    df1 = input_df[FLST_LOG_PREFIX].withColumn("sum1", col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)).groupby(
-        SCENARIO_NAME, PRIORITY).agg(F.sum("sum1").alias("sum1"))
-    df2 = input_df[FLST_LOG_PREFIX].withColumn("sum2", col(FLIGHT_TIME) - col(BASELINE_FLIGHT_TIME)).groupby(
-        SCENARIO_NAME, PRIORITY).agg(F.sum("sum2").alias("sum2"))
+    :param dataframe: data required to calculate the metrics.
+    :return: query result with the PRI1 per scenario and priority.
+    """
+    return dataframe \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .agg((sum(FLIGHT_TIME) * col(PRIORITY)).alias(PRI1)) \
+        .groupby(SCENARIO_NAME) \
+        .agg(F.sum(PRI1).alias(PRI1))
 
-    df3 = df1.join(df2, on=[SCENARIO_NAME, PRIORITY], how='outer')
-    df_tmp = df3.withColumn(PRI5, col("sum1") + col("sum2")).select(SCENARIO_NAME, PRIORITY, PRI5)
-    df_tmp.show()
-    #TODO: Ask Niki: df = df.join(df3, on=[SCENARIO_NAME, ACID], how='outer')
-    return df
+@logger.catch()
+def compute_pri2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+    """ PRI-2: Weighted mission track length
+
+    Total distance travelled weighted in function of priority level.
+
+    :param dataframe: data required to calculate the metrics.
+    :return: query result with the PRI2 per scenario and priority.
+    """
+    return dataframe \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .agg((sum(DISTANCE_3D) * col(PRIORITY)).alias(PRI2)) \
+        .groupby(SCENARIO_NAME) \
+        .agg(F.sum(PRI2).alias(PRI2))
+
+
+# TODO: Check possible optimization joining flights per priority in PRI3 and PRI4
+@logger.catch()
+def compute_pri3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+    """ PRI-3: Average mission duration per priority level
+
+    The average mission duration for each priority level per aircraft.
+
+    :param dataframe: data required to calculate the metrics.
+    :return: query result with the PRI3 per scenario and priority.
+    """
+    time_per_priority = dataframe. \
+        groupby(SCENARIO_NAME, PRIORITY) \
+        .agg(sum(FLIGHT_TIME).alias(TIME_PER_PRIORITY))
+
+    # TODO: The flight time per priority is calculated here, check optimization
+    flights_per_priority = dataframe \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .count() \
+        .withColumnRenamed('count', MISSIONS_PER_PRIORITY)
+
+    return time_per_priority \
+        .join(flights_per_priority, on=[SCENARIO_NAME, PRIORITY]) \
+        .withColumn(PRI3, col(TIME_PER_PRIORITY) / col(MISSIONS_PER_PRIORITY)) \
+        .select(SCENARIO_NAME, PRIORITY, PRI3)
+
+@logger.catch()
+def compute_pri4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+    """ PRI-4: Average mission track length per priority level
+
+    The average distance travelled for each priority level per aircraft.
+
+    :param dataframe: data required to calculate the metrics.
+    :return: query result with the PRI4 per scenario and priority.
+    """
+    distance_per_priority = dataframe \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .agg(sum(DISTANCE_3D).alias(DISTANCE_PER_PRIORITY))
+
+    # TODO: The flight time per priority is calculated here, check optimization
+    total_flights_per_priority = dataframe \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .count() \
+        .withColumnRenamed('count', MISSIONS_PER_PRIORITY)
+
+    return distance_per_priority \
+        .join(total_flights_per_priority, on=[SCENARIO_NAME, PRIORITY]) \
+        .withColumn(PRI4, col(DISTANCE_PER_PRIORITY) / col(MISSIONS_PER_PRIORITY)) \
+        .select(SCENARIO_NAME, PRIORITY, PRI4)
+
+@logger.catch()
+def compute_pri5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+    """ PRI-5: Total delay per priority level
+
+    The total delay experienced by aircraft in a certain priority category
+    relative to ideal conditions.
+
+    :param dataframe: data required to calculate the metrics.
+    :return: query result with the PRI5 per scenario and priority.
+    """
+    # TODO: The departure delay per ACID is calculated here, check optimization
+    departure_delay = dataframe \
+        .withColumn(DEPARTURE_DELAY, col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)) \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .agg(F.sum(DEPARTURE_DELAY).alias(DEPARTURE_DELAY))
+
+    # TODO: The flight time delay per ACID is calculated here, check optimization
+    flight_time_delay = dataframe \
+        .withColumn(FLIGHT_TIME_DELAY, col(FLIGHT_TIME) - col(BASELINE_FLIGHT_TIME)) \
+        .groupby(SCENARIO_NAME, PRIORITY) \
+        .agg(F.sum(FLIGHT_TIME_DELAY).alias(FLIGHT_TIME_DELAY))
+
+    return departure_delay \
+        .join(flight_time_delay, on=[SCENARIO_NAME, PRIORITY]) \
+        .withColumn(PRI5, col(DEPARTURE_DELAY) + col(FLIGHT_TIME_DELAY)) \
+        .select(SCENARIO_NAME, PRIORITY, PRI5)
+
+
+PRI_METRICS_SCENARIO = [
+    compute_pri1_metric,
+    compute_pri2_metric
+]
+PRI_METRICS_SCENARIO_PRIORITY = [
+    compute_pri3_metric,
+    compute_pri4_metric,
+    compute_pri5_metric
+]
+
+
+def compute_priority_metrics(input_dataframes: Dict[str, DataFrame],
+                             output_dataframes: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
+    """ Calculates all the priority metrics and add to the output dataframes dictionary
+    their results.
+
+    :param input_dataframes: dictionary with the dataframes from the log files.
+    :param output_dataframes: dictionary with the dataframes where the results are saved.
+    :return: updated results dataframes with the security metrics.
+    """
+    # For this metrics we only use the combined FLST log with the flight plan intentions
+    dataframe = input_dataframes[FLST_LOG_PREFIX]
+
+    result_dataframe = build_result_df_by_scenario(input_dataframes)
+    for metric in PRI_METRICS_SCENARIO:
+        logger.trace('Calculating metric: {}.', metric)
+        query_result = metric(dataframe=dataframe)
+        result_dataframe = result_dataframe.join(query_result,
+                                                 on=SCENARIO_NAME,
+                                                 how='left')
+
+    output_dataframes[PRI_METRICS_RESULTS_SCENARIO] = result_dataframe
+
+    result_dataframe = build_result_df_by_scenario_and_priority(input_dataframes)
+    for metric in PRI_METRICS_SCENARIO_PRIORITY:
+        logger.trace('Calculating metric: {}.', metric)
+        query_result = metric(dataframe=dataframe)
+        result_dataframe = result_dataframe.join(query_result,
+                                                 on=[SCENARIO_NAME, PRIORITY],
+                                                 how='left')
+
+    output_dataframes[PRI_METRICS_RESULTS_SCENARIO_PRIORITY] = result_dataframe
+    return output_dataframes

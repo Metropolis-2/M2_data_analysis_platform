@@ -1,64 +1,110 @@
+from typing import Dict, Union
+
+from loguru import logger
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, min
+
 from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
+from results.result_dataframes import build_result_df_by_scenario
+from results.results_constants import SAF_METRICS_RESULTS
 from schemas.tables_attributes import SCENARIO_NAME, SAF1, SAF2, SAF3, DISTANCE, SAF4, SAF6, SAF5, LOS_DURATION_TIME
-from pyspark.sql.functions import lit, col
-import pyspark.sql.functions as F
 
 
-def compute_SAF1_metric(input_df, output_df):
-    '''
+@logger.catch()
+def compute_saf1_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """
     SAF-1: Number of conflicts
     (Number of aircraft pairs that will experience a loss of separation within the look-ahead time)
-    '''
-    df = output_df["OUTPUT"]
-    query_rows = input_df[CONF_LOG_PREFIX].groupBy(SCENARIO_NAME).count().select([SCENARIO_NAME, col('count').alias(SAF1)])
-    df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
-    return df
+    """
+    dataframe = input_dataframes[CONF_LOG_PREFIX]
+    return dataframe \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF1)])
 
-def compute_SAF2_metric(input_df, output_df):
-    '''
+
+@logger.catch()
+def compute_saf2_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """
     SAF-2: Number of intrusions
     (Number of aircraft pairs that experience loss of separation)
-    '''
-    df = output_df["OUTPUT"]
-    query_rows = input_df[LOS_LOG_PREFIX].groupBy(SCENARIO_NAME).count().select([SCENARIO_NAME, col('count').alias(SAF2)])
-    df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
-    return df
+    """
+    dataframe = input_dataframes[LOS_LOG_PREFIX]
+    return dataframe \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF2)])
 
-def compute_SAF3_metric(input_df, output_df):
-    '''
+
+@logger.catch()
+def compute_saf3_metric(intermediate_results: DataFrame, *args, **kwargs):
+    """
     SAF-3: Intrusion prevention rate
     (Ratio representing the proportion of conflicts that did not result in a loss of separation)
-    '''
-    df = output_df["OUTPUT"]
-    df = df.withColumn(SAF3, df.SAF1/df.SAF2)
-    return df
+    """
+    return intermediate_results \
+        .withColumn(SAF3, col(SAF1) / col(SAF2)) \
+        .select(SCENARIO_NAME, SAF3)
 
-def compute_SAF4_metric(input_df, output_df):
-    '''
+
+@logger.catch()
+def compute_saf4_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """
     SAF-4: Minimum separation
     (The minimum separation between aircraft during conflicts)
-    '''
-    df = output_df["OUTPUT"]
-    tmp_df = input_df[LOS_LOG_PREFIX].groupby(SCENARIO_NAME).agg(F.min(DISTANCE).alias(SAF4))
-    df = df.join(tmp_df, on=[SCENARIO_NAME], how='outer')
-    return df
+    """
+    dataframe = input_dataframes[LOS_LOG_PREFIX]
+    return dataframe \
+        .groupby(SCENARIO_NAME) \
+        .agg(min(DISTANCE).alias(SAF4))
 
-def compute_SAF5_metric(input_df, output_df):
-    '''
+
+@logger.catch()
+def compute_saf5_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """
     SAF-5: Time spent in LOS
     (Total time spent in a state of intrusion)
-    '''
-    df = output_df["OUTPUT"]
-    query_rows = input_df[LOS_LOG_PREFIX].select(SCENARIO_NAME, col(LOS_DURATION_TIME).alias(SAF5))
-    df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
-    return df
+    """
+    dataframe = input_dataframes[LOS_LOG_PREFIX]
+    return dataframe \
+        .select(SCENARIO_NAME, col(LOS_DURATION_TIME).alias(SAF5))
 
-def compute_SAF6_metric(input_df, output_df):
-    '''
+
+@logger.catch()
+def compute_saf6_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """
     SAF-6: Geofence violations
     (The number of geofence/building area violations)
-    '''
-    df = output_df["OUTPUT"]
-    query_rows = input_df[GEO_LOG_PREFIX].groupBy(SCENARIO_NAME).count().select([SCENARIO_NAME, col('count').alias(SAF6)])
-    df = df.join(query_rows, on=[SCENARIO_NAME], how='outer')
-    return df
+    """
+    dataframe = input_dataframes[GEO_LOG_PREFIX]
+    return dataframe \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF6)])
+
+
+SAF_METRICS = [compute_saf1_metric, compute_saf2_metric, compute_saf3_metric,
+               compute_saf4_metric, compute_saf5_metric, compute_saf6_metric]
+
+
+def compute_security_metrics(input_dataframes: Dict[str, DataFrame],
+                             output_dataframes: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
+    """ Calculates all the security metrics and add to the output dataframes dictionary
+    their results.
+
+    :param input_dataframes: dictionary with the dataframes from the log files.
+    :param output_dataframes: dictionary with the dataframes where the results are saved.
+    :return: updated results dataframes with the security metrics.
+    """
+    result_dataframe = build_result_df_by_scenario(input_dataframes)
+
+    for metric in SAF_METRICS:
+        logger.trace('Calculating metric: {}.', metric)
+        query_result = metric(input_dataframes=input_dataframes,
+                              intermediate_results=result_dataframe)
+        result_dataframe = result_dataframe.join(query_result,
+                                                 on=SCENARIO_NAME,
+                                                 how='left')
+
+    output_dataframes[SAF_METRICS_RESULTS] = result_dataframe
+    return output_dataframes
