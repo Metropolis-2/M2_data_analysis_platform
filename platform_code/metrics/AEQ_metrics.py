@@ -10,12 +10,12 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when, stddev, mean, abs, max
 
-from config import settings
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import AEQ_METRICS_RESULTS, NUM_FLIGHTS, COUNT
 from schemas.tables_attributes import (SCENARIO_NAME, PRIORITY, LOITERING, BASELINE_ARRIVAL_TIME, DEL_TIME, AEQ1, AEQ2,
                                        ACID, FLIGHT_TIME, VEHICLE, AEQ2_1, AEQ1_1, AEQ3, AEQ4, AEQ5, AEQ5_1)
+from utils.config import settings
 
 DELAY = "delay"
 AVG_DELAY = "avg_delay"
@@ -153,6 +153,7 @@ def compute_aeq4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .agg(max("delay_increment").alias(AEQ4))
 
 
+@logger.catch
 def compute_aeq5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-5: Number of inequitable delayed demands
 
@@ -176,6 +177,7 @@ def compute_aeq5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .groupby(SCENARIO_NAME).count().withColumnRenamed(COUNT, AEQ5)
 
 
+@logger.catch
 def compute_aeq5_1_metric(dataframe: DataFrame,
                           intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-5-1: Percentage of inequitable delayed demands

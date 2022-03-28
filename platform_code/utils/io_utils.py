@@ -5,7 +5,7 @@ from typing import Dict, List
 from loguru import logger
 from pyspark.sql import DataFrame, SparkSession
 
-from config import settings
+from utils.config import settings
 
 
 def save_dataframes_dict(dataframes: Dict[str, DataFrame]) -> None:

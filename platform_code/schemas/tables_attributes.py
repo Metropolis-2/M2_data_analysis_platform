@@ -97,7 +97,7 @@ SIMULATION_TIME = "Simulation_time"
 
 # METRICS RESULT DATAFRAME
 OUTPUT_ID = 'Output_id'
-SUCCESS_AIRCRAFTS = 'Succeful_aircraft_number'
+SUCCESS_AIRCRAFTS = 'Successful_aircraft_number'
 SPAWNED_AIRCRAFTS = 'Spawned_aircraft_number'
 AEQ1 = 'AEQ1'
 AEQ1_1 = 'AEQ1_1'
@@ -111,6 +111,7 @@ CAP1 = 'CAP1'
 CAP2 = 'CAP2'
 ENV1 = 'ENV1'
 ENV2 = 'ENV2'
+ENV3 = 'ENV3'
 ENV4 = 'ENV4'
 SAF1 = 'SAF1'
 SAF2 = 'SAF2'

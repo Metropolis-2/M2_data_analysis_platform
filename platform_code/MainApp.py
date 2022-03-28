@@ -2,9 +2,12 @@ import sys
 
 from pyspark.sql import SparkSession
 
-from AEQ_metrics import compute_accessibility_and_equality_metrics
-from SAF_metrics import *
-from config import settings
+from metrics.AEQ_metrics import compute_accessibility_and_equality_metrics
+from metrics.CAP_metrics import compute_capacity_metrics
+from metrics.EFF_metrics import compute_efficiency_metrics
+from metrics.ENV_metrics import compute_environment_metrics
+from metrics.PRI_metrics import compute_priority_metrics
+from metrics.SAF_metrics import *
 from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
 from parse.reg_log_parser import REG_LOG_TRANSFORMATIONS
 from platform_code.parse.conf_log_parser import CONF_LOG_TRANSFORMATIONS
@@ -17,6 +20,7 @@ from platform_code.schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
 from platform_code.schemas.los_log_schema import LOS_LOG_FILE_SCHEMA
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.reg_log_schema import REG_LOG_SCHEMA
+from utils.config import settings
 # Configuration for the log names with the schema associated and the transformations
 # required after the read of the log file.
 # Prefix: (schema, transformations)
@@ -45,11 +49,12 @@ if __name__ == "__main__":
     input_dataframes = load_dataframes(df_names, spark)
 
     results = dict()
-    # results = compute_security_metrics(input_dataframes, results)
+    results = compute_security_metrics(input_dataframes, results)
     results = compute_accessibility_and_equality_metrics(input_dataframes, results)
-    # results = compute_priority_metrics(input_dataframes, results)
-    # results = compute_efficiency_metrics(input_dataframes, results)
-    # results = compute_capacity_metrics(input_dataframes, results)
+    results = compute_priority_metrics(input_dataframes, results)
+    results = compute_efficiency_metrics(input_dataframes, results)
+    results = compute_capacity_metrics(input_dataframes, results)
+    results = compute_environment_metrics(input_dataframes, results)
 
     for metric_name, metric_results in results.items():
         metric_results.show()

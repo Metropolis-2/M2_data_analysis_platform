@@ -2,16 +2,16 @@ from pathlib import Path
 from typing import Tuple
 
 import geopy.distance
+from geopy.distance import great_circle
 from loguru import logger
 from pyproj import Transformer
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import monotonically_increasing_id, col, udf
 from pyspark.sql.types import StructType, StructField, DoubleType
-from geopy.distance import great_circle
 
-from config import settings
 from parse.parser_constants import SCENARIOS, LINE_COUNT, FEET_TO_METERS_SCALE
 from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
+from utils.config import settings
 
 
 def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:

@@ -4,7 +4,6 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when
 
-from config import settings
 from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_X, ARRIVAL_DELAY, DEPARTURE_DELAY,
                                        SPAWNED, MISSION_COMPLETED, DEL_TIME, BASELINE_ARRIVAL_TIME, SPAWN_TIME,
                                        BASELINE_DEPARTURE_TIME, ACID, FLIGHT_TIME, DISTANCE_2D, DISTANCE_3D,
@@ -14,6 +13,7 @@ from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_
                                        CRUISING_SPEED, PRIORITY, LOITERING, BASELINE_2D_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
                                        BASELINE_FLIGHT_TIME, VERTICAL_SPEED, VEHICLE)
+from utils.config import settings
 from utils.parser_utils import get_fp_int_key_from_scenario_name
 
 COLUMNS_TO_DROP = [DESTINATION_X, DESTINATION_Y, DEL_X, DEL_Y]

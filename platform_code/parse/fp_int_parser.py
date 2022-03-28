@@ -1,7 +1,6 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when, hour, minute, second, split, regexp_replace
 
-from config import settings
 from schemas.fp_int_schema import COLUMNS_TO_DROP, FP_INT_COLUMNS
 from schemas.tables_attributes import (BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
                                        BASELINE_FLIGHT_TIME, BASELINE_ARRIVAL_TIME, BASELINE_2D_DISTANCE, DESTINATION_X,
@@ -9,6 +8,7 @@ from schemas.tables_attributes import (BASELINE_VERTICAL_DISTANCE, BASELINE_ASCE
                                        BASELINE_DEPARTURE_TIME, GEOFENCE_DURATION, DEPARTURE_TIME,
                                        INITIAL_LOCATION, FINAL_LOCATION, DESTINATION_LAT,
                                        DESTINATION_LON, LATITUDE, LONGITUDE, VERTICAL_SPEED, VEHICLE)
+from utils.config import settings
 from utils.parser_utils import add_dataframe_counter, transform_location, get_coordinates_distance, get_drone_speed
 
 PARENTHESIS_PATTERN = "\(|\)"

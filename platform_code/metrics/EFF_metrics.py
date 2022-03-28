@@ -14,7 +14,7 @@ from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE
 
 
 @logger.catch
-def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
+def compute_eff1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ EFF-1: Number of conflicts
 
     Ratio representing the length of the ideal horizontal route to the actual
@@ -30,7 +30,7 @@ def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
 
 
 @logger.catch
-def compute_eff2_metric(dataframe: DataFrame) -> DataFrame:
+def compute_eff2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ EFF-2: Vertical distance route efficiency
 
     Ratio representing the length of the ideal vertical route to the actual
@@ -46,7 +46,7 @@ def compute_eff2_metric(dataframe: DataFrame) -> DataFrame:
 
 
 @logger.catch
-def compute_eff3_metric(dataframe: DataFrame) -> DataFrame:
+def compute_eff3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ EFF-3: Ascending route efficiency
 
     Ratio representing the length of the ascending distance in the ideal route
@@ -62,7 +62,7 @@ def compute_eff3_metric(dataframe: DataFrame) -> DataFrame:
 
 
 @logger.catch
-def compute_eff4_metric(dataframe: DataFrame) -> DataFrame:
+def compute_eff4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ EFF-4: 3D distance route efficiency
 
     Ratio representing the 3D length of the ideal route to the 3D length
@@ -78,7 +78,7 @@ def compute_eff4_metric(dataframe: DataFrame) -> DataFrame:
 
 
 @logger.catch
-def compute_eff5_metric(dataframe: DataFrame) -> DataFrame:
+def compute_eff5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ EFF-5: Route duration efficiency
 
     Ratio representing the time duration of the ideal route to the time
@@ -94,7 +94,7 @@ def compute_eff5_metric(dataframe: DataFrame) -> DataFrame:
 
 
 @logger.catch
-def compute_eff6_metric(dataframe: DataFrame) -> DataFrame:
+def compute_eff6_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ EFF-6: Departure delay
 
     Time duration from the planned departure time until the actual
