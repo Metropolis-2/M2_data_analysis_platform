@@ -7,6 +7,7 @@ from pyproj import Transformer
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import monotonically_increasing_id, col, udf
 from pyspark.sql.types import StructType, StructField, DoubleType
+from geopy.distance import great_circle
 
 from config import settings
 from parse.parser_constants import SCENARIOS, LINE_COUNT, FEET_TO_METERS_SCALE
@@ -211,3 +212,7 @@ def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
     destination_tuple = (destination_latitude, destination_longitude)
     # TODO: direct distance calculation (in meters) between two points, is this approach correct?
     return geopy.distance.distance(origin_tuple, destination_tuple).m
+
+@udf
+def great_circle_udf(x, y):
+    return great_circle(x, y).kilometers

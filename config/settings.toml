@@ -37,3 +37,10 @@ weights.priority_4 = 4
 # COORDINATE SYSTEM
 crs.origin = "epsg:4326"
 crs.desired = "epsg:32633"
+
+#ROI POINT ENV3
+x_center = 48.15636078 #lat
+y_center = 16.32453111 #lon
+radius_roi = 10 #meters
+altitude_roi = 100 #meters
+time_roi = 120 #seconds

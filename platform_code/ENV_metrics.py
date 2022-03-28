@@ -5,7 +5,7 @@ import pyspark.sql.functions as F
 
 from parse.parser_constants import REG_LOG_PREFIX
 from schemas.tables_attributes import SCENARIO_NAME, ACID, SIMULATION_TIME, LATITUDE, LONGITUDE, ALTITUDE, ENV2, ENV4
-from utils.parser_utils import get_coordinates_distance
+from utils.parser_utils import get_coordinates_distance, great_circle_udf
 from config import settings
 
 def compute_ENV1_metric(input_df, output_df): #TODO: PENDING
@@ -15,6 +15,7 @@ def compute_ENV1_metric(input_df, output_df): #TODO: PENDING
     The indicator is directly computed in the Bluesky simulator)
     '''
     # result = self.flst_log_dataframe.agg({'Work_done': 'sum'}).show()
+
     df = output_df["OUTPUT"]
     return df
 
@@ -40,25 +41,21 @@ def compute_ENV2_metric(input_df, output_df):
     df = df.join(dataframe, on=[SCENARIO_NAME], how='outer')
     return df
 
-def compute_ENV3_metric(input_df, output_df): #TODO: PENDING
+def compute_ENV3_metric(input_df, output_df, ENV3=None): #TODO: PENDING
     '''
     ENV-3: Equivalent Noise Level
     (Represent total sound exposure at the given point on city area surface.
     It is computed by aggregating the total sound intensity (of all sound sources) at that given point over the time)
     '''
-    lat_roi = eval(settings.roi.lat)
-    lon_roi = eval(settings.roi.lon)
-    alt_roi = eval(settings.roi.alt)
     df = output_df["OUTPUT"]
-    dataframe = input_df[REG_LOG_PREFIX]
-    dataframe = input_df[REG_LOG_PREFIX]
-    dataframe = dataframe.withColumn("reached_roi",
-                                       when((alt_roi[0] <= col(ALTITUDE)) & (col(ALTITUDE) < alt_roi[1]) &
-                                            (lat_roi[0] <= col(LATITUDE)) & (col(LATITUDE) < lat_roi[1]) &
-                                            (lon_roi[0] <= col(LONGITUDE)) & (col(LONGITUDE) < lon_roi[1]),
-                                            True).otherwise(False))
-    dataframe = dataframe.select(SCENARIO_NAME, col("reached_roi")).where(col("reached_roi") == True).groupby(
-        SCENARIO_NAME).count().withColumnRenamed("count", "ENV3")
+    dataframe = input_df[REG_LOG_PREFIX].filter(col(SIMULATION_TIME) == settings.time_roi)
+    point = struct(lit(settings.x_center), lit(settings.y_center))
+    dataframe = dataframe.withColumn("distance", great_circle_udf(point, struct(col(LATITUDE), col(LONGITUDE)))).filter(
+        (col("distance") <= settings.radius_roi) &
+        (col(ALTITUDE) <= settings.altitude_roi))
+    dataframe = dataframe.withColumn("noise_level", log10(1 / pow(col("distance"), 2)))
+
+    dataframe = dataframe.groupBy(SCENARIO_NAME).agg(sum("noise_level").alias(ENV3))
     df = df.join(dataframe, on=[SCENARIO_NAME], how='outer')
     return df
 
@@ -71,7 +68,9 @@ def compute_ENV4_metric(input_df, output_df): #TODO: PENDING
     dataframe = input_df[REG_LOG_PREFIX]
     dataframe = dataframe.groupby(SCENARIO_NAME, ACID).agg(F.max(ALTITUDE).alias("MAX_ALTITUDE"),F.min(ALTITUDE).alias("MIN_ALTITUDE"))
     dataframe = dataframe.withColumn("DIFF_ALTITUDE", col("MAX_ALTITUDE") - col("MIN_ALTITUDE"))
-    avg_alt = dataframe.select(mean("DIFF_ALTITUDE").alias("MEAN_DIFF_ALTITUDE"))
+    avg_alt = dataframe.select(SCENARIO_NAME, "DIFF_ALTITUDE") \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean("DIFF_ALTITUDE").alias("MEAN_DIFF_ALTITUDE"))
     dataframe = dataframe.join(avg_alt, how='outer')
     dataframe = dataframe.withColumn(ENV4, col("DIFF_ALTITUDE") / col("MEAN_DIFF_ALTITUDE"))
     dataframe = dataframe.select(SCENARIO_NAME, ACID, ENV4)
