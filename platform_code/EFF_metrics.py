@@ -13,7 +13,7 @@ from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE
                                        EFF5, SPAWN_TIME, BASELINE_DEPARTURE_TIME, EFF6)
 
 
-@logger.catch()
+@logger.catch
 def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-1: Number of conflicts
 
@@ -29,7 +29,7 @@ def compute_eff1_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF1)
 
 
-@logger.catch()
+@logger.catch
 def compute_eff2_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-2: Vertical distance route efficiency
 
@@ -45,7 +45,7 @@ def compute_eff2_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF2)
 
 
-@logger.catch()
+@logger.catch
 def compute_eff3_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-3: Ascending route efficiency
 
@@ -61,7 +61,7 @@ def compute_eff3_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF3)
 
 
-@logger.catch()
+@logger.catch
 def compute_eff4_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-4: 3D distance route efficiency
 
@@ -77,7 +77,7 @@ def compute_eff4_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF4)
 
 
-@logger.catch()
+@logger.catch
 def compute_eff5_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-5: Route duration efficiency
 
@@ -93,7 +93,7 @@ def compute_eff5_metric(dataframe: DataFrame) -> DataFrame:
         .select(SCENARIO_NAME, ACID, EFF5)
 
 
-@logger.catch()
+@logger.catch
 def compute_eff6_metric(dataframe: DataFrame) -> DataFrame:
     """ EFF-6: Departure delay
 

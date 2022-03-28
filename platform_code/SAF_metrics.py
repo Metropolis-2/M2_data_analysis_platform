@@ -10,7 +10,7 @@ from results.results_constants import SAF_METRICS_RESULTS
 from schemas.tables_attributes import SCENARIO_NAME, SAF1, SAF2, SAF3, DISTANCE, SAF4, SAF6, SAF5, LOS_DURATION_TIME
 
 
-@logger.catch()
+@logger.catch
 def compute_saf1_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
     """
     SAF-1: Number of conflicts
@@ -23,7 +23,7 @@ def compute_saf1_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
         .select([SCENARIO_NAME, col('count').alias(SAF1)])
 
 
-@logger.catch()
+@logger.catch
 def compute_saf2_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
     """
     SAF-2: Number of intrusions
@@ -36,7 +36,7 @@ def compute_saf2_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
         .select([SCENARIO_NAME, col('count').alias(SAF2)])
 
 
-@logger.catch()
+@logger.catch
 def compute_saf3_metric(intermediate_results: DataFrame, *args, **kwargs):
     """
     SAF-3: Intrusion prevention rate
@@ -47,7 +47,7 @@ def compute_saf3_metric(intermediate_results: DataFrame, *args, **kwargs):
         .select(SCENARIO_NAME, SAF3)
 
 
-@logger.catch()
+@logger.catch
 def compute_saf4_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
     """
     SAF-4: Minimum separation
@@ -59,7 +59,7 @@ def compute_saf4_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
         .agg(min(DISTANCE).alias(SAF4))
 
 
-@logger.catch()
+@logger.catch
 def compute_saf5_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
     """
     SAF-5: Time spent in LOS
@@ -70,7 +70,7 @@ def compute_saf5_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
         .select(SCENARIO_NAME, col(LOS_DURATION_TIME).alias(SAF5))
 
 
-@logger.catch()
+@logger.catch
 def compute_saf6_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
     """
     SAF-6: Geofence violations

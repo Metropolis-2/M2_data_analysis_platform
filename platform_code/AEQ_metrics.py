@@ -24,7 +24,7 @@ AUTONOMY = "autonomy"
 CANCELLATION_LIMIT = "cancellation_limit"
 
 
-@logger.catch()
+@logger.catch
 def compute_aeq1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-1: Number of cancelled demands
 
@@ -32,6 +32,7 @@ def compute_aeq1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     is greater than ideal expected arrival time by more or equal than some given
     cancellation delay limit that depends on mission type.
     """
+    # TODO: The delay per ACID is calculated here, check optimization
     return dataframe \
         .select(SCENARIO_NAME, PRIORITY, LOITERING, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \
@@ -48,7 +49,7 @@ def compute_aeq1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .select(SCENARIO_NAME, col("count").alias(AEQ1))
 
 
-@logger.catch()
+@logger.catch
 def compute_aeq1_1_metric(dataframe: DataFrame,
                           intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-1.1 Percentage of cancelled demands
@@ -69,7 +70,7 @@ def compute_aeq1_1_metric(dataframe: DataFrame,
         .select(SCENARIO_NAME, AEQ1_1)
 
 
-@logger.catch()
+@logger.catch
 def compute_aeq2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """
     AEQ-2: Number of inoperative trajectories
@@ -87,7 +88,7 @@ def compute_aeq2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .withColumnRenamed(COUNT, AEQ2)
 
 
-@logger.catch()
+@logger.catch
 def compute_aeq2_1_metric(dataframe: DataFrame,
                           intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
     """
@@ -96,7 +97,7 @@ def compute_aeq2_1_metric(dataframe: DataFrame,
     Calculated as the ratio of AEQ-2 and the total number of flight
     intentions in the given scenario.
     """
-    # TODO: Optimize using previous calculations in metrics
+    # TODO: The number of flights per scenario is calculated here, check optimization
     flights_per_scenario = dataframe.select(SCENARIO_NAME, ACID) \
         .groupby(SCENARIO_NAME) \
         .count() \
@@ -109,7 +110,7 @@ def compute_aeq2_1_metric(dataframe: DataFrame,
         .select(SCENARIO_NAME, AEQ2_1)
 
 
-@logger.catch()
+@logger.catch
 def compute_aeq3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-3: The demand delay dispersion
 
@@ -129,7 +130,7 @@ def compute_aeq3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .agg(stddev(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AEQ3))
 
 
-@logger.catch()
+@logger.catch
 def compute_aeq4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-4: The worst demand delay
 
@@ -138,11 +139,11 @@ def compute_aeq4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     calculated as the difference between realized arrival time and
     ideal expected arrival time.
     """
+    # TODO: The average delay per scenario is calculated here, check optimization
     avg_delay = dataframe.select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .groupby(SCENARIO_NAME) \
         .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AVG_DELAY))
 
-    # TODO: the delay have been calculated previously, check how to avoid multiple recalculations
     return dataframe \
         .select(SCENARIO_NAME, ACID, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \
@@ -160,7 +161,7 @@ def compute_aeq5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     where delay for each flight intention is calculated as the difference between
     realized arrival time and ideal expected arrival time.
     """
-    # TODO: Same code as in AEQ-4, needs optimization
+    # TODO: The average delay per scenario is calculated here, check optimization
     avg_delay = dataframe.select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .groupby(SCENARIO_NAME) \
         .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AVG_DELAY))
@@ -181,7 +182,7 @@ def compute_aeq5_1_metric(dataframe: DataFrame,
 
     Calculated as the ratio of AEQ-5 and the total number of flight intentions in the given scenario.
     """
-    # TODO: Optimize using previous calculations in metrics
+    # TODO: The number of flights per scenario is calculated here, check optimization
     flights_per_scenario = dataframe.select(SCENARIO_NAME, ACID) \
         .groupby(SCENARIO_NAME) \
         .count() \

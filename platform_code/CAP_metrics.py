@@ -7,12 +7,11 @@ from pyspark.sql.functions import col, mean
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import SAF_METRICS_RESULTS, CAP_METRICS_RESULTS, NUM_FLIGHTS
-from schemas.tables_attributes import (SCENARIO_NAME, ACID, DISTANCE_ASCEND, BASELINE_ASCENDING_DISTANCE,
-                                       EFF3, DISTANCE_3D, BASELINE_3D_DISTANCE, EFF4, BASELINE_ARRIVAL_TIME, DEL_TIME,
+from schemas.tables_attributes import (SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME,
                                        CAP1, SAF2, CAP2)
 
 
-@logger.catch()
+@logger.catch
 def compute_cap1_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs) -> DataFrame:
     """ CAP-1: Average demand delay
 
@@ -23,14 +22,14 @@ def compute_cap1_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs)
         :return: query result with the CAP1 metric per scenario.
         """
     dataframe = input_dataframes[FLST_LOG_PREFIX]
-    # TODO: the average arrival delay is calculated, check optimization
+    # TODO: The delay per ACID is calculated here, check optimization
     return dataframe \
         .select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .groupby(SCENARIO_NAME) \
         .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(CAP1))
 
 
-@logger.catch()
+@logger.catch
 def compute_cap2_metric(input_dataframes: Dict[str, DataFrame],
                         output_dataframes: Dict[str, DataFrame],
                         *args, **kwargs) -> DataFrame:
@@ -60,7 +59,7 @@ def compute_cap2_metric(input_dataframes: Dict[str, DataFrame],
         .select(SCENARIO_NAME, CAP2)
 
 
-@logger.catch()
+@logger.catch
 def compute_cap3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ CAP-3: Additional demand delay
 
@@ -69,13 +68,10 @@ def compute_cap3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the EFF3 per scenario and drone id.
     """
-    return dataframe \
-        .select(SCENARIO_NAME, ACID, DISTANCE_ASCEND, BASELINE_ASCENDING_DISTANCE) \
-        .withColumn(EFF3, col(BASELINE_ASCENDING_DISTANCE) / col(DISTANCE_ASCEND)) \
-        .select(SCENARIO_NAME, ACID, EFF3)
+    pass
 
 
-@logger.catch()
+@logger.catch
 def compute_cap4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ CAP-4: Additional number of intrusions
 
@@ -85,10 +81,7 @@ def compute_cap4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the EFF4 per scenario and drone id.
     """
-    return dataframe \
-        .select(SCENARIO_NAME, ACID, DISTANCE_3D, BASELINE_3D_DISTANCE) \
-        .withColumn(EFF4, col(BASELINE_3D_DISTANCE) / col(DISTANCE_3D)) \
-        .select(SCENARIO_NAME, ACID, EFF4)
+    pass
 
 
 CAP_METRICS = [

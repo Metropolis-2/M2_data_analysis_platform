@@ -1,6 +1,5 @@
 from typing import Dict
 
-import pyspark.sql.functions as F
 from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, sum
@@ -17,7 +16,8 @@ DISTANCE_PER_PRIORITY = 'Dprio'
 MISSIONS_PER_PRIORITY = 'Nprio'
 TIME_PER_PRIORITY = 'Tprio'
 
-@logger.catch()
+
+@logger.catch
 def compute_pri1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ PRI-1: Weighted mission duration
 
@@ -30,9 +30,10 @@ def compute_pri1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .groupby(SCENARIO_NAME, PRIORITY) \
         .agg((sum(FLIGHT_TIME) * col(PRIORITY)).alias(PRI1)) \
         .groupby(SCENARIO_NAME) \
-        .agg(F.sum(PRI1).alias(PRI1))
+        .agg(sum(PRI1).alias(PRI1))
 
-@logger.catch()
+
+@logger.catch
 def compute_pri2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ PRI-2: Weighted mission track length
 
@@ -45,11 +46,11 @@ def compute_pri2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .groupby(SCENARIO_NAME, PRIORITY) \
         .agg((sum(DISTANCE_3D) * col(PRIORITY)).alias(PRI2)) \
         .groupby(SCENARIO_NAME) \
-        .agg(F.sum(PRI2).alias(PRI2))
+        .agg(sum(PRI2).alias(PRI2))
 
 
 # TODO: Check possible optimization joining flights per priority in PRI3 and PRI4
-@logger.catch()
+@logger.catch
 def compute_pri3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ PRI-3: Average mission duration per priority level
 
@@ -73,7 +74,8 @@ def compute_pri3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .withColumn(PRI3, col(TIME_PER_PRIORITY) / col(MISSIONS_PER_PRIORITY)) \
         .select(SCENARIO_NAME, PRIORITY, PRI3)
 
-@logger.catch()
+
+@logger.catch
 def compute_pri4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ PRI-4: Average mission track length per priority level
 
@@ -97,7 +99,8 @@ def compute_pri4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .withColumn(PRI4, col(DISTANCE_PER_PRIORITY) / col(MISSIONS_PER_PRIORITY)) \
         .select(SCENARIO_NAME, PRIORITY, PRI4)
 
-@logger.catch()
+
+@logger.catch
 def compute_pri5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ PRI-5: Total delay per priority level
 
@@ -111,13 +114,13 @@ def compute_pri5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     departure_delay = dataframe \
         .withColumn(DEPARTURE_DELAY, col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)) \
         .groupby(SCENARIO_NAME, PRIORITY) \
-        .agg(F.sum(DEPARTURE_DELAY).alias(DEPARTURE_DELAY))
+        .agg(sum(DEPARTURE_DELAY).alias(DEPARTURE_DELAY))
 
     # TODO: The flight time delay per ACID is calculated here, check optimization
     flight_time_delay = dataframe \
         .withColumn(FLIGHT_TIME_DELAY, col(FLIGHT_TIME) - col(BASELINE_FLIGHT_TIME)) \
         .groupby(SCENARIO_NAME, PRIORITY) \
-        .agg(F.sum(FLIGHT_TIME_DELAY).alias(FLIGHT_TIME_DELAY))
+        .agg(sum(FLIGHT_TIME_DELAY).alias(FLIGHT_TIME_DELAY))
 
     return departure_delay \
         .join(flight_time_delay, on=[SCENARIO_NAME, PRIORITY]) \
