@@ -48,7 +48,9 @@ def compute_env2_metric(dataframe: DataFrame, *args, **kwargs):
     dataframe = dataframe.withColumn("DIST_NEXT_POINT",
                                      get_coordinates_distance(LATITUDE, LONGITUDE, "NEXT_LATITUDE", "NEXT_LONGITUDE"))
     dataframe = dataframe.withColumn("WEIGHT_SEGMENT", col(ALTITUDE) * col("DIST_NEXT_POINT"))
+
     dataframe = dataframe.groupby(SCENARIO_NAME, ACID).agg(sum(col("WEIGHT_SEGMENT")).alias("FP_ENV2"))
+    # TODO: ? Check formula, if mean is needed or just divide por el segment length
     # Calculate average per scenario
     return dataframe.groupBy(SCENARIO_NAME).agg(mean("FP_ENV2").alias(ENV2))
 
@@ -56,10 +58,15 @@ def compute_env2_metric(dataframe: DataFrame, *args, **kwargs):
 @logger.catch
 def compute_env3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ ENV-3: Equivalent Noise Level
+
     Represent total sound exposure at the given point on city area surface.
-    It is computed by aggregating the total sound intensity (of all sound sources) at that given point over the time.
+    It is computed by aggregating the total sound intensity (of all sound sources)
+    at that given point over the time.
     """
     point = struct(lit(settings.x_center), lit(settings.y_center))
+
+    # TODO: ? Define formula for the sound depending on the distance to the point.
+    # TODO: ? How many points and how to define.
     return dataframe.filter(col(SIMULATION_TIME) == settings.time_roi) \
         .withColumn("distance", great_circle_udf(point, struct(col(LATITUDE), col(LONGITUDE)))) \
         .filter((col("distance") <= settings.radius_roi) & (col(ALTITUDE) <= settings.altitude_roi)) \
@@ -74,6 +81,7 @@ def compute_env4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     The ratio between the difference of maximum and minimum length
     flown at a flight level and average length flown at level.
     """
+    # TODO: ? Define flight levels / altitude discretization
     avg_alt = dataframe \
         .groupby(SCENARIO_NAME, ACID) \
         .agg(max(ALTITUDE).alias("MAX_ALTITUDE"), min(ALTITUDE).alias("MIN_ALTITUDE")) \

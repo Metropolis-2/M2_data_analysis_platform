@@ -68,6 +68,7 @@ def compute_cap3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the EFF3 per scenario and drone id.
     """
+    # TODO: ? How to compare scenarios with rogue carrier.
     pass
 
 
@@ -81,6 +82,7 @@ def compute_cap4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the EFF4 per scenario and drone id.
     """
+    # TODO: ? How to compare scenarios with rogue carrier.
     pass
 
 

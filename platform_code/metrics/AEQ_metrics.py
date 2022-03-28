@@ -77,6 +77,7 @@ def compute_aeq2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     (Number of situations when realized total mission duration is greater than specific drone autonomy.
     Realized trajectories and hence realized total mission duration comes directly from a simulation)
     """
+    # TODO: ? Define autonomy.
     return dataframe.select(SCENARIO_NAME, ACID, FLIGHT_TIME, VEHICLE) \
         .withColumn(AUTONOMY, when(col(VEHICLE) == "MP20", settings.MP20.autonomy)
                     .otherwise(settings.MP30.autonomy)) \
@@ -144,6 +145,7 @@ def compute_aeq4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .groupby(SCENARIO_NAME) \
         .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AVG_DELAY))
 
+    # TODO: ? Ask about negatives values in delays. What does it means?
     return dataframe \
         .select(SCENARIO_NAME, ACID, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \
@@ -167,6 +169,7 @@ def compute_aeq5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .groupby(SCENARIO_NAME) \
         .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AVG_DELAY))
 
+    # TODO: ? Define the threshold for the AEQ-5
     return dataframe \
         .select(SCENARIO_NAME, ACID, BASELINE_ARRIVAL_TIME, DEL_TIME) \
         .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \

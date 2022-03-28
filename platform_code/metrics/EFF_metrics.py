@@ -15,7 +15,7 @@ from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE
 
 @logger.catch
 def compute_eff1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
-    """ EFF-1: Number of conflicts
+    """ EFF-1: Horizontal distance route efficiency
 
     Ratio representing the length of the ideal horizontal route to the actual
     horizontal route.

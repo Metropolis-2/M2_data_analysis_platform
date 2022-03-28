@@ -6,7 +6,7 @@ from pyspark.sql.functions import col, sum
 
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario_and_priority, build_result_df_by_scenario
-from results.results_constants import PRI_METRICS_RESULTS_SCENARIO, PRI_METRICS_RESULTS_SCENARIO_PRIORITY
+from results.results_constants import PRI_METRICS_RESULTS_SCENARIO, PRI_METRICS_RESULTS_SCENARIO_PRIORITY, COUNT
 from schemas.tables_attributes import (FLIGHT_TIME, SCENARIO_NAME, PRIORITY, PRI1, PRI2, DISTANCE_3D, SPAWN_TIME,
                                        BASELINE_DEPARTURE_TIME, BASELINE_FLIGHT_TIME, PRI5, PRI3, PRI4)
 
@@ -26,6 +26,7 @@ def compute_pri1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the PRI1 per scenario and priority.
     """
+    # TODO: ? Define weight for priority
     return dataframe \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .agg((sum(FLIGHT_TIME) * col(PRIORITY)).alias(PRI1)) \
@@ -42,6 +43,7 @@ def compute_pri2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the PRI2 per scenario and priority.
     """
+    # TODO: ? Define weight for priority
     return dataframe \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .agg((sum(DISTANCE_3D) * col(PRIORITY)).alias(PRI2)) \
@@ -67,7 +69,7 @@ def compute_pri3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     flights_per_priority = dataframe \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .count() \
-        .withColumnRenamed('count', MISSIONS_PER_PRIORITY)
+        .withColumnRenamed(COUNT, MISSIONS_PER_PRIORITY)
 
     return time_per_priority \
         .join(flights_per_priority, on=[SCENARIO_NAME, PRIORITY]) \
@@ -92,7 +94,7 @@ def compute_pri4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     total_flights_per_priority = dataframe \
         .groupby(SCENARIO_NAME, PRIORITY) \
         .count() \
-        .withColumnRenamed('count', MISSIONS_PER_PRIORITY)
+        .withColumnRenamed(COUNT, MISSIONS_PER_PRIORITY)
 
     return distance_per_priority \
         .join(total_flights_per_priority, on=[SCENARIO_NAME, PRIORITY]) \
