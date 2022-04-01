@@ -1,0 +1,46 @@
+# PATH
+data_path = "../data"
+saving_path = "../output"
+flight_intention_path = "@format {this.data_path}/Flight_intentions"
+
+# LOGGING
+logging.level = "DEBUG"
+
+# SPARK CONFIG
+spark.app_name = "M2-Data-Analysis-Platform"
+
+# DRONE CONFIG
+MP30.avg_speed = 15.43 # m/s
+MP30.autonomy = 1800
+MP30.vertical_speed = 5 # m/s, only loitering
+MP20.avg_speed = 10.29 # m/s
+MP20.autonomy = 1800
+MP20.vertical_speed = 5 # m/s, only loitering
+
+flight_altitude.loitering = 18.288 # 60 feets
+flight_altitude.lowest = 9.144 # 30 feets
+
+# THRESHOLDS
+thresholds.destination_distance = 400
+thresholds.delay = 5
+thresholds.emergency_mission_delay = 300
+thresholds.delivery_mission_delay = 600
+thresholds.loitering_mission_delay = 1200
+threshold.AEQ5 = 50
+
+# WEIGHTS
+weights.priority_1 = 1
+weights.priority_2 = 2
+weights.priority_3 = 3
+weights.priority_4 = 4
+
+# COORDINATE SYSTEM
+crs.origin = "epsg:4326"
+crs.desired = "epsg:32633"
+
+#ROI POINT ENV3
+x_center = 48.15636078 #lat
+y_center = 16.32453111 #lon
+radius_roi = 10 #meters
+altitude_roi = 100 #meters
+time_roi = 120 #seconds
