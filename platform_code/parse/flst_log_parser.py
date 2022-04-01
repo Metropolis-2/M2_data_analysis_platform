@@ -1,10 +1,9 @@
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import lit, col
-from pyspark.sql.types import DoubleType
+from pyspark.sql.functions import col
 
 from schemas.flst_log_schema import COLUMNS_TO_DROP, FLST_LOG_COLUMNS
-from schemas.tables_attributes import (DISTANCE_ASCEND, WORK_DONE, DEL_Y, DEL_X, DEL_LATITUDE, DEL_LONGITUDE,
-                                       LATITUDE, LONGITUDE, DISTANCE_ALT, DEL_ALTITUDE)
+from schemas.tables_attributes import (ASCENDING_DISTANCE, WORK_DONE, DEL_Y, DEL_X, DEL_LATITUDE, DEL_LONGITUDE,
+                                       LATITUDE, LONGITUDE, VERTICAL_DISTANCE, DEL_ALTITUDE, FLIGHT_TIME)
 from utils.parser_utils import transform_location, convert_feet_to_meters
 
 
@@ -33,7 +32,7 @@ def convert_altitudes_to_meter(dataframe: DataFrame) -> DataFrame:
     :return: dataframe with the columns in feet transformed to meter.
     """
     # The altitude distance comprises both up and down movements
-    dataframe = convert_feet_to_meters(dataframe, DISTANCE_ALT)
+    dataframe = convert_feet_to_meters(dataframe, VERTICAL_DISTANCE)
     dataframe = convert_feet_to_meters(dataframe, DEL_ALTITUDE)
     return dataframe
 
@@ -46,18 +45,19 @@ def calculate_ascending_distance(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the FLSTLOG data read from the file.
     :return: dataframe with the column ascending distance added.
     """
-    return dataframe.withColumn(DISTANCE_ASCEND,
-                                col(DISTANCE_ALT) / 2 - col(DEL_ALTITUDE))
+    return dataframe.withColumn(ASCENDING_DISTANCE,
+                                col(VERTICAL_DISTANCE) / 2 - col(DEL_ALTITUDE))
 
 
-# TODO : create a function to compute that with inputs ascend_dist and FLIGHT_time=float(line_list[3])
 def calculate_work_done(dataframe: DataFrame) -> DataFrame:
     """ Calculates the energy employed during the flight.
 
     :param dataframe: dataframe with the FLSTLOG data read from the file.
     :return: dataframe with the column work done added.
     """
-    return dataframe.withColumn(WORK_DONE, lit(0).cast(DoubleType()))
+    # For the moment the formula is work_done = 2 * ascending_distance + flight_time
+    return dataframe.withColumn(WORK_DONE,
+                                2 * col(ASCENDING_DISTANCE) + col(FLIGHT_TIME))
 
 
 def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
@@ -78,4 +78,4 @@ def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
 
 
 FLST_LOG_TRANSFORMATIONS = [remove_flst_log_unused_columns, convert_altitudes_to_meter, calculate_ascending_distance,
-                            calculate_work_done, calculate_deletion_position, reorder_flst_log_columns]
+                            calculate_deletion_position, calculate_work_done, reorder_flst_log_columns]

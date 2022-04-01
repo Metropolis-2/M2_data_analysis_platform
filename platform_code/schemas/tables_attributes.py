@@ -72,7 +72,10 @@ DEL_X = 'Deletion_X'
 DEL_Y = 'Deletion_Y'
 DISTANCE_2D = 'Distance_2D'
 DISTANCE_3D = 'Distance_3D'
-DISTANCE_ALT = 'Distance_ALT'
+# Ascending and descending distance done by the drone
+VERTICAL_DISTANCE = 'Vertical_distance'
+# Ascending distance done by the drone. Half of vertical
+ASCENDING_DISTANCE = 'Ascending_distance'
 FLIGHT_TIME = 'Flight_time'
 SPAWN_TIME = 'Spawn_Time'
 WORK_DONE = 'Work_Done'
@@ -83,7 +86,6 @@ PILOT_ALT = 'Pilot_ALT'
 ASAS_ACTIVE = 'ASAS_Active'
 HEADING = 'Heading'
 TAS = 'TAS'
-DISTANCE_ASCEND = 'Distance_ascend'
 
 # COMBINED FLST LOG AND FLIGHT INTENTIONS
 ARRIVAL_DELAY = 'Arrival_delay'

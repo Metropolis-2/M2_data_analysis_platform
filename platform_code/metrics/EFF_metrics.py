@@ -7,10 +7,11 @@ from pyspark.sql.functions import col
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario_and_acid
 from results.results_constants import EFF_METRICS_RESULTS
-from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, EFF1, DISTANCE_ALT,
-                                       BASELINE_VERTICAL_DISTANCE, EFF2, DISTANCE_ASCEND, BASELINE_ASCENDING_DISTANCE,
-                                       EFF3, DISTANCE_3D, BASELINE_3D_DISTANCE, EFF4, FLIGHT_TIME, BASELINE_FLIGHT_TIME,
-                                       EFF5, SPAWN_TIME, BASELINE_DEPARTURE_TIME, EFF6)
+from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, EFF1, VERTICAL_DISTANCE,
+                                       BASELINE_VERTICAL_DISTANCE, EFF2, ASCENDING_DISTANCE,
+                                       BASELINE_ASCENDING_DISTANCE, EFF3, DISTANCE_3D, BASELINE_3D_DISTANCE, EFF4,
+                                       FLIGHT_TIME, BASELINE_FLIGHT_TIME, EFF5, SPAWN_TIME, BASELINE_DEPARTURE_TIME,
+                                       EFF6)
 
 
 @logger.catch
@@ -40,8 +41,8 @@ def compute_eff2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :return: query result with the EFF2 per scenario and drone id.
     """
     return dataframe \
-        .select(SCENARIO_NAME, ACID, DISTANCE_ALT, BASELINE_VERTICAL_DISTANCE) \
-        .withColumn(EFF2, col(BASELINE_VERTICAL_DISTANCE) / col(DISTANCE_ALT)) \
+        .select(SCENARIO_NAME, ACID, VERTICAL_DISTANCE, BASELINE_VERTICAL_DISTANCE) \
+        .withColumn(EFF2, col(BASELINE_VERTICAL_DISTANCE) / col(VERTICAL_DISTANCE)) \
         .select(SCENARIO_NAME, ACID, EFF2)
 
 
@@ -56,8 +57,8 @@ def compute_eff3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :return: query result with the EFF3 per scenario and drone id.
     """
     return dataframe \
-        .select(SCENARIO_NAME, ACID, DISTANCE_ASCEND, BASELINE_ASCENDING_DISTANCE) \
-        .withColumn(EFF3, col(BASELINE_ASCENDING_DISTANCE) / col(DISTANCE_ASCEND)) \
+        .select(SCENARIO_NAME, ACID, ASCENDING_DISTANCE, BASELINE_ASCENDING_DISTANCE) \
+        .withColumn(EFF3, col(BASELINE_ASCENDING_DISTANCE) / col(ASCENDING_DISTANCE)) \
         .select(SCENARIO_NAME, ACID, EFF3)
 
 

@@ -7,10 +7,9 @@ from pyspark.sql.functions import col, when
 from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_X, ARRIVAL_DELAY, DEPARTURE_DELAY,
                                        SPAWNED, MISSION_COMPLETED, DEL_TIME, BASELINE_ARRIVAL_TIME, SPAWN_TIME,
                                        BASELINE_DEPARTURE_TIME, ACID, FLIGHT_TIME, DISTANCE_2D, DISTANCE_3D,
-                                       DISTANCE_ALT, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, DISTANCE_ASCEND,
-                                       WORK_DONE,
-                                       FLST_ID, SCENARIO_NAME, ORIGIN_LAT, ORIGIN_LON, DESTINATION_LAT, DESTINATION_LON,
-                                       CRUISING_SPEED, PRIORITY, LOITERING, BASELINE_2D_DISTANCE,
+                                       VERTICAL_DISTANCE, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, ASCENDING_DISTANCE,
+                                       WORK_DONE, FLST_ID, SCENARIO_NAME, ORIGIN_LAT, ORIGIN_LON, DESTINATION_LAT,
+                                       DESTINATION_LON, CRUISING_SPEED, PRIORITY, LOITERING, BASELINE_2D_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
                                        BASELINE_FLIGHT_TIME, VERTICAL_SPEED, VEHICLE)
 from utils.config import settings
@@ -42,12 +41,12 @@ COMBINED_COLUMNS = [
     FLIGHT_TIME,
     DISTANCE_2D,
     DISTANCE_3D,
-    DISTANCE_ALT,
+    VERTICAL_DISTANCE,
+    ASCENDING_DISTANCE,
+    WORK_DONE,
     DEL_LATITUDE,
     DEL_LONGITUDE,
-    DEL_ALTITUDE,
-    DISTANCE_ASCEND,
-    WORK_DONE
+    DEL_ALTITUDE
 ]
 
 

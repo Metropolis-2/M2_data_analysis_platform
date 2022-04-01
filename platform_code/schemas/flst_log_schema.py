@@ -1,9 +1,9 @@
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
 from schemas.tables_attributes import (ACID, SCENARIO_NAME, DEL_TIME, SPAWN_TIME, DISTANCE_2D, FLIGHT_TIME, DISTANCE_3D,
-                                       DISTANCE_ALT, WORK_DONE, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, DEL_X, DEL_Y,
-                                       TAS, VERTICAL_SPEED, HEADING, ASAS_ACTIVE, PILOT_ALT, PILOT_SPD, PILOT_HDG,
-                                       PILOT_VS, DISTANCE_ASCEND)
+                                       VERTICAL_DISTANCE, WORK_DONE, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, DEL_X,
+                                       DEL_Y, TAS, VERTICAL_SPEED, HEADING, ASAS_ACTIVE, PILOT_ALT, PILOT_SPD,
+                                       PILOT_HDG, PILOT_VS, ASCENDING_DISTANCE)
 
 # The heading of the FLSTLOG is the following, with the names changed made:
 # - Deletion Time [s] -> DELETION_TIME
@@ -12,7 +12,7 @@ from schemas.tables_attributes import (ACID, SCENARIO_NAME, DEL_TIME, SPAWN_TIME
 # - Flight time [s] -> FLIGHT_TIME
 # - Distance 2D [m] -> DISTANCE_2D
 # - Distance 3D [m] -> DISTANCE_3D
-# - Distance ALT [ft] -> DISTANCE_ALT this includes the
+# - Distance ALT [ft] -> VERTICAL_DISTANCE this includes the
 # - Work Done [MJ] -> Removed, wrong values that have to be calculated
 # - Latitude [deg] -> DEL_LATITUDE
 # - Longitude [deg] -> DEL_LONGITUDE
@@ -33,7 +33,7 @@ FLST_LOG_FILE_SCHEMA = StructType([
     StructField(FLIGHT_TIME, StringType(), False),
     StructField(DISTANCE_2D, StringType(), False),
     StructField(DISTANCE_3D, DoubleType(), False),
-    StructField(DISTANCE_ALT, DoubleType(), False),
+    StructField(VERTICAL_DISTANCE, DoubleType(), False),
     StructField(WORK_DONE, DoubleType(), False),
     StructField(DEL_LATITUDE, DoubleType(), False),
     StructField(DEL_LONGITUDE, DoubleType(), False),
@@ -57,11 +57,11 @@ FLST_LOG_COLUMNS = [
     FLIGHT_TIME,
     DISTANCE_2D,
     DISTANCE_3D,
-    DISTANCE_ALT,
+    VERTICAL_DISTANCE,
     DEL_LATITUDE,
     DEL_LONGITUDE,
     DEL_ALTITUDE,
-    DISTANCE_ASCEND,
+    ASCENDING_DISTANCE,
     WORK_DONE,
     DEL_X,
     DEL_Y
