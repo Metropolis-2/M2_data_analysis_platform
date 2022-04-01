@@ -2,7 +2,7 @@ from typing import Dict, Union
 
 from loguru import logger
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, min
+from pyspark.sql.functions import col, min, sum
 
 from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
@@ -68,9 +68,11 @@ def compute_saf5_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
     Total time spent in a state of intrusion.
     """
     dataframe = input_dataframes[LOS_LOG_PREFIX]
-    # TODO: ? Define the representation. Mean/Sum of scenario
     return dataframe \
-        .select(SCENARIO_NAME, col(LOS_DURATION_TIME).alias(SAF5))
+        .select(SCENARIO_NAME, LOS_DURATION_TIME) \
+        .groupby(SCENARIO_NAME) \
+        .agg(sum(LOS_DURATION_TIME).alias(SAF5)) \
+        .select(SCENARIO_NAME, SAF5)
 
 
 @logger.catch
