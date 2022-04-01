@@ -26,6 +26,7 @@ from utils.config import settings
 # Configuration for the log names with the schema associated and the transformations
 # required after the read of the log file.
 # Prefix: (schema, transformations)
+from utils.io_utils import save_dataframes_dict, load_dataframes
 
 PARSE_CONFIG = {
     CONF_LOG_PREFIX: (CONF_LOG_FILE_SCHEMA, CONF_LOG_TRANSFORMATIONS),
@@ -42,19 +43,19 @@ if __name__ == "__main__":
 
     spark = SparkSession.builder.appName(settings.spark.app_name).getOrCreate()
 
-    fp_intentions_dfs = parse_flight_intentions(spark)
-    input_dataframes = parse_log_files(PARSE_CONFIG, fp_intentions_dfs, spark)
+    # fp_intentions_dfs = parse_flight_intentions(spark)
+    # input_dataframes = parse_log_files(PARSE_CONFIG, fp_intentions_dfs, spark)
     # save_dataframes_dict(input_dataframes)
 
-    # df_names = [CONF_LOG_PREFIX, FLST_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX, REG_LOG_PREFIX]
-    # input_dataframes = load_dataframes(df_names, spark)
+    df_names = [CONF_LOG_PREFIX, FLST_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX, REG_LOG_PREFIX]
+    input_dataframes = load_dataframes(df_names, spark)
 
     results = dict()
-    results = compute_security_metrics(input_dataframes, results)
-    results = compute_accessibility_and_equality_metrics(input_dataframes, results)
-    results = compute_priority_metrics(input_dataframes, results)
-    results = compute_efficiency_metrics(input_dataframes, results)
-    results = compute_capacity_metrics(input_dataframes, results)
+    # results = compute_security_metrics(input_dataframes, results)
+    # results = compute_accessibility_and_equality_metrics(input_dataframes, results)
+    # results = compute_priority_metrics(input_dataframes, results)
+    # results = compute_efficiency_metrics(input_dataframes, results)
+    # results = compute_capacity_metrics(input_dataframes, results)
     results = compute_environment_metrics(input_dataframes, results)
 
     for metric_name, metric_results in results.items():
