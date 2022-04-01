@@ -2,8 +2,8 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 
 from schemas.flst_log_schema import COLUMNS_TO_DROP, FLST_LOG_COLUMNS
-from schemas.tables_attributes import (ASCENDING_DISTANCE, WORK_DONE, DEL_Y, DEL_X, DEL_LATITUDE, DEL_LONGITUDE,
-                                       LATITUDE, LONGITUDE, VERTICAL_DISTANCE, DEL_ALTITUDE, FLIGHT_TIME)
+from schemas.tables_attributes import (DEL_Y, DEL_X, DEL_LATITUDE, DEL_LONGITUDE,
+                                       LATITUDE, LONGITUDE, VERTICAL_DISTANCE, DEL_ALTITUDE)
 from utils.parser_utils import transform_location, convert_feet_to_meters
 
 
@@ -37,29 +37,6 @@ def convert_altitudes_to_meter(dataframe: DataFrame) -> DataFrame:
     return dataframe
 
 
-def calculate_ascending_distance(dataframe: DataFrame) -> DataFrame:
-    """ Calculates the ascending distance navigated by the drone.
-    This distance is calculated by halving the altitude distance, to take
-    only the up movements, and subtracting the deletion altitude.
-
-    :param dataframe: dataframe with the FLSTLOG data read from the file.
-    :return: dataframe with the column ascending distance added.
-    """
-    return dataframe.withColumn(ASCENDING_DISTANCE,
-                                col(VERTICAL_DISTANCE) / 2 - col(DEL_ALTITUDE))
-
-
-def calculate_work_done(dataframe: DataFrame) -> DataFrame:
-    """ Calculates the energy employed during the flight.
-
-    :param dataframe: dataframe with the FLSTLOG data read from the file.
-    :return: dataframe with the column work done added.
-    """
-    # For the moment the formula is work_done = 2 * ascending_distance + flight_time
-    return dataframe.withColumn(WORK_DONE,
-                                2 * col(ASCENDING_DISTANCE) + col(FLIGHT_TIME))
-
-
 def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
     """ Calculates the position where the drone was deleted in the axis X and Y.
     It performs the transformation from the coordinates to X and Y units.
@@ -77,5 +54,5 @@ def calculate_deletion_position(dataframe: DataFrame) -> DataFrame:
     return dataframe
 
 
-FLST_LOG_TRANSFORMATIONS = [remove_flst_log_unused_columns, convert_altitudes_to_meter, calculate_ascending_distance,
-                            calculate_deletion_position, calculate_work_done, reorder_flst_log_columns]
+FLST_LOG_TRANSFORMATIONS = [remove_flst_log_unused_columns, convert_altitudes_to_meter,
+                            calculate_deletion_position, reorder_flst_log_columns]

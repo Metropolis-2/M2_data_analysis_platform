@@ -48,7 +48,9 @@ def check_if_loitering_mission(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the flight plan intention data read from the file.
     :return: dataframe with the column loitering added.
     """
-    return dataframe.withColumn(LOITERING, when(col(GEOFENCE_DURATION).isNotNull(), True).otherwise(False))
+    return dataframe.withColumn(LOITERING,
+                                when(col(GEOFENCE_DURATION).isNotNull(), True)
+                                .otherwise(False))
 
 
 def calculate_speeds(dataframe: DataFrame) -> DataFrame:
@@ -129,21 +131,20 @@ def calculate_baseline_metrics(dataframe: DataFrame) -> DataFrame:
                                                               col(DESTINATION_LAT), col(DESTINATION_LON)))
 
     # TODO: Ask for the loitering flight altitude
+    # The flight time is the same for both types, however the loitering mission is removed in the air.
+    # Therefore, the vertical distance = ascending distance for them
     dataframe = dataframe.withColumn(BASELINE_ASCENDING_DISTANCE,
                                      when(col(LOITERING), settings.flight_altitude.loitering)
                                      .otherwise(settings.flight_altitude.lowest))
     dataframe = dataframe.withColumn(BASELINE_VERTICAL_DISTANCE,
-                                     col(BASELINE_ASCENDING_DISTANCE) * 2)
+                                     when(col(LOITERING), col(BASELINE_ASCENDING_DISTANCE))
+                                     .otherwise(col(BASELINE_ASCENDING_DISTANCE) * 2))
+    dataframe = dataframe.withColumn(BASELINE_FLIGHT_TIME,
+                                     col(BASELINE_2D_DISTANCE) / col(CRUISING_SPEED) +
+                                     col(BASELINE_ASCENDING_DISTANCE) / col(VERTICAL_SPEED))
 
     dataframe = dataframe.withColumn(BASELINE_3D_DISTANCE,
                                      col(BASELINE_2D_DISTANCE) + col(BASELINE_VERTICAL_DISTANCE))
-
-    # TODO: Ask for the vertical speed for loitering and for normal flights
-    dataframe = dataframe.withColumn(BASELINE_FLIGHT_TIME,
-                                     when(col(LOITERING), (col(BASELINE_2D_DISTANCE) / col(CRUISING_SPEED) +
-                                                           col(BASELINE_2D_DISTANCE) / col(VERTICAL_SPEED)))
-                                     .otherwise(col(BASELINE_2D_DISTANCE) / col(CRUISING_SPEED)))
-
     # The BASELINE_DEPARTURE_TIME is calculated in `transform_timestamps_to_seconds()`
     dataframe = dataframe.withColumn(BASELINE_ARRIVAL_TIME,
                                      col(BASELINE_DEPARTURE_TIME) + col(BASELINE_FLIGHT_TIME))

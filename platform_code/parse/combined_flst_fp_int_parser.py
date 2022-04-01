@@ -68,6 +68,35 @@ def reorder_combined_columns(dataframe: DataFrame) -> DataFrame:
     return dataframe.select(COMBINED_COLUMNS)
 
 
+def calculate_ascending_distance(dataframe: DataFrame) -> DataFrame:
+    """ Calculates the ascending distance navigated by the drone.
+
+    For most of the flights, this distance is calculated by halving the
+    vertical distance, to take only the up movements, and subtracting the
+    deletion altitude.
+
+    However, for the loitering missions, which are removed in the air. The
+    ascending distance is the same as the vertical distance.
+
+    :param dataframe: dataframe with the FLSTLOG and fli data read from the file.
+    :return: dataframe with the column ascending distance added.
+    """
+    return dataframe.withColumn(ASCENDING_DISTANCE,
+                                when(col(LOITERING), col(VERTICAL_DISTANCE))
+                                .otherwise(col(VERTICAL_DISTANCE) / 2 - col(DEL_ALTITUDE)))
+
+
+def calculate_work_done(dataframe: DataFrame) -> DataFrame:
+    """ Calculates the energy employed during the flight.
+
+    :param dataframe: dataframe with the FLSTLOG data read from the file.
+    :return: dataframe with the column work done added.
+    """
+    # For the moment the formula is work_done = 2 * ascending_distance + flight_time
+    return dataframe.withColumn(WORK_DONE,
+                                2 * col(ASCENDING_DISTANCE) + col(FLIGHT_TIME))
+
+
 def calculate_arrival_delay(dataframe: DataFrame) -> DataFrame:
     """ Calculates the delay in the arrival with respect to the baseline.
 
@@ -107,8 +136,9 @@ def was_mission_completed(dataframe: DataFrame) -> DataFrame:
         settings.thresholds.destination_distance, False).otherwise(True))
 
 
-COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_arrival_delay, calculate_departure_delay, was_spawned,
-                                        was_mission_completed, remove_combined_unused_columns, reorder_combined_columns]
+COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_ascending_distance, calculate_work_done, calculate_arrival_delay,
+                                        calculate_departure_delay, was_spawned, was_mission_completed,
+                                        remove_combined_unused_columns, reorder_combined_columns]
 
 
 @logger.catch

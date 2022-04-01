@@ -3,7 +3,7 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from schemas.tables_attributes import (ACID, SCENARIO_NAME, DEL_TIME, SPAWN_TIME, DISTANCE_2D, FLIGHT_TIME, DISTANCE_3D,
                                        VERTICAL_DISTANCE, WORK_DONE, DEL_LATITUDE, DEL_LONGITUDE, DEL_ALTITUDE, DEL_X,
                                        DEL_Y, TAS, VERTICAL_SPEED, HEADING, ASAS_ACTIVE, PILOT_ALT, PILOT_SPD,
-                                       PILOT_HDG, PILOT_VS, ASCENDING_DISTANCE)
+                                       PILOT_HDG, PILOT_VS)
 
 # The heading of the FLSTLOG is the following, with the names changed made:
 # - Deletion Time [s] -> DELETION_TIME
@@ -61,8 +61,6 @@ FLST_LOG_COLUMNS = [
     DEL_LATITUDE,
     DEL_LONGITUDE,
     DEL_ALTITUDE,
-    ASCENDING_DISTANCE,
-    WORK_DONE,
     DEL_X,
     DEL_Y
 ]
