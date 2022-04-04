@@ -1,4 +1,5 @@
-SCENARIOS = ['Centralised', 'Hybrid', 'Decentralised']
+CONCEPTS = ['Centralised', 'Hybrid', 'Decentralised']
+UNCERTAINTIES = ['R1', 'R2', 'R3', 'W1', 'W3', 'W5']
 
 CONF_LOG_PREFIX = 'CONFLOG'
 FLST_LOG_PREFIX = 'FLSTLOG'

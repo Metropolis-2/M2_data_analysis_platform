@@ -9,7 +9,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import monotonically_increasing_id, col, udf
 from pyspark.sql.types import StructType, StructField, DoubleType
 
-from parse.parser_constants import SCENARIOS, LINE_COUNT, FEET_TO_METERS_SCALE
+from parse.parser_constants import CONCEPTS, LINE_COUNT, FEET_TO_METERS_SCALE, UNCERTAINTIES
 from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
 from utils.config import settings
 
@@ -32,20 +32,6 @@ def get_density_from_fp_int_string(fp_intention: List[str]) -> Tuple[str, List[s
     return density, fp_intention
 
 
-def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:
-    """ Method to get the flight intention file name from the scenario name.
-
-    :param scenario_name: scenario name.
-    :return: the name of the flight intention related with the scenario.
-    """
-    # 1: discard the concept
-    scenario_name_split = scenario_name.split('_')[1:]
-    fp_int_string = parse_fp_int_string(scenario_name_split)
-    logger.debug('Matched scenario name: {} with flight intention: {}.',
-                 scenario_name, fp_int_string)
-    return fp_int_string
-
-
 def parse_fp_int_string(fp_intention: List[str]) -> str:
     """ Parses the flight intention split string present in the flight
     intention and log files in order to be used as key in the
@@ -58,6 +44,26 @@ def parse_fp_int_string(fp_intention: List[str]) -> str:
     # First check the density
     density, fp_intention = get_density_from_fp_int_string(fp_intention)
     return f'{density}_{"_".join(fp_intention)}'
+
+
+def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:
+    """ Method to get the flight intention file name from the scenario name.
+
+    :param scenario_name: scenario name.
+    :return: the name of the flight intention related with the scenario.
+    """
+    # 1: discard the concept
+    scenario_name_split = scenario_name.split('_')[1:]
+
+    # The flight intentions do not have the uncertainty info in the name
+    # Therefore, the uncertainty part is removed.
+    if scenario_name_split[-1] in UNCERTAINTIES:
+        scenario_name_split = scenario_name_split[:-1]
+
+    fp_int_string = parse_fp_int_string(scenario_name_split)
+    logger.debug('Matched scenario name: {} with flight intention: {}.',
+                 scenario_name, fp_int_string)
+    return fp_int_string
 
 
 def get_scenario_data_from_fp_int(file_name: Path) -> str:
@@ -83,7 +89,7 @@ def build_scenario_name(file_name: Path) -> str:
     """
     logger.trace('Obtaining the scenario name for file: {}.', file_name)
     concept = file_name.parent.name
-    concept_index = str(SCENARIOS.index(concept) + 1)
+    concept_index = str(CONCEPTS.index(concept) + 1)
 
     # 3: removes the log name and the 'Flight_intention' string
     # -2: removes the timestamp
