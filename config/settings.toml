@@ -15,6 +15,10 @@ flight_intention_path = "@format {this.data_path}/Flight_intentions"
 # logs files and the metric dataframes.
 saving_path = "../output"
 
+# GEOJSON ENV3 POINTS PATH
+geojson.path = "C:\\Users\\jpedrero\\workspace\\M2_data_analysis_platform\\graphs\\env3_points.geojson"
+
+
 # LOGGING
 logging.level = "DEBUG"
 
@@ -51,7 +55,8 @@ crs.origin = "epsg:4326"
 crs.desired = "epsg:32633"
 
 #ROI POINT ENV3
-x_center = [48.15636078, 48.156360789, 48.15636071, 48.15636072, 48.15636073] #lat
-y_center = [16.32453111, 16.32453112, 16.32453113, 16.32453114, 16.32453115] #lon
-radius_roi = 16 #meters
-time_roi = [120, 180, 240, 320, 380] #seconds
+#x_center = [48.15636078, 48.156360789, 48.15636071, 48.15636072, 48.15636073] #lat
+#y_center = [16.32453111, 16.32453112, 16.32453113, 16.32453114, 16.32453115] #lon
+#radius_roi = 16 #meters
+#time_roi = [120, 180, 240, 320, 380] #seconds
+env3.time_roi = 120 #seconds

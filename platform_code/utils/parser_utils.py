@@ -12,6 +12,7 @@ from pyspark.sql.types import StructType, StructField, DoubleType
 from parse.parser_constants import CONCEPTS, LINE_COUNT, FEET_TO_METERS_SCALE, UNCERTAINTIES
 from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
 from utils.config import settings
+import geopandas as gpd
 
 
 def get_density_from_fp_int_string(fp_intention: List[str]) -> Tuple[str, List[str]]:
@@ -237,3 +238,6 @@ def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
 @udf
 def great_circle_udf(x, y):
     return great_circle(x, y).kilometers
+
+def loadEnv3points(geojson):
+    return gpd.read_file(geojson)[0:10] #only first 100 rows
