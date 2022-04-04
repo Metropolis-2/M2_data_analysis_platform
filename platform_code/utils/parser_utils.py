@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 
 import geopy.distance
 from geopy.distance import great_circle
@@ -14,25 +14,50 @@ from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUIS
 from utils.config import settings
 
 
+def get_density_from_fp_int_string(fp_intention: List[str]) -> Tuple[str, List[str]]:
+    """ Gets the scenario density and returns it together with the rest
+    of string yet to be parsed.
+
+    :param fp_intention: flight intention split string.
+    :return: density and the rest of the elements of the split to be parsed.
+    """
+    if fp_intention[0] == 'very':
+        logger.trace('The density is very low. Check: {}_{}.', *fp_intention[:2])
+        density = "very_low"
+        fp_intention = fp_intention[2:]
+    else:
+        density = fp_intention[0]
+        fp_intention = fp_intention[1:]
+
+    return density, fp_intention
+
+
 def get_fp_int_key_from_scenario_name(scenario_name: str) -> str:
     """ Method to get the flight intention file name from the scenario name.
 
     :param scenario_name: scenario name.
     :return: the name of the flight intention related with the scenario.
     """
-    scenario_name_split = scenario_name.split('_')
-    if len(scenario_name_split) == 6:
-        density = f'{scenario_name_split[1]}_{scenario_name_split[2]}'
-        distribution = scenario_name_split[3]
-        repetition = scenario_name_split[4]
-        uncertainty = scenario_name_split[5]
-    else:
-        density = scenario_name_split[1]
-        distribution = scenario_name_split[2]
-        repetition = scenario_name_split[3]
-        uncertainty = scenario_name_split[4]
+    # 1: discard the concept
+    scenario_name_split = scenario_name.split('_')[1:]
+    fp_int_string = parse_fp_int_string(scenario_name_split)
+    logger.debug('Matched scenario name: {} with flight intention: {}.',
+                 scenario_name, fp_int_string)
+    return fp_int_string
 
-    return f'{density}_{distribution}_{repetition}_{uncertainty}'
+
+def parse_fp_int_string(fp_intention: List[str]) -> str:
+    """ Parses the flight intention split string present in the flight
+    intention and log files in order to be used as key in the
+    dataframes.
+
+    :param fp_intention: flight intention string part of the file name.
+     For example: ['very', 'low', '40', '8']
+    :return: string with the elements joint by underscores.
+    """
+    # First check the density
+    density, fp_intention = get_density_from_fp_int_string(fp_intention)
+    return f'{density}_{"_".join(fp_intention)}'
 
 
 def get_scenario_data_from_fp_int(file_name: Path) -> str:
@@ -44,17 +69,8 @@ def get_scenario_data_from_fp_int(file_name: Path) -> str:
     logger.trace('Obtaining the scenario data for file: {}.', file_name)
 
     fp_intention = file_name.stem.split("_")[2:]
-    distribution = fp_intention[-3]
-    repetition = fp_intention[-2]
-    uncertainty = fp_intention[-1]
+    scenario_data = parse_fp_int_string(fp_intention)
 
-    # If the flight intention is very low, the split generates 5 elements, otherwise 4.
-    if len(fp_intention) == 5:
-        density = "very_low"
-    else:
-        density = fp_intention[0]
-
-    scenario_data = density + "_" + distribution + "_" + repetition + "_" + uncertainty
     logger.debug('Scenario data string obtained: {}.', scenario_data)
     return scenario_data
 
@@ -69,18 +85,12 @@ def build_scenario_name(file_name: Path) -> str:
     concept = file_name.parent.name
     concept_index = str(SCENARIOS.index(concept) + 1)
 
+    # 3: removes the log name and the 'Flight_intention' string
+    # -2: removes the timestamp
     fp_intention = file_name.stem.split("_")[3:-2]
-    distribution = fp_intention[-3]
-    repetition = fp_intention[-2]
-    uncertainty = fp_intention[-1]
+    scenario_data = parse_fp_int_string(fp_intention)
 
-    # If the flight intention is very low, the split generates 5 elements, otherwise 4.
-    if len(fp_intention) == 5:
-        density = "very_low"
-    else:
-        density = fp_intention[0]
-
-    scenario_name = concept_index + "_" + density + "_" + distribution + "_" + repetition + "_" + uncertainty
+    scenario_name = f'{concept_index}_{scenario_data}'
     logger.debug('Scenario name obtained: {}.', scenario_name)
     return scenario_name
 
@@ -212,6 +222,7 @@ def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
     destination_tuple = (destination_latitude, destination_longitude)
     # TODO: direct distance calculation (in meters) between two points, is this approach correct?
     return geopy.distance.distance(origin_tuple, destination_tuple).m
+
 
 @udf
 def great_circle_udf(x, y):
