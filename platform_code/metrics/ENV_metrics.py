@@ -10,7 +10,8 @@ from results.results_constants import ENV_METRICS_RESULTS
 from schemas.tables_attributes import (SCENARIO_NAME, ACID, SIMULATION_TIME, LATITUDE, LONGITUDE, ALTITUDE, ENV2, ENV4,
                                        ENV3, WORK_DONE, ENV1)
 from utils.config import settings
-from utils.parser_utils import get_coordinates_distance, great_circle_udf
+from utils.parser_utils import get_coordinates_distance, great_circle_udf, loadEnv3points
+from os.path import exists
 
 
 @logger.catch
@@ -66,16 +67,24 @@ def compute_env3_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs)
     at that given point over the time.
     """
     dataframe = input_dataframes[REG_LOG_PREFIX]
+    df_points = loadEnv3points(settings.geojson.path)
 
-    point = struct(lit(settings.x_center), lit(settings.y_center))
 
-    # TODO: ? Define formula for the sound depending on the distance to the point.
-    # TODO: ? How many points and how to define.
-    return dataframe.filter(col(SIMULATION_TIME) == settings.time_roi) \
-        .withColumn("distance", great_circle_udf(point, struct(col(LATITUDE), col(LONGITUDE)))) \
-        .filter((col("distance") <= settings.radius_roi) & (col(ALTITUDE) <= settings.altitude_roi)) \
-        .withColumn("noise_level", log10(1 / pow(col("distance"), 2))) \
-        .groupBy(SCENARIO_NAME).agg(sum("noise_level").alias(ENV3))
+    for i, (x, y) in enumerate(zip(df_points.geometry.x, df_points.geometry.y)):
+        point = struct(lit(y), lit(x))
+        aux_dataframe = dataframe.filter(col(SIMULATION_TIME) == settings.env3.time_roi)
+        aux_dataframe = aux_dataframe.withColumn("distance",great_circle_udf(point, struct(col(LATITUDE), col(LONGITUDE))))
+        aux_dataframe = aux_dataframe.filter((col("distance") <= 16))
+        aux_dataframe = aux_dataframe.withColumn("sound_intensity",1 / (pow((col("distance") / settings.flight_altitude.lowest), 2)))
+        aux_dataframe = aux_dataframe.groupby(SCENARIO_NAME).agg(sum("sound_intensity").alias(f"ENV3_p{i}"))
+
+        if (i == 0):
+            final_dataframe = aux_dataframe
+        else:
+            final_dataframe = final_dataframe.join(aux_dataframe, SCENARIO_NAME)
+
+
+    return final_dataframe
 
 
 @logger.catch
@@ -102,9 +111,9 @@ def compute_env4_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs)
 
 
 ENV_METRICS = [
-    compute_env1_metric
+    # compute_env1_metric
     # compute_env2_metric,
-    # compute_env3_metric,
+    compute_env3_metric
     # compute_env4_metric
 ]
 
