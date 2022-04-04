@@ -3,7 +3,7 @@ from typing import Dict
 from loguru import logger
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import sum, col, mean, log10, struct, lit, max, min, lag
-
+import pyspark.sql.functions as F
 from parse.parser_constants import REG_LOG_PREFIX, FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import ENV_METRICS_RESULTS
@@ -94,27 +94,21 @@ def compute_env4_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs)
     The ratio between the difference of maximum and minimum length
     flown at a flight level and average length flown at level.
     """
-    """
-    # TODO: ? Define flight levels / altitude discretization
-    avg_alt = input_dataframes \
-        .groupby(SCENARIO_NAME, ACID) \
-        .agg(max(ALTITUDE).alias("MAX_ALTITUDE"), min(ALTITUDE).alias("MIN_ALTITUDE")) \
-        .withColumn("DIFF_ALTITUDE", col("MAX_ALTITUDE") - col("MIN_ALTITUDE")) \
-        .select(SCENARIO_NAME, "DIFF_ALTITUDE") \
-        .groupby(SCENARIO_NAME) \
-        .agg(mean("DIFF_ALTITUDE").alias("MEAN_DIFF_ALTITUDE"))
-
-    return input_dataframes.join(avg_alt, how='outer') \
-        .withColumn(ENV4, col("DIFF_ALTITUDE") / col("MEAN_DIFF_ALTITUDE")) \
-        .select(SCENARIO_NAME, ACID, ENV4)
-    """
+    dataframe = input_dataframes[REG_LOG_PREFIX]
+    dataframe = dataframe.groupby(SCENARIO_NAME, ACID).agg(F.max(ALTITUDE).alias("MAX_ALTITUDE"), F.min(ALTITUDE).alias("MIN_ALTITUDE"))
+    dataframe = dataframe.withColumn("DIFF_ALTITUDE", col("MAX_ALTITUDE") - col("MIN_ALTITUDE"))
+    avg_delay = dataframe.select(mean("DIFF_ALTITUDE").alias("MEAN_DIFF_ALTITUDE"))
+    dataframe = dataframe.join(avg_delay, how='outer')
+    dataframe = dataframe.withColumn(ENV4, col("DIFF_ALTITUDE")/col("MEAN_DIFF_ALTITUDE"))
+    dataframe = dataframe.select(SCENARIO_NAME, ACID, ENV4)
+    return dataframe
 
 
 ENV_METRICS = [
     # compute_env1_metric
     # compute_env2_metric,
-    compute_env3_metric
-    # compute_env4_metric
+    # compute_env3_metric
+    compute_env4_metric
 ]
 
 
