@@ -1,14 +1,19 @@
 from typing import Dict
 
 from loguru import logger
-from pyspark.pandas import DataFrame
-from pyspark.sql.functions import col, mean
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, mean, length, lit
 
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import SAF_METRICS_RESULTS, CAP_METRICS_RESULTS, NUM_FLIGHTS
 from schemas.tables_attributes import (SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME,
-                                       CAP1, SAF2, CAP2)
+                                       CAP1, SAF2, CAP2, CAP3, CAP4)
+
+REF_CAP1 = f'Ref_{CAP1}'
+REF_CAP2 = f'Ref_{CAP2}'
+REF_SCENARIO_NAME = f'Ref_{SCENARIO_NAME}'
+SCENARIO_NAME_LENGTH = f'{SCENARIO_NAME}_LENGTH'
 
 
 @logger.catch
@@ -60,35 +65,47 @@ def compute_cap2_metric(input_dataframes: Dict[str, DataFrame],
 
 
 @logger.catch
-def compute_cap3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
-    """ CAP-3: Additional demand delay
+def compute_cap3_and_cap4_metrics(results: DataFrame,
+                                  *args, **kwargs) -> DataFrame:
+    """ Utility method that handles all the calculation of the CAP-3 and
+    CAP-4 metrics efficiently.
 
-    Calculates the magnitude of delay increase (CAP-1) due to the fact of the existence of rogue aircraft.
+    Generates a results temporary table with relates the scenarios with
+    rogue carriers with their baseline, so the CAP 3 and CAP 4 can be calculated.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF3 per scenario and drone id.
+    :param results: table with the results of the CAP-1 and CAP-2.
+    :return:
     """
-    # TODO: ? How to compare scenarios with rogue carrier.
-    pass
+    # First, get the dataframe with the baseline data
+    scenarios_without_uncertainty = results \
+        .where(col(SCENARIO_NAME).rlike('.*_[R|W][1,2,3,5]') == False) \
+        .select(col(SCENARIO_NAME).alias(REF_SCENARIO_NAME),
+                col(CAP1).alias(REF_CAP1),
+                col(CAP2).alias(REF_CAP2))
 
+    # Then get only the scenarios with rogue carriers, and generate a column with
+    # the name of its related baseline
+    scenarios_with_rogue = results \
+        .where(col(SCENARIO_NAME).rlike('.*_R[1,2,3]')) \
+        .withColumn(SCENARIO_NAME_LENGTH, length(col(SCENARIO_NAME))) \
+        .withColumn(REF_SCENARIO_NAME,
+                    (col(SCENARIO_NAME).substr(lit(0), col(SCENARIO_NAME_LENGTH) - lit(3)))) \
+        .drop(SCENARIO_NAME_LENGTH)
 
-@logger.catch
-def compute_cap4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
-    """ CAP-4: Additional number of intrusions
+    # Join both tables so we can calculate CAP-3 and CAP-4
+    query_result = scenarios_with_rogue.join(scenarios_without_uncertainty,
+                                             on=REF_SCENARIO_NAME)
 
-    Calculates the degradation produced in the intrusion safety indicator
-    when rogue aircraft are introduced.
-
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF4 per scenario and drone id.
-    """
-    # TODO: ? How to compare scenarios with rogue carrier.
-    pass
+    return query_result \
+        .withColumn(CAP3, col(REF_CAP1) - col(CAP1)) \
+        .withColumn(CAP4, col(REF_CAP2) - col(CAP2)) \
+        .select(SCENARIO_NAME, CAP3, CAP4)
 
 
 CAP_METRICS = [
     compute_cap1_metric,
     compute_cap2_metric,
+    compute_cap3_and_cap4_metrics
 ]
 
 
@@ -106,7 +123,8 @@ def compute_capacity_metrics(input_dataframes: Dict[str, DataFrame],
     for metric in CAP_METRICS:
         logger.trace('Calculating metric: {}.', metric)
         query_result = metric(input_dataframes=input_dataframes,
-                              output_dataframes=output_dataframes)
+                              output_dataframes=output_dataframes,
+                              results=result_dataframe)
         result_dataframe = result_dataframe.join(query_result,
                                                  on=SCENARIO_NAME,
                                                  how='left')

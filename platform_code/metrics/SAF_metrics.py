@@ -92,8 +92,8 @@ SAF_METRICS = [compute_saf1_metric, compute_saf2_metric, compute_saf3_metric,
                compute_saf4_metric, compute_saf5_metric, compute_saf6_metric]
 
 
-def compute_security_metrics(input_dataframes: Dict[str, DataFrame],
-                             output_dataframes: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
+def compute_safety_metrics(input_dataframes: Dict[str, DataFrame],
+                           output_dataframes: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
     """ Calculates all the security metrics and add to the output dataframes dictionary
     their results.
 
