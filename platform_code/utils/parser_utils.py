@@ -147,7 +147,7 @@ def get_drone_avg_speed(drone_model: str) -> float:
         logger.warning('No drone model value was retrieved. Returning speed 0.')
         speed = 0
 
-    return speed
+    return float(speed)
 
 
 def get_drone_vertical_speed(drone_model: str) -> float:
@@ -164,7 +164,7 @@ def get_drone_vertical_speed(drone_model: str) -> float:
         logger.warning('No drone model value was retrieved. Returning speed 0.')
         speed = 0
 
-    return speed
+    return float(speed)
 
 
 @udf(returnType=StructType([
@@ -182,6 +182,10 @@ def get_drone_speed(drone_model: str) -> Tuple[float, float]:
     logger.trace('The drone model is {}.', drone_model)
     avg_speed = get_drone_avg_speed(drone_model)
     vertical_speed = get_drone_vertical_speed(drone_model)
+    logger.debug('Drone model: {} with:\n'
+                 '- Loitering speed: {}\n'
+                 '- Vertical speed: {}\n',
+                 drone_model, avg_speed, vertical_speed)
 
     return avg_speed, vertical_speed
 
