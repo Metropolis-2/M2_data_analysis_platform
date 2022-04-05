@@ -11,6 +11,8 @@ data_path = "../data"
 # Path to the flight intentions, uses the data folder as root. However,
 # it can be changed to an external folder.
 flight_intention_path = "@format {this.data_path}/Flight_intentions"
+# Path to the JSON with the interest points to calculate the noise
+interest_points = "@format {this.data_path}/interest_points.json"
 # Folder where the generated data will be saved. This included the processed
 # logs files and the metric dataframes.
 saving_path = "../output"
@@ -20,7 +22,7 @@ geojson.path = "C:\\Users\\jpedrero\\workspace\\M2_data_analysis_platform\\graph
 
 
 # LOGGING
-logging.level = "DEBUG"
+logging.level = "INFO"
 
 # SPARK CONFIG
 spark.app_name = "M2-Data-Analysis-Platform"
@@ -55,8 +57,6 @@ crs.origin = "epsg:4326"
 crs.desired = "epsg:32633"
 
 #ROI POINT ENV3
-#x_center = [48.15636078, 48.156360789, 48.15636071, 48.15636072, 48.15636073] #lat
-#y_center = [16.32453111, 16.32453112, 16.32453113, 16.32453114, 16.32453115] #lon
-#radius_roi = 16 #meters
-#time_roi = [120, 180, 240, 320, 380] #seconds
-env3.time_roi = 120 #seconds
+env3.time_roi = 120 # seconds
+env3.distance_to_point = 160 # meters
+env3.reference_altitude = 9.144 # 30 feets, same as lower layer

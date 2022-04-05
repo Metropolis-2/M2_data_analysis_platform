@@ -1,5 +1,6 @@
+import json
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Union, Dict
 
 import geopy.distance
 from geopy.distance import great_circle
@@ -12,7 +13,6 @@ from pyspark.sql.types import StructType, StructField, DoubleType
 from parse.parser_constants import CONCEPTS, LINE_COUNT, FEET_TO_METERS_SCALE, UNCERTAINTIES
 from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
 from utils.config import settings
-import geopandas as gpd
 
 
 def get_density_from_fp_int_string(fp_intention: List[str]) -> Tuple[str, List[str]]:
@@ -231,7 +231,6 @@ def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
     """
     origin_tuple = (origin_latitude, origin_longitude)
     destination_tuple = (destination_latitude, destination_longitude)
-    # TODO: direct distance calculation (in meters) between two points, is this approach correct?
     return geopy.distance.distance(origin_tuple, destination_tuple).m
 
 
@@ -239,5 +238,21 @@ def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
 def great_circle_udf(x, y):
     return great_circle(x, y).kilometers
 
-def loadEnv3points(geojson):
-    return gpd.read_file(geojson)[0:10] #only first 100 rows
+
+def load_interest_points(file_path: Union[str, Path]) -> Dict[str, List]:
+    """ Parses the JSON file with the interest points. The returned
+    object is a dictionary with the name of the point as the key and
+    a list as value with the latitude, longitude and the type of point.
+
+    The point could be of type:
+     - 'constained': if it is inside the city area.
+     - 'border': if it is the border between the city area and the open area.
+     - 'open': if it is in the open area.
+
+    :param file_path: path to the interest points JSON file.
+    :return: dictionary with the point name as key and
+     [latitude, longitude, type] as value.
+    """
+    with open(file_path) as f:
+        interest_points = json.load(f)
+    return interest_points
