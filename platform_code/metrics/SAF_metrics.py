@@ -4,10 +4,11 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, min, sum
 
-from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
+from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX, FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import SAF_METRICS_RESULTS, COUNT
-from schemas.tables_attributes import SCENARIO_NAME, SAF1, SAF2, SAF3, DISTANCE, SAF4, SAF6, SAF5, LOS_DURATION_TIME
+from schemas.tables_attributes import SCENARIO_NAME, SAF1, SAF2, SAF3, DISTANCE, SAF4, SAF6, SAF5, LOS_DURATION_TIME, \
+    SAF2_1, SAF6_1, VIOLATION_SEVERITY, CRASH
 
 
 @logger.catch
@@ -37,6 +38,18 @@ def compute_saf2_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
         .count() \
         .select([SCENARIO_NAME, col(COUNT).alias(SAF2)])
 
+@logger.catch
+def compute_saf2_1_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """ SAF-2: Count of crashes
+
+    Count of crashes for each scenario (each aircraft logged in the FLSTlog has a boolean flag called crash,
+    if that is true ir counts as a crash and the number of the times crash is true is the result of this metric.
+    """
+    dataframe = input_dataframes[LOS_LOG_PREFIX].filter(col(CRASH) == True)
+    return dataframe \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col(COUNT).alias(SAF2_1)])
 
 @logger.catch
 def compute_saf3_metric(intermediate_results: DataFrame, *args, **kwargs):
@@ -87,9 +100,21 @@ def compute_saf6_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
         .count() \
         .select([SCENARIO_NAME, col('count').alias(SAF6)])
 
+@logger.catch
+def compute_saf6_1_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """
+    SAF-6: Severe Geofence violations
+    Every geofence violation in the GEOlog has a severity flag.
+    """
+    dataframe = input_dataframes[GEO_LOG_PREFIX].filter(col(VIOLATION_SEVERITY) == True)
+    return dataframe \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF6_1)])
 
-SAF_METRICS = [compute_saf1_metric, compute_saf2_metric, compute_saf3_metric,
-               compute_saf4_metric, compute_saf5_metric, compute_saf6_metric]
+
+SAF_METRICS = [compute_saf1_metric, compute_saf2_metric,  compute_saf2_1_metric, compute_saf3_metric,
+               compute_saf4_metric, compute_saf5_metric, compute_saf6_metric, compute_saf6_1_metric]
 
 
 def compute_safety_metrics(input_dataframes: Dict[str, DataFrame],

@@ -47,8 +47,8 @@ threshold.AEQ5 = 50
 # WEIGHTS
 weights.priority_1 = 1
 weights.priority_2 = 2
-weights.priority_3 = 3
-weights.priority_4 = 4
+weights.priority_3 = 4
+weights.priority_4 = 8
 
 # COORDINATE SYSTEM
 crs.origin = "epsg:4326"

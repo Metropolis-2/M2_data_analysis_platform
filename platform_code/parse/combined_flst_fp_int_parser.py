@@ -11,7 +11,7 @@ from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_
                                        WORK_DONE, FLST_ID, SCENARIO_NAME, ORIGIN_LAT, ORIGIN_LON, DESTINATION_LAT,
                                        DESTINATION_LON, CRUISING_SPEED, PRIORITY, LOITERING, BASELINE_2D_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, BASELINE_ASCENDING_DISTANCE, BASELINE_3D_DISTANCE,
-                                       BASELINE_FLIGHT_TIME, VERTICAL_SPEED, VEHICLE)
+                                       BASELINE_FLIGHT_TIME, VERTICAL_SPEED, VEHICLE, PRIORITY_WEIGHT)
 from utils.config import settings
 from utils.parser_utils import get_fp_int_key_from_scenario_name
 
@@ -135,10 +135,14 @@ def was_mission_completed(dataframe: DataFrame) -> DataFrame:
         ((col(DESTINATION_Y) - col(DEL_Y)) * (col(DESTINATION_Y) - col(DEL_Y))) >
         settings.thresholds.destination_distance, False).otherwise(True))
 
+def create_priority_weights(dataframe: DataFrame) -> DataFrame:
+    dataframe = dataframe.withColumn(PRIORITY_WEIGHT, when(col(PRIORITY) == 1, settings.weights.priority_1).otherwise(when(col(PRIORITY) == 2, settings.weights.priority_2).otherwise(when(col(PRIORITY) == 3, settings.weights.priority_3).otherwise(settings.weights.priority_4))))
+    return dataframe
+
 
 COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_ascending_distance, calculate_work_done, calculate_arrival_delay,
                                         calculate_departure_delay, was_spawned, was_mission_completed,
-                                        remove_combined_unused_columns, reorder_combined_columns]
+                                        remove_combined_unused_columns, reorder_combined_columns, create_priority_weights]
 
 
 @logger.catch
