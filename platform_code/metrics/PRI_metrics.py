@@ -148,6 +148,7 @@ def compute_priority_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
+    logger.info('Calculating priority metrics.')
     # For this metrics we only use the combined FLST log with the flight plan intentions
     dataframe = input_dataframes[FLST_LOG_PREFIX]
 

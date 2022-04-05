@@ -193,6 +193,7 @@ def compute_environment_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
+    logger.info('Calculating environment metrics.')
     result_dataframe = build_result_df_by_scenario(input_dataframes)
     segment_dataframe = generate_segment_dataframe(input_dataframes)
 

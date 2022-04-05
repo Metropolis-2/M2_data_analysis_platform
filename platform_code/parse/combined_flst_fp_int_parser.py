@@ -136,14 +136,25 @@ def was_mission_completed(dataframe: DataFrame) -> DataFrame:
         ((col(DESTINATION_Y) - col(DEL_Y)) * (col(DESTINATION_Y) - col(DEL_Y))) >
         settings.thresholds.destination_distance, False).otherwise(True))
 
+
 def create_priority_weights(dataframe: DataFrame) -> DataFrame:
-    dataframe = dataframe.withColumn(PRIORITY_WEIGHT, when(col(PRIORITY) == 1, settings.weights.priority_1).otherwise(when(col(PRIORITY) == 2, settings.weights.priority_2).otherwise(when(col(PRIORITY) == 3, settings.weights.priority_3).otherwise(settings.weights.priority_4))))
+    """ Adds a column with the weight of given priority.
+
+    :param dataframe: dataframe with the FLSTLOG data and flight intentions read from the files.
+    :return: dataframe with priority weight column added.
+    """
+    dataframe = dataframe.withColumn(PRIORITY_WEIGHT,
+                                     when(col(PRIORITY) == 1, settings.weights.priority_1).otherwise(
+                                         when(col(PRIORITY) == 2, settings.weights.priority_2).otherwise(
+                                             when(col(PRIORITY) == 3, settings.weights.priority_3).otherwise(
+                                                 settings.weights.priority_4))))
     return dataframe
 
 
 COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_ascending_distance, calculate_work_done, calculate_arrival_delay,
-                                        calculate_departure_delay, was_spawned, was_mission_completed, create_priority_weights,
-                                        remove_combined_unused_columns, reorder_combined_columns]
+                                        calculate_departure_delay, was_spawned, was_mission_completed,
+                                        create_priority_weights, remove_combined_unused_columns,
+                                        reorder_combined_columns]
 
 
 @logger.catch

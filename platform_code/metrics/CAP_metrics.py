@@ -20,12 +20,12 @@ SCENARIO_NAME_LENGTH = f'{SCENARIO_NAME}_LENGTH'
 def compute_cap1_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs) -> DataFrame:
     """ CAP-1: Average demand delay
 
-        Average demand delay is computed as the arithmetic mean of the delays
-        of all flight intentions in a scenario.
+    Average demand delay is computed as the arithmetic mean of the delays
+    of all flight intentions in a scenario.
 
-        :param input_dataframes: dataframes with the logs data.
-        :return: query result with the CAP1 metric per scenario.
-        """
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the CAP1 metric per scenario.
+    """
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     # TODO: The delay per ACID is calculated here, check optimization
     return dataframe \
@@ -118,6 +118,7 @@ def compute_capacity_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the capacity metrics.
     """
+    logger.info('Calculating capacity metrics.')
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in CAP_METRICS:

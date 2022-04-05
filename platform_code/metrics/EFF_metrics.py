@@ -5,7 +5,7 @@ from pyspark.pandas import DataFrame
 from pyspark.sql.functions import col, mean
 
 from parse.parser_constants import FLST_LOG_PREFIX
-from results.result_dataframes import build_result_df_by_scenario_and_acid, build_result_df_by_scenario
+from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import EFF_METRICS_RESULTS
 from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, EFF1, VERTICAL_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, EFF2, ASCENDING_DISTANCE,
@@ -27,7 +27,9 @@ def compute_eff1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D) \
         .withColumn(EFF1, col(BASELINE_2D_DISTANCE) / col(DISTANCE_2D)) \
-        .select(SCENARIO_NAME, ACID, EFF1).groupby(SCENARIO_NAME).agg(mean(EFF1).alias(EFF1))
+        .select(SCENARIO_NAME, ACID, EFF1) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(EFF1).alias(EFF1))
 
 
 @logger.catch
@@ -43,7 +45,9 @@ def compute_eff2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, VERTICAL_DISTANCE, BASELINE_VERTICAL_DISTANCE) \
         .withColumn(EFF2, col(BASELINE_VERTICAL_DISTANCE) / col(VERTICAL_DISTANCE)) \
-        .select(SCENARIO_NAME, ACID, EFF2).groupby(SCENARIO_NAME).agg(mean(EFF2).alias(EFF2))
+        .select(SCENARIO_NAME, ACID, EFF2) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(EFF2).alias(EFF2))
 
 
 @logger.catch
@@ -59,7 +63,9 @@ def compute_eff3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, ASCENDING_DISTANCE, BASELINE_ASCENDING_DISTANCE) \
         .withColumn(EFF3, col(BASELINE_ASCENDING_DISTANCE) / col(ASCENDING_DISTANCE)) \
-        .select(SCENARIO_NAME, ACID, EFF3).groupby(SCENARIO_NAME).agg(mean(EFF3).alias(EFF3))
+        .select(SCENARIO_NAME, ACID, EFF3) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(EFF3).alias(EFF3))
 
 
 @logger.catch
@@ -75,7 +81,9 @@ def compute_eff4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, DISTANCE_3D, BASELINE_3D_DISTANCE) \
         .withColumn(EFF4, col(BASELINE_3D_DISTANCE) / col(DISTANCE_3D)) \
-        .select(SCENARIO_NAME, ACID, EFF4).groupby(SCENARIO_NAME).agg(mean(EFF4).alias(EFF4))
+        .select(SCENARIO_NAME, ACID, EFF4) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(EFF4).alias(EFF4))
 
 
 @logger.catch
@@ -91,7 +99,9 @@ def compute_eff5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, FLIGHT_TIME, BASELINE_FLIGHT_TIME) \
         .withColumn(EFF5, col(BASELINE_FLIGHT_TIME) / col(FLIGHT_TIME)) \
-        .select(SCENARIO_NAME, ACID, EFF5).groupby(SCENARIO_NAME).agg(mean(EFF5).alias(EFF5))
+        .select(SCENARIO_NAME, ACID, EFF5) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(EFF5).alias(EFF5))
 
 
 @logger.catch
@@ -108,7 +118,9 @@ def compute_eff6_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     return dataframe \
         .select(SCENARIO_NAME, ACID, SPAWN_TIME, BASELINE_DEPARTURE_TIME) \
         .withColumn(EFF6, col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)) \
-        .select(SCENARIO_NAME, ACID, EFF6).groupby(SCENARIO_NAME).agg(mean(EFF6).alias(EFF6))
+        .select(SCENARIO_NAME, ACID, EFF6) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(EFF6).alias(EFF6))
 
 
 EFF_METRICS = [compute_eff1_metric, compute_eff2_metric, compute_eff3_metric,
@@ -124,6 +136,8 @@ def compute_efficiency_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the efficiency metrics.
     """
+    logger.info('Calculating efficiency metrics.')
+
     # For this metrics we only use the combined FLST log with the flight plan intentions
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     result_dataframe = build_result_df_by_scenario(input_dataframes)

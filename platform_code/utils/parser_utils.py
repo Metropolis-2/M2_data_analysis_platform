@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Tuple, List, Union, Dict
 
 import geopy.distance
-from geopy.distance import great_circle
 from loguru import logger
 from pyproj import Transformer
 from pyspark.sql import DataFrame
@@ -232,11 +231,6 @@ def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
     origin_tuple = (origin_latitude, origin_longitude)
     destination_tuple = (destination_latitude, destination_longitude)
     return geopy.distance.distance(origin_tuple, destination_tuple).m
-
-
-@udf
-def great_circle_udf(x, y):
-    return great_circle(x, y).kilometers
 
 
 def load_interest_points(file_path: Union[str, Path]) -> Dict[str, List]:

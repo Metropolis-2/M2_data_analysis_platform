@@ -221,6 +221,7 @@ def compute_accessibility_and_equality_metrics(input_dataframes: Dict[str, DataF
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
+    logger.info('Calculating accessibility and equality metrics.')
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
