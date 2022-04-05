@@ -29,6 +29,7 @@ COMBINED_COLUMNS = [
     CRUISING_SPEED,
     VERTICAL_SPEED,
     PRIORITY,
+    PRIORITY_WEIGHT,
     LOITERING,
     BASELINE_2D_DISTANCE,
     BASELINE_VERTICAL_DISTANCE,
@@ -141,8 +142,8 @@ def create_priority_weights(dataframe: DataFrame) -> DataFrame:
 
 
 COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_ascending_distance, calculate_work_done, calculate_arrival_delay,
-                                        calculate_departure_delay, was_spawned, was_mission_completed,
-                                        remove_combined_unused_columns, reorder_combined_columns, create_priority_weights]
+                                        calculate_departure_delay, was_spawned, was_mission_completed, create_priority_weights,
+                                        remove_combined_unused_columns, reorder_combined_columns]
 
 
 @logger.catch
