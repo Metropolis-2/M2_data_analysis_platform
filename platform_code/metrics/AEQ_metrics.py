@@ -13,35 +13,52 @@ from pyspark.sql.functions import col, when, stddev, mean, abs, max
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import AEQ_METRICS_RESULTS, NUM_FLIGHTS, COUNT
-from schemas.tables_attributes import (SCENARIO_NAME, PRIORITY, LOITERING, BASELINE_ARRIVAL_TIME, DEL_TIME, AEQ1, AEQ2,
-                                       ACID, FLIGHT_TIME, VEHICLE, AEQ2_1, AEQ1_1, AEQ3, AEQ4, AEQ5, AEQ5_1)
+from schemas.tables_attributes import (SCENARIO_NAME, PRIORITY, LOITERING, AEQ1, AEQ2,
+                                       ACID, FLIGHT_TIME, VEHICLE, AEQ2_1, AEQ1_1, AEQ3, AEQ4, AEQ5, AEQ5_1,
+                                       ARRIVAL_DELAY, MISSION_COMPLETED, SPAWNED)
 from utils.config import settings
 
-DELAY = "delay"
-AVG_DELAY = "avg_delay"
-INOPERATIVE_TRAJECTORY = "inoperative"
-AUTONOMY = "autonomy"
-CANCELLATION_LIMIT = "cancellation_limit"
+AUTONOMY = 'Autonomy'
+AVG_DELAY = 'Average_delay'
+CANCELLATION_LIMIT = 'Cancellation_limit'
+DELAY_INCREMENT = 'Delay_increment'
+INOPERATIVE_TRAJECTORY = 'Inoperative'
+
+
+@logger.catch
+def calculate_avg_delay(dataframe: DataFrame) -> DataFrame:
+    """ Calculates the average arrival delay per scenario.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :return: average delay per scenario.
+    """
+    avg_delay = dataframe \
+        .select(SCENARIO_NAME, ARRIVAL_DELAY) \
+        .groupby(SCENARIO_NAME) \
+        .agg(mean(ARRIVAL_DELAY).alias(AVG_DELAY))
+    return avg_delay
 
 
 @logger.catch
 def compute_aeq1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-1: Number of cancelled demands
-
     Number of situations when realized arrival time of a given flight intention
     is greater than ideal expected arrival time by more or equal than some given
     cancellation delay limit that depends on mission type.
+
+    The missions not completed are filtered from this metric.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :return: query result with the AEQ1 metric per scenario.
     """
-    # TODO: The delay per ACID is calculated here, check optimization
     return dataframe \
-        .select(SCENARIO_NAME, PRIORITY, LOITERING, BASELINE_ARRIVAL_TIME, DEL_TIME) \
-        .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \
+        .select(SCENARIO_NAME, PRIORITY, LOITERING, ARRIVAL_DELAY) \
         .withColumn(CANCELLATION_LIMIT,
-                    when(col(PRIORITY) == 4, settings.thresholds.emergency_mission_delay)
-                    .otherwise(when(col(LOITERING), settings.thresholds.loitering_mission_delay)
-                               .otherwise(settings.thresholds.delivery_mission_delay))) \
-        .select(SCENARIO_NAME, DELAY, CANCELLATION_LIMIT) \
-        .withColumn(AEQ1, col(DELAY) >= col(CANCELLATION_LIMIT)) \
+                    when(col(PRIORITY) == 4, settings.thresholds.emergency_mission_delay).otherwise(
+                        when(col(LOITERING), settings.thresholds.loitering_mission_delay).otherwise(
+                            settings.thresholds.delivery_mission_delay))) \
+        .select(SCENARIO_NAME, ARRIVAL_DELAY, CANCELLATION_LIMIT) \
+        .withColumn(AEQ1, col(ARRIVAL_DELAY) >= col(CANCELLATION_LIMIT)) \
         .select(SCENARIO_NAME, AEQ1) \
         .where(col(AEQ1)) \
         .groupby(SCENARIO_NAME) \
@@ -53,12 +70,16 @@ def compute_aeq1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
 def compute_aeq1_1_metric(dataframe: DataFrame,
                           intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-1.1 Percentage of cancelled demands
-
     Calculated as the ratio of AEQ-1 and the total number of flight intentions
     in the given scenario.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :param intermediate_results: current aeq results table.
+    :return: query result with the AEQ1-1 metric per scenario.
     """
     # TODO: The number of flights per scenario is calculated here, check optimization
-    flights_per_scenario = dataframe.select(SCENARIO_NAME, ACID) \
+    flights_per_scenario = dataframe \
+        .select(SCENARIO_NAME, ACID) \
         .groupby(SCENARIO_NAME) \
         .count() \
         .withColumnRenamed(COUNT, NUM_FLIGHTS)
@@ -72,13 +93,18 @@ def compute_aeq1_1_metric(dataframe: DataFrame,
 
 @logger.catch
 def compute_aeq2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
-    """
-    AEQ-2: Number of inoperative trajectories
-    (Number of situations when realized total mission duration is greater than specific drone autonomy.
-    Realized trajectories and hence realized total mission duration comes directly from a simulation)
+    """ AEQ-2: Number of inoperative trajectories
+    Number of situations when realized total mission duration is greater
+    than specific drone autonomy.
+    Realized trajectories and hence realized total mission duration comes
+    directly from a simulation)
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :return: query result with the AEQ2 metric per scenario.
     """
     # TODO: ? Define autonomy.
-    return dataframe.select(SCENARIO_NAME, ACID, FLIGHT_TIME, VEHICLE) \
+    return dataframe \
+        .select(SCENARIO_NAME, ACID, FLIGHT_TIME, VEHICLE) \
         .withColumn(AUTONOMY, when(col(VEHICLE) == "MP20", settings.MP20.autonomy)
                     .otherwise(settings.MP30.autonomy)) \
         .withColumn(INOPERATIVE_TRAJECTORY, when(col(FLIGHT_TIME) >= col(AUTONOMY), True)
@@ -92,14 +118,18 @@ def compute_aeq2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
 @logger.catch
 def compute_aeq2_1_metric(dataframe: DataFrame,
                           intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
-    """
-    AEQ-2.1: Percentage of inoperative trajectories
+    """ AEQ-2.1: Percentage of inoperative trajectories
 
     Calculated as the ratio of AEQ-2 and the total number of flight
     intentions in the given scenario.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :param intermediate_results: current aeq results table.
+    :return: query result with the AEQ2-1 metric per scenario.
     """
     # TODO: The number of flights per scenario is calculated here, check optimization
-    flights_per_scenario = dataframe.select(SCENARIO_NAME, ACID) \
+    flights_per_scenario = dataframe \
+        .select(SCENARIO_NAME, ACID) \
         .groupby(SCENARIO_NAME) \
         .count() \
         .withColumnRenamed(COUNT, NUM_FLIGHTS)
@@ -124,59 +154,65 @@ def compute_aeq3_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     if a user were alone in the system, respecting all concept airspace rules.
 
     Realized arrival time comes directly from the simulations.
+    The missions not completed are filtered from this metric.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :return: query result with the AEQ3 metric per scenario.
     """
     return dataframe \
-        .select(SCENARIO_NAME, ACID, BASELINE_ARRIVAL_TIME, DEL_TIME) \
+        .where(SPAWNED) \
+        .where(MISSION_COMPLETED) \
+        .select(SCENARIO_NAME, ACID, ARRIVAL_DELAY) \
         .groupby(SCENARIO_NAME) \
-        .agg(stddev(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AEQ3))
+        .agg(stddev(ARRIVAL_DELAY).alias(AEQ3))
 
 
 @logger.catch
-def compute_aeq4_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+def compute_aeq4_metric(dataframe: DataFrame,
+                        avg_delay: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-4: The worst demand delay
-
     Computed as the maximal difference between any individual flight intention
     delay and the average delay, where delay for each flight intention is
     calculated as the difference between realized arrival time and
     ideal expected arrival time.
-    """
-    # TODO: The average delay per scenario is calculated here, check optimization
-    avg_delay = dataframe.select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
-        .groupby(SCENARIO_NAME) \
-        .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AVG_DELAY))
 
-    # TODO: ? Ask about negatives values in delays. What does it means?
+    The missions not started and completed are filtered from this metric.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :param avg_delay: average delay per dataframe per scenario.
+    :return: query result with the AEQ4 metric per scenario.
+    """
     return dataframe \
-        .select(SCENARIO_NAME, ACID, BASELINE_ARRIVAL_TIME, DEL_TIME) \
-        .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \
+        .where(SPAWNED) \
+        .where(MISSION_COMPLETED) \
+        .select(SCENARIO_NAME, ACID, ARRIVAL_DELAY) \
         .join(avg_delay, on=SCENARIO_NAME, how='left') \
-        .withColumn("delay_increment", abs(col(DELAY) - col(AVG_DELAY))) \
+        .withColumn(DELAY_INCREMENT, abs(col(ARRIVAL_DELAY) - col(AVG_DELAY))) \
         .groupby(SCENARIO_NAME) \
-        .agg(max("delay_increment").alias(AEQ4))
+        .agg(max(DELAY_INCREMENT).alias(AEQ4))
 
 
 @logger.catch
-def compute_aeq5_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
+def compute_aeq5_metric(dataframe: DataFrame,
+                        avg_delay: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-5: Number of inequitable delayed demands
 
     Number of flight intentions whose delay is greater than a given threshold
     from the average delay in absolute sense,
     where delay for each flight intention is calculated as the difference between
     realized arrival time and ideal expected arrival time.
-    """
-    # TODO: The average delay per scenario is calculated here, check optimization
-    avg_delay = dataframe.select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
-        .groupby(SCENARIO_NAME) \
-        .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(AVG_DELAY))
 
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :param avg_delay: average delay per dataframe per scenario.
+    :return: query result with the AEQ5 metric per scenario.
+    """
     # TODO: ? Define the threshold for the AEQ-5
     return dataframe \
-        .select(SCENARIO_NAME, ACID, BASELINE_ARRIVAL_TIME, DEL_TIME) \
-        .withColumn(DELAY, col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)) \
+        .select(SCENARIO_NAME, ACID, ARRIVAL_DELAY) \
         .join(avg_delay, on=SCENARIO_NAME, how='left') \
         .select(SCENARIO_NAME, ACID) \
-        .where(((col(DELAY) > col(AVG_DELAY) + settings.threshold.AEQ5) |
-                (col(DELAY) < col(AVG_DELAY) - settings.threshold.AEQ5))) \
+        .where(((col(ARRIVAL_DELAY) > col(AVG_DELAY) + settings.threshold.AEQ5) |
+                (col(ARRIVAL_DELAY) < col(AVG_DELAY) - settings.threshold.AEQ5))) \
         .groupby(SCENARIO_NAME).count().withColumnRenamed(COUNT, AEQ5)
 
 
@@ -186,9 +222,14 @@ def compute_aeq5_1_metric(dataframe: DataFrame,
     """ AEQ-5-1: Percentage of inequitable delayed demands
 
     Calculated as the ratio of AEQ-5 and the total number of flight intentions in the given scenario.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :param intermediate_results: current aeq results table.
+    :return: query result with the AEQ5-1 metric per scenario.
     """
     # TODO: The number of flights per scenario is calculated here, check optimization
-    flights_per_scenario = dataframe.select(SCENARIO_NAME, ACID) \
+    flights_per_scenario = dataframe \
+        .select(SCENARIO_NAME, ACID) \
         .groupby(SCENARIO_NAME) \
         .count() \
         .withColumnRenamed(COUNT, NUM_FLIGHTS)
@@ -223,12 +264,14 @@ def compute_accessibility_and_equality_metrics(input_dataframes: Dict[str, DataF
     """
     logger.info('Calculating accessibility and equality metrics.')
     dataframe = input_dataframes[FLST_LOG_PREFIX]
+    avg_delay = calculate_avg_delay(dataframe)
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in AEQ_METRICS:
         logger.trace('Calculating metric: {}.', metric)
         query_result = metric(dataframe=dataframe,
-                              intermediate_results=result_dataframe)
+                              intermediate_results=result_dataframe,
+                              avg_delay=avg_delay)
         result_dataframe = result_dataframe.join(query_result,
                                                  on=SCENARIO_NAME,
                                                  how='left')
