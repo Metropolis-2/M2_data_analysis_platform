@@ -37,13 +37,17 @@ COMBINED_COLUMNS = [
     BASELINE_3D_DISTANCE,
     BASELINE_FLIGHT_TIME,
     BASELINE_ARRIVAL_TIME,
-    DEL_TIME,
+    SPAWNED,
     SPAWN_TIME,
+    DEL_TIME,
+    MISSION_COMPLETED,
     FLIGHT_TIME,
     DISTANCE_2D,
     DISTANCE_3D,
     VERTICAL_DISTANCE,
     ASCENDING_DISTANCE,
+    ARRIVAL_DELAY,
+    DEPARTURE_DELAY,
     WORK_DONE,
     DEL_LATITUDE,
     DEL_LONGITUDE,
@@ -161,7 +165,7 @@ COMBINED_FLST_FP_INT_TRANSFORMATIONS = [calculate_ascending_distance, calculate_
 def generate_combined_dataframe(scenario_name: str,
                                 flst_log_dataframe: DataFrame,
                                 flight_intentions: Dict[str, DataFrame]) -> DataFrame:
-    """
+    """ Combines the FLST log with the reference flight intention file.
 
     :param scenario_name: scenario name of the file being processed.
     :param flst_log_dataframe: parsed flst log dataframe.

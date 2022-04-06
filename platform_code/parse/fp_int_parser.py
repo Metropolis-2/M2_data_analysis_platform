@@ -79,13 +79,13 @@ def parse_locations(dataframe: DataFrame) -> DataFrame:
     # First remove the parenthesis at the beginning and the end, split by the comma and get the items
     dataframe = dataframe.withColumn(INITIAL_LOCATION, regexp_replace(col(INITIAL_LOCATION), PARENTHESIS_PATTERN, ""))
     dataframe = dataframe.withColumn(INITIAL_LOCATION, split(col(INITIAL_LOCATION), COMMA_PATTERN))
-    dataframe = dataframe.withColumn(ORIGIN_LAT, col(INITIAL_LOCATION).getItem(0))
-    dataframe = dataframe.withColumn(ORIGIN_LON, col(INITIAL_LOCATION).getItem(1))
+    dataframe = dataframe.withColumn(ORIGIN_LAT, col(INITIAL_LOCATION).getItem(1))
+    dataframe = dataframe.withColumn(ORIGIN_LON, col(INITIAL_LOCATION).getItem(0))
 
     dataframe = dataframe.withColumn(FINAL_LOCATION, regexp_replace(col(FINAL_LOCATION), PARENTHESIS_PATTERN, ""))
     dataframe = dataframe.withColumn(FINAL_LOCATION, split(col(FINAL_LOCATION), COMMA_PATTERN))
-    dataframe = dataframe.withColumn(DESTINATION_LAT, col(FINAL_LOCATION).getItem(0))
-    dataframe = dataframe.withColumn(DESTINATION_LON, col(FINAL_LOCATION).getItem(1))
+    dataframe = dataframe.withColumn(DESTINATION_LAT, col(FINAL_LOCATION).getItem(1))
+    dataframe = dataframe.withColumn(DESTINATION_LON, col(FINAL_LOCATION).getItem(0))
 
     return dataframe
 
