@@ -3,6 +3,7 @@ from pathlib import Path
 
 from loguru import logger
 from pyspark.sql import SparkSession
+from tqdm import tqdm
 
 from metrics.AEQ_metrics import compute_accessibility_and_equality_metrics
 from metrics.CAP_metrics import compute_capacity_metrics
@@ -18,6 +19,7 @@ from parse.los_log_parser import LOS_LOG_TRANSFORMATIONS
 from parse.reg_log_parser import REG_LOG_TRANSFORMATIONS
 from platform_code.parse.parser_constants import (CONF_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX,
                                                   REG_LOG_PREFIX, FLST_LOG_PREFIX)
+from results.result_dataframes import save_results_dataframes
 from schemas.conf_log_schema import CONF_LOG_FILE_SCHEMA
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
@@ -38,7 +40,7 @@ PARSE_CONFIG = {
 }
 DATAFRAMES_NAMES = [CONF_LOG_PREFIX, FLST_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX, REG_LOG_PREFIX]
 
-PROCESS_NEW_FILES = True
+PROCESS_NEW_FILES = False
 
 if __name__ == "__main__":
     logger.remove()
@@ -62,5 +64,6 @@ if __name__ == "__main__":
     results = compute_capacity_metrics(input_dataframes, results)
     results = compute_environment_metrics(input_dataframes, results)
 
-    for metric_name, metric_results in results.items():
+    save_results_dataframes(results)
+    for metric_name, metric_results in tqdm(results.items()):
         metric_results.show()

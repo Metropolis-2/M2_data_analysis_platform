@@ -6,6 +6,7 @@ from loguru import logger
 from pyarrow import StructType
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import lit
+from tqdm import tqdm
 
 from parse.combined_flst_fp_int_parser import generate_combined_dataframe
 from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
@@ -43,7 +44,7 @@ def parse_flight_intentions(spark: SparkSession) -> Dict[str, DataFrame]:
     fp_int_folder = Path(settings.flight_intention_path)
     fp_int_paths = list(fp_int_folder.rglob(f"{FP_INT_PREFIX}*.csv"))
 
-    for fp_int_path in fp_int_paths:
+    for fp_int_path in tqdm(fp_int_paths):
         logger.trace('Reading file: `{}`.', fp_int_path)
         scenario_data = get_scenario_data_from_fp_int(fp_int_path)
         dataframe = spark.read.csv(str(fp_int_path), header=False, schema=FP_INT_FILE_SCHEMA)
@@ -109,7 +110,7 @@ def parse_log_file(log_files: List[Path],
     """
     dataframe = None
 
-    for log_file in log_files:
+    for log_file in tqdm(log_files):
         scenario_name = build_scenario_name(log_file)
         logger.debug('Processing file: `{}` with scenario name: {}.', log_file.name, scenario_name)
 

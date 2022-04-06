@@ -6,8 +6,9 @@ from pyspark.sql.functions import col, mean, length, lit
 
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
-from results.results_constants import SAF_METRICS_RESULTS, CAP_METRICS_RESULTS, NUM_FLIGHTS
-from schemas.tables_attributes import (SCENARIO_NAME, CAP1, SAF2, CAP2, CAP3, CAP4, ARRIVAL_DELAY, SPAWNED,
+from results.results_constants import (SAF_METRICS_RESULTS, CAP_METRICS_RESULTS,
+                                       NUM_FLIGHTS, CAP1, CAP2, CAP3, CAP4, SAF2)
+from schemas.tables_attributes import (SCENARIO_NAME, ARRIVAL_DELAY, SPAWNED,
                                        MISSION_COMPLETED)
 
 REF_CAP1 = f'Ref_{CAP1}'
@@ -119,11 +120,11 @@ def compute_capacity_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the capacity metrics.
     """
-    logger.info('Calculating capacity metrics.')
+    logger.info('Generating plan for capacity metrics.')
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in CAP_METRICS:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(input_dataframes=input_dataframes,
                               output_dataframes=output_dataframes,
                               results=result_dataframe)

@@ -6,9 +6,10 @@ from pyspark.sql.functions import col, min, sum
 
 from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
-from results.results_constants import SAF_METRICS_RESULTS, COUNT
-from schemas.tables_attributes import SCENARIO_NAME, SAF1, SAF2, SAF3, DISTANCE, SAF4, SAF6, SAF5, LOS_DURATION_TIME, \
-    SAF2_1, SAF6_1, VIOLATION_SEVERITY, CRASH
+from results.results_constants import (SAF_METRICS_RESULTS, COUNT, SAF1, SAF2,
+                                       SAF2_1, SAF3, SAF4, SAF5, SAF6, SAF6_1)
+from schemas.tables_attributes import (SCENARIO_NAME, DISTANCE, LOS_DURATION_TIME,
+                                       VIOLATION_SEVERITY, CRASH)
 
 
 @logger.catch
@@ -156,11 +157,11 @@ def compute_safety_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
-    logger.info('Calculating safety metrics.')
+    logger.info('Generating plan for safety metrics.')
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in SAF_METRICS:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(input_dataframes=input_dataframes,
                               intermediate_results=result_dataframe)
         result_dataframe = result_dataframe.join(query_result,

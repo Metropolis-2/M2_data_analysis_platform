@@ -6,12 +6,11 @@ from pyspark.sql.functions import col, mean
 
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
-from results.results_constants import EFF_METRICS_RESULTS
-from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, EFF1, VERTICAL_DISTANCE,
-                                       BASELINE_VERTICAL_DISTANCE, EFF2, ASCENDING_DISTANCE,
-                                       BASELINE_ASCENDING_DISTANCE, EFF3, DISTANCE_3D, BASELINE_3D_DISTANCE, EFF4,
-                                       FLIGHT_TIME, BASELINE_FLIGHT_TIME, EFF5, EFF6, MISSION_COMPLETED,
-                                       DEPARTURE_DELAY)
+from results.results_constants import EFF_METRICS_RESULTS, EFF1, EFF2, EFF3, EFF4, EFF5, EFF6
+from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, VERTICAL_DISTANCE,
+                                       BASELINE_VERTICAL_DISTANCE, ASCENDING_DISTANCE,
+                                       BASELINE_ASCENDING_DISTANCE, DISTANCE_3D, BASELINE_3D_DISTANCE, FLIGHT_TIME,
+                                       BASELINE_FLIGHT_TIME, MISSION_COMPLETED, DEPARTURE_DELAY)
 
 
 @logger.catch
@@ -134,14 +133,14 @@ def compute_efficiency_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the efficiency metrics.
     """
-    logger.info('Calculating efficiency metrics.')
+    logger.info('Generating plan for efficiency metrics.')
 
     # For this metrics we only use the combined FLST log with the flight plan intentions
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in EFF_METRICS:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(dataframe)
         result_dataframe = result_dataframe.join(query_result,
                                                  on=[SCENARIO_NAME],

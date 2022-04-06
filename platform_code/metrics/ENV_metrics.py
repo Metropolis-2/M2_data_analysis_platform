@@ -6,27 +6,27 @@ from pyspark.sql.functions import sum, col, lit, lag, max, mean, min, round, cou
 
 from parse.parser_constants import REG_LOG_PREFIX, FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
-from results.results_constants import ENV_METRICS_RESULTS
+from results.results_constants import ENV_METRICS_RESULTS, ENV1, ENV2, ENV3, ENV4
 from schemas.tables_attributes import (SCENARIO_NAME, SIMULATION_TIME, LATITUDE,
-                                       LONGITUDE, ALTITUDE, ENV2, WORK_DONE,
-                                       ENV1, ACID, ENV4, ENV3)
+                                       LONGITUDE, ALTITUDE, WORK_DONE,
+                                       ACID)
 from utils.config import settings
 from utils.parser_utils import get_coordinates_distance, load_interest_points
 
-DIFF_LENGTH = 'DIFF_LENGTH'
+DIFF_LENGTH = 'Diff_length'
 DISTANCE = 'Distance'
-MAX_LENGTH = 'MAX_LENGTH'
-MIN_LENGTH = 'MIN_LENGTH'
-NEXT_ALTITUDE = 'NEXT_ALTITUDE'
-NEXT_LATITUDE = 'NEXT_LATITUDE'
-NEXT_LONGITUDE = 'NEXT_LONGITUDE'
-NORM_LENGTH = 'NORM_LENGTH'
-NUM_LEVELS = 'NUM_LEVELS'
-SEGMENT_ALTITUDE = 'SEGMENT_ALTITUDE'
-SEGMENT_LENGTH = 'SEGMENT_LENGTH'
-SEGMENT_WEIGHT = 'SEGMENT_WEIGHT'
+MAX_LENGTH = 'Max_length'
+MIN_LENGTH = 'Min_length'
+NEXT_ALTITUDE = 'Next_altitude'
+NEXT_LATITUDE = 'Next_latitude'
+NEXT_LONGITUDE = 'Next_longitude'
+NORM_LENGTH = 'Norm_length'
+NUM_LEVELS = 'Num_levels'
+SEGMENT_ALTITUDE = 'Segment_altitude'
+SEGMENT_LENGTH = 'Segment_length'
+SEGMENT_WEIGHT = 'Segment_weight'
 SOUND_INTENSITY = 'Sound_intensity'
-TOTAL_LENGTH = 'TOTAL_LENGTH'
+TOTAL_LENGTH = 'Total_length'
 
 
 @logger.catch
@@ -193,12 +193,12 @@ def compute_environment_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
-    logger.info('Calculating environment metrics.')
+    logger.info('Generating plan for environment metrics.')
     result_dataframe = build_result_df_by_scenario(input_dataframes)
     segment_dataframe = generate_segment_dataframe(input_dataframes)
 
     for metric in ENV_METRICS:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(input_dataframes=input_dataframes,
                               segment_dataframe=segment_dataframe,
                               result_dataframe=result_dataframe)

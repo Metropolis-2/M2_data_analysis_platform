@@ -6,9 +6,10 @@ from pyspark.sql.functions import col, sum
 
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario_and_priority, build_result_df_by_scenario
-from results.results_constants import PRI_METRICS_RESULTS_SCENARIO, PRI_METRICS_RESULTS_SCENARIO_PRIORITY, COUNT
-from schemas.tables_attributes import (FLIGHT_TIME, SCENARIO_NAME, PRIORITY, PRI1, PRI2, DISTANCE_3D,
-                                       BASELINE_FLIGHT_TIME, PRI5, PRI3, PRI4, PRIORITY_WEIGHT, SPAWNED,
+from results.results_constants import (PRI_METRICS_RESULTS_SCENARIO, PRI_METRICS_RESULTS_SCENARIO_PRIORITY,
+                                       COUNT, PRI1, PRI2, PRI3, PRI4, PRI5)
+from schemas.tables_attributes import (FLIGHT_TIME, SCENARIO_NAME, PRIORITY, DISTANCE_3D,
+                                       BASELINE_FLIGHT_TIME, PRIORITY_WEIGHT, SPAWNED,
                                        DEPARTURE_DELAY)
 
 FLIGHT_TIME_DELAY = 'flight_time_delay'
@@ -155,14 +156,14 @@ def compute_priority_metrics(input_dataframes: Dict[str, DataFrame],
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
-    logger.info('Calculating priority metrics.')
+    logger.info('Generating plan for priority metrics.')
     # For this metrics we only use the combined FLST log with the flight plan intentions
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     flights_per_priority = calculate_num_flights_per_priority(dataframe)
 
     result_dataframe = build_result_df_by_scenario(input_dataframes)
     for metric in PRI_METRICS_SCENARIO:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(dataframe=dataframe)
         result_dataframe = result_dataframe.join(query_result,
                                                  on=SCENARIO_NAME,
@@ -172,7 +173,7 @@ def compute_priority_metrics(input_dataframes: Dict[str, DataFrame],
 
     result_dataframe = build_result_df_by_scenario_and_priority(input_dataframes)
     for metric in PRI_METRICS_SCENARIO_PRIORITY:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(dataframe=dataframe,
                               flights_per_priority=flights_per_priority)
         result_dataframe = result_dataframe.join(query_result,

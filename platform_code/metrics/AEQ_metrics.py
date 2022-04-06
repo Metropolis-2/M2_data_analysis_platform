@@ -10,12 +10,13 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when, stddev, mean, abs, max
 
+import results.results_constants
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
-from results.results_constants import AEQ_METRICS_RESULTS, NUM_FLIGHTS, COUNT
-from schemas.tables_attributes import (SCENARIO_NAME, PRIORITY, LOITERING, AEQ1, AEQ2,
-                                       ACID, FLIGHT_TIME, VEHICLE, AEQ2_1, AEQ1_1, AEQ3, AEQ4, AEQ5, AEQ5_1,
-                                       ARRIVAL_DELAY, MISSION_COMPLETED, SPAWNED)
+from results.results_constants import (AEQ_METRICS_RESULTS, NUM_FLIGHTS, COUNT, AEQ1, AEQ1_1, AEQ2, AEQ2_1, AEQ3, AEQ4,
+                                       AEQ5, AEQ5_1)
+from schemas.tables_attributes import (SCENARIO_NAME, PRIORITY, LOITERING, ACID, FLIGHT_TIME, VEHICLE, ARRIVAL_DELAY,
+                                       MISSION_COMPLETED, SPAWNED)
 from utils.config import settings
 
 AUTONOMY = 'Autonomy'
@@ -211,8 +212,8 @@ def compute_aeq5_metric(dataframe: DataFrame,
         .select(SCENARIO_NAME, ACID, ARRIVAL_DELAY) \
         .join(avg_delay, on=SCENARIO_NAME, how='left') \
         .select(SCENARIO_NAME, ACID) \
-        .where(((col(ARRIVAL_DELAY) > col(AVG_DELAY) + settings.threshold.AEQ5) |
-                (col(ARRIVAL_DELAY) < col(AVG_DELAY) - settings.threshold.AEQ5))) \
+        .where(((col(ARRIVAL_DELAY) > col(AVG_DELAY) + results.results_constants.AEQ5) |
+                (col(ARRIVAL_DELAY) < col(AVG_DELAY) - results.results_constants.AEQ5))) \
         .groupby(SCENARIO_NAME).count().withColumnRenamed(COUNT, AEQ5)
 
 
@@ -255,14 +256,14 @@ def compute_accessibility_and_equality_metrics(input_dataframes: Dict[str, DataF
     :param output_dataframes: dictionary with the dataframes where the results are saved.
     :return: updated results dataframes with the security metrics.
     """
-    logger.info('Calculating accessibility and equality metrics.')
+    logger.info('Generating plan for accessibility and equality metrics.')
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     avg_delay = calculate_avg_delay(dataframe)
     flights_per_scenario = calculate_number_of_flights_per_scenario(dataframe)
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in AEQ_METRICS:
-        logger.trace('Calculating metric: {}.', metric)
+        logger.trace('Generating plan for metric: {}.', metric)
         query_result = metric(dataframe=dataframe,
                               intermediate_results=result_dataframe,
                               avg_delay=avg_delay,
