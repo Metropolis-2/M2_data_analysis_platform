@@ -10,8 +10,8 @@ from results.results_constants import EFF_METRICS_RESULTS
 from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, EFF1, VERTICAL_DISTANCE,
                                        BASELINE_VERTICAL_DISTANCE, EFF2, ASCENDING_DISTANCE,
                                        BASELINE_ASCENDING_DISTANCE, EFF3, DISTANCE_3D, BASELINE_3D_DISTANCE, EFF4,
-                                       FLIGHT_TIME, BASELINE_FLIGHT_TIME, EFF5, SPAWN_TIME, BASELINE_DEPARTURE_TIME,
-                                       EFF6)
+                                       FLIGHT_TIME, BASELINE_FLIGHT_TIME, EFF5, EFF6, MISSION_COMPLETED,
+                                       DEPARTURE_DELAY)
 
 
 @logger.catch
@@ -114,11 +114,9 @@ def compute_eff6_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
     :param dataframe: data required to calculate the metrics.
     :return: query result with the EFF6 per scenario and drone id.
     """
-    # TODO: The departure delay per ACID is calculated here, check optimization
     return dataframe \
-        .select(SCENARIO_NAME, ACID, SPAWN_TIME, BASELINE_DEPARTURE_TIME) \
-        .withColumn(EFF6, col(SPAWN_TIME) - col(BASELINE_DEPARTURE_TIME)) \
-        .select(SCENARIO_NAME, ACID, EFF6) \
+        .where(MISSION_COMPLETED) \
+        .select(SCENARIO_NAME, ACID, col(DEPARTURE_DELAY).alias(EFF6)) \
         .groupby(SCENARIO_NAME) \
         .agg(mean(EFF6).alias(EFF6))
 

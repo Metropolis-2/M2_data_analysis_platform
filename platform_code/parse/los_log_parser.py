@@ -4,6 +4,7 @@ from pyspark.sql.functions import when, col, abs
 from schemas.los_log_schema import LOS_LOG_COLUMNS
 from schemas.tables_attributes import (CRASH, DISTANCE, ALTITUDE, LOS_DURATION_TIME,
                                        LOS_EXIT_TIME, LOS_START_TIME, LOS_ID)
+from utils.config import settings
 from utils.parser_utils import add_dataframe_counter, convert_feet_to_meters
 
 
@@ -43,11 +44,12 @@ def generate_crash_column(los_log_dataframe):
     :param los_log_dataframe: dataframe with the LOSLOG data read from the file.
     :return: dataframe with the column crash added.
     """
-    return los_log_dataframe.withColumn(
-        CRASH,
-        when((col(DISTANCE) <= 1.7) &
-             (abs(col(f'{ALTITUDE}_1') - col(f'{ALTITUDE}_2')) < 2.46), True).otherwise(False)
-    )
+    return los_log_dataframe \
+        .withColumn(CRASH,
+                    when((col(DISTANCE) <= settings.thresholds.crash_horizontal_distance) &
+                         (abs(col(f'{ALTITUDE}_1') - col(f'{ALTITUDE}_2'))
+                          < settings.thresholds.crash_vertical_distance), True)
+                    .otherwise(False))
 
 
 def reorder_loss_log_columns(dataframe: DataFrame) -> DataFrame:

@@ -25,6 +25,20 @@ DELAY_INCREMENT = 'Delay_increment'
 INOPERATIVE_TRAJECTORY = 'Inoperative'
 
 
+def calculate_number_of_flights_per_scenario(dataframe: DataFrame) -> DataFrame:
+    """ Calculates the number of flights in the scenario
+    using the flight intention.
+
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :return: dataframe with the number of flights
+    """
+    return dataframe \
+        .select(SCENARIO_NAME, ACID) \
+        .groupby(SCENARIO_NAME) \
+        .count() \
+        .withColumnRenamed(COUNT, NUM_FLIGHTS)
+
+
 @logger.catch
 def calculate_avg_delay(dataframe: DataFrame) -> DataFrame:
     """ Calculates the average arrival delay per scenario.
@@ -63,27 +77,20 @@ def compute_aeq1_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
         .where(col(AEQ1)) \
         .groupby(SCENARIO_NAME) \
         .count() \
-        .select(SCENARIO_NAME, col("count").alias(AEQ1))
+        .select(SCENARIO_NAME, col(COUNT).alias(AEQ1))
 
 
 @logger.catch
-def compute_aeq1_1_metric(dataframe: DataFrame,
-                          intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
+def compute_aeq1_1_metric(intermediate_results: DataFrame,
+                          flights_per_scenario: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-1.1 Percentage of cancelled demands
     Calculated as the ratio of AEQ-1 and the total number of flight intentions
     in the given scenario.
 
-    :param dataframe: combined FLST log and Flight intention dataframe.
     :param intermediate_results: current aeq results table.
+    :param flights_per_scenario: number of flights planed for the scenario.
     :return: query result with the AEQ1-1 metric per scenario.
     """
-    # TODO: The number of flights per scenario is calculated here, check optimization
-    flights_per_scenario = dataframe \
-        .select(SCENARIO_NAME, ACID) \
-        .groupby(SCENARIO_NAME) \
-        .count() \
-        .withColumnRenamed(COUNT, NUM_FLIGHTS)
-
     return intermediate_results \
         .select(SCENARIO_NAME, AEQ1) \
         .join(flights_per_scenario, on=[SCENARIO_NAME]) \
@@ -116,24 +123,17 @@ def compute_aeq2_metric(dataframe: DataFrame, *args, **kwargs) -> DataFrame:
 
 
 @logger.catch
-def compute_aeq2_1_metric(dataframe: DataFrame,
-                          intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
+def compute_aeq2_1_metric(intermediate_results: DataFrame,
+                          flights_per_scenario: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-2.1: Percentage of inoperative trajectories
 
     Calculated as the ratio of AEQ-2 and the total number of flight
     intentions in the given scenario.
 
-    :param dataframe: combined FLST log and Flight intention dataframe.
     :param intermediate_results: current aeq results table.
+    :param flights_per_scenario: number of flights planed for the scenario.
     :return: query result with the AEQ2-1 metric per scenario.
     """
-    # TODO: The number of flights per scenario is calculated here, check optimization
-    flights_per_scenario = dataframe \
-        .select(SCENARIO_NAME, ACID) \
-        .groupby(SCENARIO_NAME) \
-        .count() \
-        .withColumnRenamed(COUNT, NUM_FLIGHTS)
-
     return intermediate_results \
         .select(SCENARIO_NAME, AEQ2) \
         .join(flights_per_scenario, on=SCENARIO_NAME) \
@@ -217,23 +217,16 @@ def compute_aeq5_metric(dataframe: DataFrame,
 
 
 @logger.catch
-def compute_aeq5_1_metric(dataframe: DataFrame,
-                          intermediate_results: DataFrame, *args, **kwargs) -> DataFrame:
+def compute_aeq5_1_metric(intermediate_results: DataFrame,
+                          flights_per_scenario: DataFrame, *args, **kwargs) -> DataFrame:
     """ AEQ-5-1: Percentage of inequitable delayed demands
 
     Calculated as the ratio of AEQ-5 and the total number of flight intentions in the given scenario.
 
-    :param dataframe: combined FLST log and Flight intention dataframe.
     :param intermediate_results: current aeq results table.
+    :param flights_per_scenario: number of flights planed for the scenario.
     :return: query result with the AEQ5-1 metric per scenario.
     """
-    # TODO: The number of flights per scenario is calculated here, check optimization
-    flights_per_scenario = dataframe \
-        .select(SCENARIO_NAME, ACID) \
-        .groupby(SCENARIO_NAME) \
-        .count() \
-        .withColumnRenamed(COUNT, NUM_FLIGHTS)
-
     return intermediate_results \
         .select(SCENARIO_NAME, AEQ5) \
         .join(flights_per_scenario, on=SCENARIO_NAME) \
@@ -265,13 +258,15 @@ def compute_accessibility_and_equality_metrics(input_dataframes: Dict[str, DataF
     logger.info('Calculating accessibility and equality metrics.')
     dataframe = input_dataframes[FLST_LOG_PREFIX]
     avg_delay = calculate_avg_delay(dataframe)
+    flights_per_scenario = calculate_number_of_flights_per_scenario(dataframe)
     result_dataframe = build_result_df_by_scenario(input_dataframes)
 
     for metric in AEQ_METRICS:
         logger.trace('Calculating metric: {}.', metric)
         query_result = metric(dataframe=dataframe,
                               intermediate_results=result_dataframe,
-                              avg_delay=avg_delay)
+                              avg_delay=avg_delay,
+                              flights_per_scenario=flights_per_scenario)
         result_dataframe = result_dataframe.join(query_result,
                                                  on=SCENARIO_NAME,
                                                  how='left')

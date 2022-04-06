@@ -39,11 +39,14 @@ flight_altitude.loitering = 18.288 # 60 feets
 flight_altitude.lowest = 9.144 # 30 feets
 
 # THRESHOLDS
-thresholds.destination_distance = 400
-thresholds.delay = 5
-thresholds.emergency_mission_delay = 300
-thresholds.delivery_mission_delay = 600
-thresholds.loitering_mission_delay = 1200
+thresholds.destination_distance = 400 # meters
+thresholds.delay = 5 # seconds
+thresholds.emergency_mission_delay = 300 # seconds
+thresholds.delivery_mission_delay = 600 # seconds
+thresholds.loitering_mission_delay = 1200 # seconds
+thresholds.crash_vertical_distance = 0.749808 # meters = 2.46 feet
+thresholds.crash_horizontal_distance = 1.7 # meters
+thresholds.intrusion_distance = 1 # meters
 threshold.AEQ5 = 50
 
 # WEIGHTS

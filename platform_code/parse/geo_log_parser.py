@@ -4,6 +4,7 @@ from pyspark.sql.functions import when, col
 from schemas.geo_log_schema import GEO_LOG_COLUMNS, COLUMNS_TO_DROP
 from schemas.tables_attributes import (VIOLATION_SEVERITY, MAX_INTRUSION, GEOFENCE_NAME, OPEN_AIRSPACE, GEO_ID,
                                        LOITERING_NFZ)
+from utils.config import settings
 from utils.parser_utils import add_dataframe_counter
 
 
@@ -32,8 +33,10 @@ def check_intrusion_severity(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the GEOLOG data read from the file.
     :return: dataframe with the columns indicating if the intrusion is severe.
     """
-    return dataframe.withColumn(VIOLATION_SEVERITY,
-                                when(col(MAX_INTRUSION) < 1., False).otherwise(True))
+    return dataframe \
+        .withColumn(VIOLATION_SEVERITY,
+                    when(col(MAX_INTRUSION) < settings.thresholds.intrusion_distance, False)
+                    .otherwise(True))
 
 
 def check_geofence_location(dataframe: DataFrame) -> DataFrame:

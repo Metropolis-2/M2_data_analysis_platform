@@ -130,7 +130,6 @@ def calculate_baseline_metrics(dataframe: DataFrame) -> DataFrame:
                                      get_coordinates_distance(col(ORIGIN_LAT), col(ORIGIN_LON),
                                                               col(DESTINATION_LAT), col(DESTINATION_LON)))
 
-    # TODO: Ask for the loitering flight altitude
     # The flight time is the same for both types, however the loitering mission is removed in the air.
     # Therefore, the vertical distance = ascending distance for them
     dataframe = dataframe.withColumn(BASELINE_ASCENDING_DISTANCE,

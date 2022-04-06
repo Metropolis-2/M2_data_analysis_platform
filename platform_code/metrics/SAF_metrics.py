@@ -56,7 +56,7 @@ def compute_saf2_1_metric(input_dataframes: Union[str, DataFrame], *args, **kwar
     """
     dataframe = input_dataframes[LOS_LOG_PREFIX]
     return dataframe \
-        .where(col(CRASH)) \
+        .where(CRASH) \
         .groupBy(SCENARIO_NAME) \
         .count() \
         .select([SCENARIO_NAME, col(COUNT).alias(SAF2_1)])

@@ -7,8 +7,8 @@ from pyspark.sql.functions import col, mean, length, lit
 from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import SAF_METRICS_RESULTS, CAP_METRICS_RESULTS, NUM_FLIGHTS
-from schemas.tables_attributes import (SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME,
-                                       CAP1, SAF2, CAP2, CAP3, CAP4)
+from schemas.tables_attributes import (SCENARIO_NAME, CAP1, SAF2, CAP2, CAP3, CAP4, ARRIVAL_DELAY, SPAWNED,
+                                       MISSION_COMPLETED)
 
 REF_CAP1 = f'Ref_{CAP1}'
 REF_CAP2 = f'Ref_{CAP2}'
@@ -27,11 +27,12 @@ def compute_cap1_metric(input_dataframes: Dict[str, DataFrame], *args, **kwargs)
     :return: query result with the CAP1 metric per scenario.
     """
     dataframe = input_dataframes[FLST_LOG_PREFIX]
-    # TODO: The delay per ACID is calculated here, check optimization
     return dataframe \
-        .select(SCENARIO_NAME, BASELINE_ARRIVAL_TIME, DEL_TIME) \
+        .where(SPAWNED) \
+        .where(MISSION_COMPLETED) \
+        .select(SCENARIO_NAME, ARRIVAL_DELAY) \
         .groupby(SCENARIO_NAME) \
-        .agg(mean(col(DEL_TIME) - col(BASELINE_ARRIVAL_TIME)).alias(CAP1))
+        .agg(mean(ARRIVAL_DELAY).alias(CAP1))
 
 
 @logger.catch
@@ -50,10 +51,10 @@ def compute_cap2_metric(input_dataframes: Dict[str, DataFrame],
     # Take the SAF-2 metric
     saf2_data = output_dataframes[SAF_METRICS_RESULTS].select(SCENARIO_NAME, SAF2)
 
-    # Calculate the total number of flights executed
-    # TODO: The number of flights per scenario is calculated here, check optimization
+    # Calculate the total number of flights deployed
     flst_log_df = input_dataframes[FLST_LOG_PREFIX]
     number_of_flights = flst_log_df \
+        .where(SPAWNED) \
         .groupby(SCENARIO_NAME) \
         .count() \
         .select([SCENARIO_NAME, col('count').alias(NUM_FLIGHTS)])
@@ -78,7 +79,7 @@ def compute_cap3_and_cap4_metrics(results: DataFrame,
     """
     # First, get the dataframe with the baseline data
     scenarios_without_uncertainty = results \
-        .where(col(SCENARIO_NAME).rlike('.*_[R|W][1,2,3,5]') == False) \
+        .where(~col(SCENARIO_NAME).rlike('.*_[R|W][1,2,3,5]')) \
         .select(col(SCENARIO_NAME).alias(REF_SCENARIO_NAME),
                 col(CAP1).alias(REF_CAP1),
                 col(CAP2).alias(REF_CAP2))
