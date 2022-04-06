@@ -31,7 +31,7 @@ https://conda.anaconda.org/conda-forge/linux-64/libwebp-base-1.2.2-h7f98852_1.ta
 https://conda.anaconda.org/conda-forge/linux-64/libzlib-1.2.11-h36c2ea0_1013.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/lz4-c-1.9.3-h9c3ff4c_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/ncurses-6.3-h9c3ff4c_0.tar.bz2
-https://conda.anaconda.org/conda-forge/linux-64/openssl-1.1.1l-h7f98852_0.tar.bz2
+https://conda.anaconda.org/conda-forge/linux-64/openssl-1.1.1n-h166bdaf_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/re2-2021.11.01-h9c3ff4c_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/snappy-1.1.8-he1b5a44_3.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/xz-5.2.5-h516909a_1.tar.bz2
@@ -68,6 +68,7 @@ https://conda.anaconda.org/conda-forge/linux-64/orc-1.7.1-h1be678f_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/python-3.8.12-ha38a3c6_3_cpython.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/aws-c-auth-0.6.8-hadad3cd_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/aws-c-mqtt-0.7.10-h885097b_0.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.4-pyh9f0ad1d_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/geographiclib-1.52-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/proj-9.0.0-h93bde94_1.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/py4j-0.10.9.3-pyhd8ed1ab_1.tar.bz2
@@ -76,12 +77,13 @@ https://conda.anaconda.org/conda-forge/noarch/pytz-2022.1-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/six-1.16.0-pyh6c4a22f_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/wheel-0.37.1-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/aws-c-s3-0.1.29-h8d70ed6_0.tar.bz2
-https://conda.anaconda.org/conda-forge/linux-64/certifi-2021.10.8-py38h578d9bd_1.tar.bz2
+https://conda.anaconda.org/conda-forge/linux-64/certifi-2021.10.8-py38h578d9bd_2.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/geopy-2.2.0-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/loguru-0.5.3-py38h578d9bd_3.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/numpy-1.22.3-py38h05e7239_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.8.2-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/setuptools-60.10.0-py38h578d9bd_0.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/tqdm-4.64.0-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/aws-crt-cpp-0.17.10-h6ab17b9_5.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/dynaconf-3.1.7-pyhd8ed1ab_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/pandas-1.4.1-py38h43a58ef_0.tar.bz2
