@@ -2,7 +2,7 @@ from typing import Dict
 
 from loguru import logger
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, when
+from pyspark.sql.functions import col, when, lit
 
 from schemas.tables_attributes import (DEL_Y, DEL_X, DESTINATION_Y, DESTINATION_X, ARRIVAL_DELAY, DEPARTURE_DELAY,
                                        SPAWNED, MISSION_COMPLETED, DEL_TIME, BASELINE_ARRIVAL_TIME, SPAWN_TIME,
@@ -135,10 +135,14 @@ def was_mission_completed(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the FLSTLOG data and flight intentions read from the files.
     :return: dataframe with the check if the destination was reached column added.
     """
-    return dataframe.withColumn(MISSION_COMPLETED, when(
-        ((col(DESTINATION_X) - col(DEL_X)) * (col(DESTINATION_X) - col(DEL_X))) +
-        ((col(DESTINATION_Y) - col(DEL_Y)) * (col(DESTINATION_Y) - col(DEL_Y))) >
-        settings.thresholds.destination_distance, False).otherwise(True))
+    return dataframe \
+        .withColumn(MISSION_COMPLETED,
+                    when(col(DEL_X).isNull() & col(DEL_Y).isNull(), False)
+                    .otherwise(when(
+                        (col(DESTINATION_X) - col(DEL_X)) * (col(DESTINATION_X) - col(DEL_X)) +
+                        ((col(DESTINATION_Y) - col(DEL_Y)) * (col(DESTINATION_Y) - col(DEL_Y)))
+                        <= settings.thresholds.destination_distance, True)
+                               .otherwise(False)))
 
 
 def create_priority_weights(dataframe: DataFrame) -> DataFrame:
@@ -178,7 +182,11 @@ def generate_combined_dataframe(scenario_name: str,
         # Join flst log with flight plan using the ship id
         dataframe_tmp = flst_log_dataframe.join(fp_int_dataframe,
                                                 on=ACID,
-                                                how='left')
+                                                how='outer')
+        # Those intentions not contained in FLST log have scenario name null,
+        # add scenario name by hand
+        dataframe_tmp = dataframe_tmp \
+            .withColumn(SCENARIO_NAME, lit(scenario_name))
 
         for transformation in COMBINED_FLST_FP_INT_TRANSFORMATIONS:
             logger.trace('Applying data transformation: {}.', transformation)
