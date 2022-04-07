@@ -11,14 +11,14 @@ from metrics.EFF_metrics import compute_efficiency_metrics
 from metrics.ENV_metrics import compute_environment_metrics
 from metrics.PRI_metrics import compute_priority_metrics
 from metrics.SAF_metrics import compute_safety_metrics
-from parse.conf_log_parser import CONF_LOG_TRANSFORMATIONS
-from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
-from parse.generic_parser import parse_flight_intentions, parse_log_files
-from parse.geo_log_parser import GEO_LOG_TRANSFORMATIONS
-from parse.los_log_parser import LOS_LOG_TRANSFORMATIONS
-from parse.reg_log_parser import REG_LOG_TRANSFORMATIONS
-from platform_code.parse.parser_constants import (CONF_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX,
-                                                  REG_LOG_PREFIX, FLST_LOG_PREFIX)
+from parser.conf_log_parser import CONF_LOG_TRANSFORMATIONS
+from parser.flst_log_parser import FLST_LOG_TRANSFORMATIONS
+from parser.generic_parser import parse_flight_intentions, parse_log_files
+from parser.geo_log_parser import GEO_LOG_TRANSFORMATIONS
+from parser.los_log_parser import LOS_LOG_TRANSFORMATIONS
+from parser.parser_constants import (CONF_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX,
+                                     REG_LOG_PREFIX, FLST_LOG_PREFIX)
+from parser.reg_log_parser import REG_LOG_TRANSFORMATIONS
 from results.result_dataframes import save_results_dataframes
 from schemas.conf_log_schema import CONF_LOG_FILE_SCHEMA
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA

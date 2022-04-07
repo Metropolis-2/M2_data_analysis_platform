@@ -4,7 +4,7 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, min, sum
 
-from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
+from parser.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import (SAF_METRICS_RESULTS, COUNT, SAF1, SAF2,
                                        SAF2_1, SAF3, SAF4, SAF5, SAF6, SAF6_1)

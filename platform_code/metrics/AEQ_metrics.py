@@ -11,7 +11,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when, stddev, mean, abs, max
 
 import results.results_constants
-from parse.parser_constants import FLST_LOG_PREFIX
+from parser.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import (AEQ_METRICS_RESULTS, NUM_FLIGHTS, COUNT, AEQ1, AEQ1_1, AEQ2, AEQ2_1, AEQ3, AEQ4,
                                        AEQ5, AEQ5_1)
