@@ -99,8 +99,8 @@ def compute_cap3_and_cap4_metrics(results: DataFrame,
                                              on=REF_SCENARIO_NAME)
 
     return query_result \
-        .withColumn(CAP3, col(REF_CAP1) - col(CAP1)) \
-        .withColumn(CAP4, col(REF_CAP2) - col(CAP2)) \
+        .withColumn(CAP3, col(CAP1) - col(REF_CAP1)) \
+        .withColumn(CAP4, col(CAP2) - col(REF_CAP2)) \
         .select(SCENARIO_NAME, CAP3, CAP4)
 
 
