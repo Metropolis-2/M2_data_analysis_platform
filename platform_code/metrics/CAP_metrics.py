@@ -4,7 +4,7 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, mean, length, lit
 
-from parser.parser_constants import FLST_LOG_PREFIX
+from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import (SAF_METRICS_RESULTS, CAP_METRICS_RESULTS,
                                        NUM_FLIGHTS, CAP1, CAP2, CAP3, CAP4, SAF2)

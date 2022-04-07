@@ -4,7 +4,7 @@ from loguru import logger
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import sum, col, lit, lag, max, mean, min, round, count_distinct
 
-from parser.parser_constants import REG_LOG_PREFIX, FLST_LOG_PREFIX
+from parse.parser_constants import REG_LOG_PREFIX, FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import ENV_METRICS_RESULTS, ENV1, ENV2, ENV3, ENV4
 from schemas.tables_attributes import (SCENARIO_NAME, SIMULATION_TIME, LATITUDE,

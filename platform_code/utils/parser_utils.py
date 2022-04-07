@@ -9,7 +9,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import monotonically_increasing_id, col, udf
 from pyspark.sql.types import StructType, StructField, DoubleType
 
-from parser.parser_constants import CONCEPTS, LINE_COUNT, FEET_TO_METERS_SCALE, UNCERTAINTIES
+from parse.parser_constants import CONCEPTS, LINE_COUNT, FEET_TO_METERS_SCALE, UNCERTAINTIES
 from schemas.tables_attributes import LATITUDE, LONGITUDE, VERTICAL_SPEED, CRUISING_SPEED
 from utils.config import settings
 

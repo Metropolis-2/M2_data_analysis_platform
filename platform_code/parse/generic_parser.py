@@ -8,11 +8,11 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import lit
 from tqdm import tqdm
 
-from parser.combined_flst_fp_int_parser import generate_combined_dataframe
-from parser.flst_log_parser import FLST_LOG_TRANSFORMATIONS
-from parser.fp_int_parser import FP_INT_TRANSFORMATIONS
-from parser.parser_constants import FLST_LOG_PREFIX, FP_INT_PREFIX, REG_LOG_PREFIX
-from parser.reg_log_parser import generate_reg_log_dataframe
+from parse.combined_flst_fp_int_parser import generate_combined_dataframe
+from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
+from parse.fp_int_parser import FP_INT_TRANSFORMATIONS
+from parse.parser_constants import FLST_LOG_PREFIX, FP_INT_PREFIX, REG_LOG_PREFIX
+from parse.reg_log_parser import generate_reg_log_dataframe
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.fp_int_schema import FP_INT_FILE_SCHEMA
 from schemas.tables_attributes import SCENARIO_NAME

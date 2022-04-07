@@ -5,7 +5,7 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from tqdm import tqdm
 
-from parser.parser_constants import FLST_LOG_PREFIX
+from parse.parser_constants import FLST_LOG_PREFIX
 from results.results_constants import SCENARIO_DATAFRAMES, SCENARIO_RESULTS, SCENARIO_PRIORITY_RESULTS
 from schemas.tables_attributes import SCENARIO_NAME, PRIORITY
 from utils.config import settings

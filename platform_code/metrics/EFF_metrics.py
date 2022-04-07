@@ -4,7 +4,7 @@ from loguru import logger
 from pyspark.pandas import DataFrame
 from pyspark.sql.functions import col, mean
 
-from parser.parser_constants import FLST_LOG_PREFIX
+from parse.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import EFF_METRICS_RESULTS, EFF1, EFF2, EFF3, EFF4, EFF5, EFF6
 from schemas.tables_attributes import (SCENARIO_NAME, ACID, BASELINE_2D_DISTANCE, DISTANCE_2D, VERTICAL_DISTANCE,
