@@ -5,6 +5,8 @@ channels:
 dependencies:
   - abseil-cpp=20210324.2=h0e60522_0
   - arrow-cpp=6.0.0=py38hc881a58_3_cpu
+  - atomicwrites=1.4.0=pyh9f0ad1d_0
+  - attrs=21.4.0=pyhd8ed1ab_0
   - aws-c-auth=0.6.4=hd061354_3
   - aws-c-cal=0.5.12=h395cb70_2
   - aws-c-common=0.6.11=h8ffe710_0
@@ -20,7 +22,7 @@ dependencies:
   - bzip2=1.0.8=h8ffe710_4
   - c-ares=1.18.1=h8ffe710_0
   - ca-certificates=2021.10.8=h5b45459_0
-  - certifi=2021.10.8=py38haa244fe_1
+  - certifi=2021.10.8=py38haa244fe_2
   - colorama=0.4.4=pyh9f0ad1d_0
   - dill=0.3.4=pyhd8ed1ab_0
   - dynaconf=3.1.7=pyhd8ed1ab_1
@@ -30,6 +32,7 @@ dependencies:
   - gflags=2.2.2=ha925a31_1004
   - glog=0.5.0=h4797de2_0
   - grpc-cpp=1.41.1=ha2fd154_2
+  - iniconfig=1.1.1=pyh9f0ad1d_0
   - intel-openmp=2022.0.0=h57928b3_3663
   - jbig=2.1=h8d14728_2003
   - jpeg=9e=h8ffe710_0
@@ -53,15 +56,20 @@ dependencies:
   - lz4-c=1.9.3=h8ffe710_1
   - mkl=2022.0.0=h0e2418a_796
   - numpy=1.22.3=py38hcf66579_0
-  - openssl=1.1.1l=h8ffe710_0
+  - openssl=1.1.1n=h8ffe710_0
+  - packaging=21.3=pyhd8ed1ab_0
   - pandas=1.4.1=py38h5d928e2_0
   - parquet-cpp=1.5.1=2
   - pip=22.0.4=pyhd8ed1ab_0
+  - pluggy=1.0.0=py38haa244fe_2
   - proj=9.0.0=h1cfcee9_1
+  - py=1.11.0=pyh6c4a22f_0
   - py4j=0.10.9.3=pyhd8ed1ab_1
   - pyarrow=6.0.0=py38h0b4a547_3_cpu
+  - pyparsing=3.0.7=pyhd8ed1ab_0
   - pyproj=3.3.0=py38h3b5edaa_2
   - pyspark=3.2.1=pyhd8ed1ab_0
+  - pytest=7.1.1=py38haa244fe_0
   - python=3.8.12=h7840368_2_cpython
   - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python_abi=3.8=2_cp38
@@ -73,6 +81,8 @@ dependencies:
   - snappy=1.1.8=ha925a31_3
   - sqlite=3.37.1=h8ffe710_0
   - tbb=2021.5.0=h2d74725_0
+  - tomli=2.0.1=pyhd8ed1ab_0
+  - tqdm=4.64.0=pyhd8ed1ab_0
   - ucrt=10.0.20348.0=h57928b3_0
   - vc=14.2=hb210afc_6
   - vs2015_runtime=14.29.30037=h902a5da_6
