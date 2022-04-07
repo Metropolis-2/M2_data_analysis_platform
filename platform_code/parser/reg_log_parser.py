@@ -6,6 +6,7 @@ from loguru import logger
 from pyspark.pandas import DataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
+from tqdm import tqdm
 
 from schemas.tables_attributes import ALTITUDE
 from utils.parser_utils import build_scenario_name, convert_feet_to_meters
@@ -84,7 +85,7 @@ def generate_reg_log_dataframe(log_files: List[Path],
     """
     dataframe = None
 
-    for log_file in log_files:
+    for log_file in tqdm(log_files):
         reg_log_list = list()
         reg_log_object_counter = 0
         reg_log_data = read_reglog(log_file)

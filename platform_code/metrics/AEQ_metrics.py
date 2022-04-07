@@ -10,7 +10,6 @@ from loguru import logger
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when, stddev, mean, abs, max
 
-import results.results_constants
 from parser.parser_constants import FLST_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import (AEQ_METRICS_RESULTS, NUM_FLIGHTS, COUNT, AEQ1, AEQ1_1, AEQ2, AEQ2_1, AEQ3, AEQ4,
@@ -211,9 +210,9 @@ def compute_aeq5_metric(dataframe: DataFrame,
     return dataframe \
         .select(SCENARIO_NAME, ACID, ARRIVAL_DELAY) \
         .join(avg_delay, on=SCENARIO_NAME, how='left') \
-        .select(SCENARIO_NAME, ACID) \
-        .where(((col(ARRIVAL_DELAY) > col(AVG_DELAY) + results.results_constants.AEQ5) |
-                (col(ARRIVAL_DELAY) < col(AVG_DELAY) - results.results_constants.AEQ5))) \
+        .select(SCENARIO_NAME, ACID, ARRIVAL_DELAY, AVG_DELAY) \
+        .where(((col(ARRIVAL_DELAY) > col(AVG_DELAY) + settings.threshold.AEQ5) |
+                (col(ARRIVAL_DELAY) < col(AVG_DELAY) - settings.threshold.AEQ5))) \
         .groupby(SCENARIO_NAME).count().withColumnRenamed(COUNT, AEQ5)
 
 
