@@ -1,6 +1,3 @@
-# Ignore results
-output/
-
 # Ignore dynaconf secret files
 config/.secrets.toml
 
