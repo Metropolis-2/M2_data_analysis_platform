@@ -19,7 +19,6 @@ from parse.los_log_parser import LOS_LOG_TRANSFORMATIONS
 from parse.parser_constants import (CONF_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX,
                                     REG_LOG_PREFIX, FLST_LOG_PREFIX)
 from parse.reg_log_parser import REG_LOG_TRANSFORMATIONS
-from results.result_dataframes import save_results_dataframes
 from schemas.conf_log_schema import CONF_LOG_FILE_SCHEMA
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
@@ -35,8 +34,8 @@ PARSE_CONFIG = {
     CONF_LOG_PREFIX: (CONF_LOG_FILE_SCHEMA, CONF_LOG_TRANSFORMATIONS),
     LOS_LOG_PREFIX: (LOS_LOG_FILE_SCHEMA, LOS_LOG_TRANSFORMATIONS),
     GEO_LOG_PREFIX: (GEO_LOG_FILE_SCHEMA, GEO_LOG_TRANSFORMATIONS),
+    REG_LOG_PREFIX: (REG_LOG_SCHEMA, REG_LOG_TRANSFORMATIONS),
     FLST_LOG_PREFIX: (FLST_LOG_FILE_SCHEMA, FLST_LOG_TRANSFORMATIONS),
-    REG_LOG_PREFIX: (REG_LOG_SCHEMA, REG_LOG_TRANSFORMATIONS)
 }
 DATAFRAMES_NAMES = [CONF_LOG_PREFIX, FLST_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX, REG_LOG_PREFIX]
 
@@ -45,6 +44,9 @@ PROCESS_NEW_FILES = True
 if __name__ == "__main__":
     logger.remove()
     logger.add(sys.stderr, level=settings.logging.level)
+    if settings.logging.save.file:
+        logger.add(settings.logging.save.path, rotation='10 MB', level=settings.logging.level)
+    
     spark = SparkSession.builder \
         .appName(settings.spark.app_name) \
         .getOrCreate()
@@ -53,19 +55,18 @@ if __name__ == "__main__":
         logger.info('The log files in folder `{}` will be processed.', Path(settings.data_path).resolve())
         fp_intentions_dfs = parse_flight_intentions(spark)
         input_dataframes = parse_log_files(PARSE_CONFIG, fp_intentions_dfs, spark)
-        save_dataframes_dict(input_dataframes)
     else:
         logger.info('The preprocessed files in folder `{}` will be loaded.', Path(settings.saving_path).resolve())
         input_dataframes = load_dataframes(DATAFRAMES_NAMES, spark)
 
-    results = dict()
-    results = compute_safety_metrics(input_dataframes, results)
-    results = compute_accessibility_and_equality_metrics(input_dataframes, results)
-    results = compute_priority_metrics(input_dataframes, results)
-    results = compute_efficiency_metrics(input_dataframes, results)
-    results = compute_capacity_metrics(input_dataframes, results)
-    results = compute_environment_metrics(input_dataframes, results)
-
-    save_results_dataframes(results)
-    for metric_name, metric_results in tqdm(results.items()):
-        metric_results.show()
+    # results = dict()
+    # results = compute_safety_metrics(input_dataframes, results)
+    # results = compute_accessibility_and_equality_metrics(input_dataframes, results)
+    # results = compute_priority_metrics(input_dataframes, results)
+    # results = compute_efficiency_metrics(input_dataframes, results)
+    # results = compute_capacity_metrics(input_dataframes, results)
+    # results = compute_environment_metrics(input_dataframes, results)
+    #
+    # save_results_dataframes(results)
+    # for metric_name, metric_results in tqdm(results.items()):
+    #     metric_results.show()

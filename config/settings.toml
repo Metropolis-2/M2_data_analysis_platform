@@ -7,25 +7,28 @@
 #   |--- Hybrid
 #   |--- Flight_intentions (this one could be in another path)
 #
-data_path = "../data"
+root_path = "/mnt/HDD/METROPOLIS/"
+data_path = "@format {this.root_path}/input"
 # Path to the flight intentions, uses the data folder as root. However,
 # it can be changed to an external folder.
-flight_intention_path = "@format {this.data_path}/Flight_intentions"
+flight_intention_path = "@format {this.root_path}/Flight_intentions"
 # Path to the JSON with the interest points to calculate the noise
-interest_points = "@format {this.data_path}/interest_points.json"
+interest_points = "/home/uas/Workspace/METROPOLIS/M2_data_analysis_platform/data/interest_points.json"
 # Folder where the generated data will be saved. This included the processed
 # logs files and the metric dataframes.
-saving_path = "../output"
-
-# GEOJSON ENV3 POINTS PATH
-geojson.path = "C:\\Users\\jpedrero\\workspace\\M2_data_analysis_platform\\graphs\\env3_points.geojson"
-
+save_log_dataframes = true
+saving_path = "/media/uas/output/"
 
 # LOGGING
 logging.level = "INFO"
+logging.save.file= true
+logging.save.path = "@format {this.root_path}/logs/python_logs.log"
 
 # SPARK CONFIG
 spark.app_name = "M2-Data-Analysis-Platform"
+spark.repartition.perform = true
+spark.repartition.scale_factor = 30
+spark.cache_logs = false
 
 # DRONE CONFIG
 MP30.avg_speed = 15.43 # m/s

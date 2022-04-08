@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import List, Tuple, Dict
 
@@ -9,26 +8,14 @@ from pyspark.sql.functions import lit
 from tqdm import tqdm
 
 from parse.combined_flst_fp_int_parser import generate_combined_dataframe
-from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
 from parse.fp_int_parser import FP_INT_TRANSFORMATIONS
 from parse.parser_constants import FLST_LOG_PREFIX, FP_INT_PREFIX, REG_LOG_PREFIX
 from parse.reg_log_parser import generate_reg_log_dataframe
-from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.fp_int_schema import FP_INT_FILE_SCHEMA
 from schemas.tables_attributes import SCENARIO_NAME
 from utils.config import settings
+from utils.io_utils import save_dataframe
 from utils.parser_utils import (build_scenario_name, remove_commented_log_lines, get_scenario_data_from_fp_int)
-
-# Configuration for the log names with the schema associated and the transformations
-# required after the read of the log file.
-# Prefix: (schema, transformations)
-PARSE_CONFIG = {
-    # CONF_LOG_PREFIX: (CONF_LOG_FILE_SCHEMA, CONF_LOG_TRANSFORMATIONS),
-    # LOS_LOG_PREFIX: (LOS_LOG_FILE_SCHEMA, LOS_LOG_TRANSFORMATIONS),
-    # GEO_LOG_PREFIX: (GEO_LOG_FILE_SCHEMA, GEO_LOG_TRANSFORMATIONS),
-    FLST_LOG_PREFIX: (FLST_LOG_FILE_SCHEMA, FLST_LOG_TRANSFORMATIONS),
-    # REG_LOG_PREFIX: (REG_LOG_SCHEMA, REG_LOG_TRANSFORMATIONS)
-}
 
 
 def parse_flight_intentions(spark: SparkSession) -> Dict[str, DataFrame]:
@@ -40,6 +27,7 @@ def parse_flight_intentions(spark: SparkSession) -> Dict[str, DataFrame]:
     :return: dictionary with each of the flight intentions, using the
      scenario data as key.
     """
+    logger.info('Parsing flight intentions.')
     fp_int_dataframes = dict()
     fp_int_folder = Path(settings.flight_intention_path)
     fp_int_paths = list(fp_int_folder.rglob(f"{FP_INT_PREFIX}*.csv"))
@@ -82,6 +70,20 @@ def parse_log_files(parse_config: Dict[str, Tuple],
             dataframe = parse_log_file(log_paths, schema, transformations, flight_intentions, spark)
         else:
             dataframe = generate_reg_log_dataframe(log_paths, schema, transformations, spark)
+
+        if settings.spark.repartition.perform:
+            logger.info('Performing dataframe repartition for: {}.', log_prefix)
+            num_partitions = dataframe.rdd.getNumPartitions()
+            logger.debug('Current number of partitions: {}', num_partitions)
+            dataframe = dataframe.repartition(num_partitions * settings.spark.repartition.scale_factor)
+            logger.debug('New number of partitions: {}', dataframe.rdd.getNumPartitions())
+
+        if settings.spark.cache_logs:
+            logger.info('Caching {} dataframe.', log_prefix)
+            dataframe = dataframe.persist()
+
+        if settings.save_log_dataframes:
+            save_dataframe(log_prefix, dataframe, 'log_files')
 
         dataframes[log_prefix] = dataframe
 
@@ -132,17 +134,3 @@ def parse_log_file(log_files: List[Path],
             dataframe = dataframe_tmp
 
     return dataframe
-
-
-if __name__ == '__main__':
-    logger.remove()
-    logger.add(sys.stderr, level=settings.logging.level)
-
-    spark = SparkSession.builder.appName(settings.spark.app_name).getOrCreate()
-
-    fp_intentions_dfs = parse_flight_intentions(spark)
-    log_files_dfs = parse_log_files(PARSE_CONFIG, fp_intentions_dfs, spark)
-
-    for log_type, df in log_files_dfs.items():
-        logger.info('Showing dataframe for {} logs', log_type)
-        df.show()

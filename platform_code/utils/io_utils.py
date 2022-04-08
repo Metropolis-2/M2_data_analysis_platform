@@ -24,7 +24,7 @@ def save_dataframe(file_name: str,
         saving_path = Path(settings.saving_path, f'{file_name.lower()}.parquet')
     os.makedirs(saving_path.parent, exist_ok=True)
     logger.info('Saving dataframe with name: {}.', saving_path.stem)
-    dataframe.write.parquet(str(saving_path))
+    dataframe.write.parquet(str(saving_path), mode='overwrite')
 
 
 def save_dataframes_dict(dataframes: Dict[str, DataFrame]) -> None:

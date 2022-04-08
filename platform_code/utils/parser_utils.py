@@ -179,14 +179,8 @@ def get_drone_speed(drone_model: str) -> Tuple[float, float]:
     :param drone_model: name of the drone model. For example, MP20.
     :return: avg_speed in meters per second.
     """
-    logger.trace('The drone model is {}.', drone_model)
     avg_speed = get_drone_avg_speed(drone_model)
     vertical_speed = get_drone_vertical_speed(drone_model)
-    logger.debug('Drone model: {} with:\n'
-                 '- Loitering speed: {}\n'
-                 '- Vertical speed: {}\n',
-                 drone_model, avg_speed, vertical_speed)
-
     return avg_speed, vertical_speed
 
 
@@ -209,11 +203,6 @@ def transform_location(latitude: float, longitude: float) -> Tuple[float, float]
     p = transformer.transform(latitude, longitude)
     transformed_latitude = p[0]
     transformed_longitude = p[1]
-
-    logger.trace('Transformed from {} ({}, {}) to {}, ({}, {}).',
-                 settings.crs.origin, latitude, longitude,
-                 settings.crs.desired, transformed_latitude, transformed_longitude)
-
     return transformed_latitude, transformed_longitude
 
 
