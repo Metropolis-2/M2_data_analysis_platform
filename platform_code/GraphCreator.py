@@ -68,11 +68,11 @@ traffic_mix_names_dict={}
 for i in range(len(traffic_mix)):
     traffic_mix_names_dict[traffic_mix[i]]=traffic_mix_names[i]
 
-repetitions=["0","1","2","3","4","5","6","7","8"]
+repetitions=["0_","1_","2_","3_","4_","5_","6_","7_","8_"]
 
-uncertainties=["","_R1","_R2","_R3","_W1","_W3","_W5"]
-rogue_uncertainties=["","_R1","_R2","_R3"]
-wind_uncertainties=["","_W1","_W3","_W5"]
+uncertainties=["","R1","R2","R3","W1","W3","W5"]
+rogue_uncertainties=["","R1","R2","R3"]
+wind_uncertainties=["","W1","W3","W5"]
 uncertainties_names=["No uncertainty","R1","R2","R3","W1","W3","W5"]
 uncertainties_names_dict={}
 for i in range(len(uncertainties)):
@@ -87,18 +87,14 @@ def metric_boxplots_baseline(metric,dataframe):
             for conc in concepts:
                 for rep in repetitions:
                     scenario_name=conc+density+t_mix+rep
-                    tmp_dt=dataframe.filter(dataframe["Scenario"]==scenario_name).select(metric)
-                    tmp_dt_list=tmp_dt.collect()
-                    if len(tmp_dt_list)==0:
-                        #print("No value for metric:",metric," for scenario ",scenario_name)
-                        ##TODO delete teh next three lines, they were added for testing
+                    try:
+                        metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                    except:
                         metric_value=240+random.randint(-5,5)
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                        vals.append(tmp)
-                    else:
-                        metric_value=tmp_dt_list[0][0]
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                        vals.append(tmp)
+                        #print("No value for scenario",scenario_name)
+                    
+                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                    vals.append(tmp)
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric])
     
@@ -128,18 +124,15 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
             for conc in concepts:
                 for rep in repetitions:
                     scenario_name=conc+density+t_mix+rep+wind
-                    tmp_dt=dataframe.filter(dataframe["Scenario"]==scenario_name).select(metric)
-                    tmp_dt_list=tmp_dt.collect()
-                    if len(tmp_dt_list)==0:
-                        #print("No value for metric:",metric," for scenario ",scenario_name)
-                        ##TODO delete teh next three lines, they were added for testing
+                    try:
+                        metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                    except:
                         metric_value=240+random.randint(-5,5)
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value,uncertainties_names_dict[wind]]
-                        vals.append(tmp)
-                    else:
-                        metric_value=tmp_dt_list[0][0]
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value,uncertainties_names_dict[wind]]
-                        vals.append(tmp)
+                        #print("No value for scenario",scenario_name)
+                    
+                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                    vals.append(tmp)
+ 
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Wind level"])
     
@@ -168,18 +161,15 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
             for conc in concepts:
                 for rep in repetitions:
                     scenario_name=conc+density+t_mix+rep+rogue
-                    tmp_dt=dataframe.filter(dataframe["Scenario"]==scenario_name).select(metric)
-                    tmp_dt_list=tmp_dt.collect()
-                    if len(tmp_dt_list)==0:
-                        #print("No value for metric:",metric," for scenario ",scenario_name)
-                        ##TODO delete teh next three lines, they were added for testing
+                    try:
+                        metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                    except:
                         metric_value=240+random.randint(-5,5)
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value,uncertainties_names_dict[rogue]]
-                        vals.append(tmp)
-                    else:
-                        metric_value=tmp_dt_list[0][0]
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value,uncertainties_names_dict[rogue]]
-                        vals.append(tmp)
+                        #print("No value for scenario",scenario_name)
+                    
+                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                    vals.append(tmp)
+
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Rogue level"])
     
@@ -212,18 +202,15 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
             for conc in concepts:
                 for rep in repetitions:
                     scenario_name=conc+density+t_mix+rep+rogue
-                    tmp_dt=dataframe.filter(dataframe["Scenario"]==scenario_name).select(metric)
-                    tmp_dt_list=tmp_dt.collect()
-                    if len(tmp_dt_list)==0:
-                        #print("No value for metric:",metric," for scenario ",scenario_name)
-                        ##TODO delete teh next three lines, they were added for testing
+                    try:
+                        metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                    except:
                         metric_value=240+random.randint(-5,5)
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value,uncertainties_names_dict[rogue]]
-                        vals.append(tmp)
-                    else:
-                        metric_value=tmp_dt_list[0][0]
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value,uncertainties_names_dict[rogue]]
-                        vals.append(tmp)
+                        #print("No value for scenario",scenario_name)
+                    
+                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                    vals.append(tmp)
+
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Rogue level"])
     
@@ -253,18 +240,15 @@ def metric_boxplots_priority(metric,dataframe,priority):
             for conc in concepts:
                 for rep in repetitions:
                     scenario_name=conc+density+t_mix+rep
-                    tmp_dt=dataframe.filter((dataframe["Scenario"]==scenario_name) & (dataframe["Priority"]==priority)).select(metric)
-                    tmp_dt_list=tmp_dt.collect()
-                    if len(tmp_dt_list)==0:
-                        #print("No value for metric:",metric," for scenario ",scenario_name)
-                        ##TODO delete teh next three lines, they were added for testing
+                    try:
+                        metric_value=dataframe[(dataframe["Scenario"]==scenario_name)&(dataframe["Priority"]==priority)][metric].values[0]
+                    except:
                         metric_value=240+random.randint(-5,5)
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                        vals.append(tmp)
-                    else:
-                        metric_value=tmp_dt_list[0][0]
-                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                        vals.append(tmp)
+                        #print("No value for scenario",scenario_name)
+                    
+                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                    vals.append(tmp)
+
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric])
     
@@ -294,16 +278,14 @@ def density_graph(density, t_mix,rep,dataframe):
        time_stamp=0
        while time_stamp< 10800:
            time_stamp+=30
-           tmp_dt=dataframe.filter((dataframe["Scenario"]==scenario_name) & (dataframe["Time_stamp"]==time_stamp)).select("Alive_aircraft")
-           tmp_dt_list=tmp_dt.collect()
-           if len(tmp_dt_list)==0:
-               #print("No value for metric:",metric," for scenario ",scenario_name)
-               ##TODO delete teh next two lines, they were added for testing
-               metric_value=100+random.randint(-5,5)
-               data.append(metric_value)
-           else:
-               metric_value=tmp_dt_list[0][0]
-               data.append(metric_value)
+           try:
+               metric_value=dataframe[(dataframe["Scenario"]==scenario_name)&(dataframe["Time_stamp"]==time_stamp)]["Alive_aircraft"].values[0]
+           except:
+               metric_value=240+random.randint(-5,5)
+               #print("No value for scenario",scenario_name)
+      
+           vals.append(metric_value)
+
                
        vals.append(data)
        
