@@ -43,12 +43,23 @@ class DataframeCreator():
         
         input_file=open("data/baseline_routes.dill", 'rb')
         self.baseline_length_dict=dill.load(input_file)
+        
+        ##The datframes  generation function shod be called in order,
+        #as soem of teh em require already created dataframes
+        #the order is self.create_flstlog_dataframe() 
+        # self.create_loslog_dataframe() 
+        #self.create_conflog_dataframe() 
+        #self.create_geolog_dataframe()
+        #self.create_env_metrics_dataframe()
+        #self.create_density_dataframe()
+        #self.create_metrics_dataframe()
 
         
-        self.los_log_dataframe = self.create_loslog_dataframe() 
+        self.flst_log_dataframe,self.loitering_nfz_data_frame = self.create_flstlog_dataframe() 
+        #self.los_log_dataframe = self.create_loslog_dataframe() 
         #self.conf_log_dataframe = self.create_conflog_dataframe() 
         #self.geo_log_dataframe = self.create_geolog_dataframe()
-        #self.flst_log_dataframe = self.create_flstlog_dataframe() 
+        
         #self.reg_log_dataframe = self.create_reglog_dataframe()
         #self.env_metrics_dataframe=self.create_env_metrics_dataframe()
         #self.dens_log_dataframe=self.create_density_dataframe()
@@ -240,9 +251,23 @@ class DataframeCreator():
     ##GEOLOG dataframe
     def create_geolog_dataframe(self):
         
+        input_file=open("dills/loitering_nfz_dataframe.dill", 'wb')
+        loitering_nfz_data_frame=dill.load(input_file)
+        input_file.close()
+        
+        input_file=open("dills/flstlog_dataframe.dill", 'wb')
+        flstlog_data_frame=dill.load(input_file)
+        input_file.close()
+        #drop unused columns
+        flstlog_data_frame=flstlog_data_frame.drop(["Baseline_deparure_time", "cruising_speed",
+                    "Priority","loitering","Baseline_2D_distance","Baseline_vertical_distance","Baseline_ascending_distance","Baseline_3D_distance",\
+                        "Baseline_flight_time","Baseline_arrival_time","DEL_time", "SPAWN_time",
+                     "FLIGHT_time", "2D_dist", "3D_dist", "ALT_dist",  "DEL_LAT" \
+             , "DEL_LON", "DEL_ALT","Ascend_dist","work_done"],axis=1)  
+        
         dataframe_cnt=0
-        col_list = ["GEO_id", "Scenario_name", "GEOF_NAME", "MAX_intrusion","Intrusion_time", "Violation_severity","Open_airspace","Loitering_nfz","in_time"]
-          #TODO : add the rest of the geoviolations flags
+        col_list = ["GEO_id", "Scenario_name", "GEOF_NAME", "MAX_intrusion","Intrusion_time", "Violation_severity","Open_airspace","Loitering_nfz","Node_in_nfz","In_nfz_applied","in_time"]
+
         geo_id=0    
         
         geolog_list = list()
@@ -315,6 +340,21 @@ class DataframeCreator():
                     in_time=False
                     if tmp_list[4]<=5400:
                         in_time=True
+                        
+                    node_in_nfz=False
+                    in_nfz_applied=False
+                    if loitering:
+                        loiter_filtered=loitering_nfz_data_frame[(loitering_nfz_data_frame["Scenario_name"]==scenario_name)&(loitering_nfz_data_frame["NFZ_name"]==line_list[3])]
+                        nfz_applied_time=loiter_filtered["Applied_time"].values[0]
+                        nfz_area=loiter_filtered["NFZ_area"].values[0]
+                        flstlog_data_frame_filtered=flstlog_data_frame[(flstlog_data_frame["Scenario_name"]==scenario_name)&(flstlog_data_frame["ACID"]==line_list[1])]
+                        
+                        in_nfz_applied=util_functions.is_in_area_when_applied(nfz_applied_time,float(value[:-2]))
+                        node_in_nfz=util_functions.has_orig_dest_in_nfz(flstlog_data_frame_filtered,nfz_area)
+                        
+                        
+                    tmp_list.append(node_in_nfz)
+                    tmp_list.append(in_nfz_applied)
                     
                     tmp_list.append(in_time)
                     
@@ -352,7 +392,9 @@ class DataframeCreator():
         
         flint_list = list()
         
-        flst_id=0                    
+        flst_id=0               
+        
+        uncertainties_list=["","R1","R2","R3","W1","W3","W5"]
                     
         for ii,file_name in enumerate(self.flight_intention_names):
             print(file_name)
@@ -364,81 +406,83 @@ class DataframeCreator():
                 density="very_low"
                 distribution=scenario_var[4]
                 repetition=scenario_var[5]
-                if len(scenario_var)==7:
-                    uncertainty=scenario_var[6].split(".")[0]   
-                else:
-                    uncertainty="" 
+
+     
             else:
                 density=scenario_var[2]
                 distribution=scenario_var[3]
                 repetition=scenario_var[4]
-                if len(scenario_var)==6:
-                    uncertainty=scenario_var[5].split(".")[0]   
-                else:
-                    uncertainty="" 
+
+            if distribution=="40":
+                uncertainties=uncertainties_list
+            else:
+                uncertainties=[""]
+                
+            for uncertainty in uncertainties:
 
             
-            scenario_name_centr="1_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
-            scenario_name_hybrid="2_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
-            scenario_name_decentr="3_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
+                scenario_name_centr="1_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
+                scenario_name_hybrid="2_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
+                scenario_name_decentr="3_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
 
        
-
-            flight_int_file = open(flight_file, "r")
-            
-            for line in  flight_int_file:
-
-                flight_data=line.split(",")
-                acid=flight_data[1]
-                aircraft_type=flight_data[2]
-                time_data=flight_data[3].split(":")
-                time=int(time_data[2])+int(time_data[1])*60+int(time_data[0])*3600
-                priority=flight_data[8]
-                origin_lon=round(float(flight_data[4].split("(")[1]),10)
-                dest_lon=round(float(flight_data[6].split("(")[1]),10)
-                origin_lat=round(float(flight_data[5].split(")")[0]),10)
-                dest_lat=round(float(flight_data[7].split(")")[0]) ,10)
+    
+                flight_int_file = open(flight_file, "r")
                 
-                transformer = Transformer.from_crs('epsg:4326','epsg:32633')
-                p=transformer.transform( dest_lat,dest_lon)
-                dest_x=p[0]
-                dest_y=p[1]
-                
-                loitering=False
-                if flight_data[9]!="":
-                    loitering=True
+                for line in  flight_int_file:
+    
+                    flight_data=line.split(",")
+                    acid=flight_data[1]
+                    aircraft_type=flight_data[2]
+                    time_data=flight_data[3].split(":")
+                    time=int(time_data[2])+int(time_data[1])*60+int(time_data[0])*3600
+                    priority=flight_data[8]
+                    origin_lon=round(float(flight_data[4].split("(")[1]),10)
+                    dest_lon=round(float(flight_data[6].split("(")[1]),10)
+                    origin_lat=round(float(flight_data[5].split(")")[0]),10)
+                    dest_lat=round(float(flight_data[7].split(")")[0]) ,10)
                     
-                cruising_speed=10.29 # m/s
-                if aircraft_type=="MP30": 
-                    cruising_speed=15.43 # m/s
+                    transformer = Transformer.from_crs('epsg:4326','epsg:32633')
+                    p=transformer.transform( dest_lat,dest_lon)
+                    dest_x=p[0]
+                    dest_y=p[1]
                     
-                base_2d_dist=self.baseline_length_dict[str(origin_lat)+"-"+str(origin_lon)+"-"+str(dest_lat)+"-"+str(dest_lon)]
-                base_vertical_dist=util_functions.compute_baseline_vertical_distance(loitering)
-                base_ascending_dist=util_functions.compute_baseline_ascending_distance()
-                base_3d_dist=base_2d_dist+base_vertical_dist
-                base_flight_time=base_2d_dist/cruising_speed
-                base_arrival_time=base_flight_time+time
+                    loitering=False
+                    if flight_data[9]!="":
+                        loitering=True
+                        
+                    cruising_speed=10.29 # m/s
+                    if aircraft_type=="MP30": 
+                        cruising_speed=15.43 # m/s
+                        
+                    base_2d_dist=self.baseline_length_dict[str(origin_lat)+"-"+str(origin_lon)+"-"+str(dest_lat)+"-"+str(dest_lon)]
+                    base_vertical_dist=util_functions.compute_baseline_vertical_distance(loitering)
+                    base_ascending_dist=util_functions.compute_baseline_ascending_distance()
+                    base_3d_dist=base_2d_dist+base_vertical_dist
+                    base_flight_time=base_2d_dist/cruising_speed
+                    base_arrival_time=base_flight_time+time
                 
-                if flight_data[9]!="":
-                    area_str=flight_data[10]+"-"+flight_data[11]+"-"+flight_data[12]+"-"+flight_data[13]
-                    nfz_name="L"+acid[1:]
-                    nfz_list.append([scenario_name_centr,acid,nfz_name,area_str])
-                    nfz_list.append([scenario_name_hybrid,acid,nfz_name,area_str])
-                    nfz_list.append([scenario_name_decentr,acid,nfz_name,area_str])
-                
-                
-                tmp_list = [flst_id,scenario_name_centr, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,cruising_speed,priority,loitering,base_2d_dist,base_vertical_dist,base_ascending_dist,\
-                            base_3d_dist,base_flight_time,base_arrival_time,dest_x,dest_y]
-                flst_id=flst_id+1
-                flint_list.append(tmp_list)
-                tmp_list = [flst_id,scenario_name_hybrid, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,cruising_speed,priority,loitering,base_2d_dist,base_vertical_dist,base_ascending_dist,\
-                            base_3d_dist,base_flight_time,base_arrival_time,dest_x,dest_y]
-                flst_id=flst_id+1
-                flint_list.append(tmp_list)
-                tmp_list = [flst_id,scenario_name_decentr, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,cruising_speed,priority,loitering,base_2d_dist,base_vertical_dist,base_ascending_dist,\
-                            base_3d_dist,base_flight_time,base_arrival_time,dest_x,dest_y]
-                flst_id=flst_id+1
-                flint_list.append(tmp_list)
+                    if flight_data[9]!="":
+                        area_str=flight_data[10]+"-"+flight_data[11]+"-"+flight_data[12]+"-"+flight_data[13]
+                        nfz_name="LOITER"+acid
+                        print(nfz_name)
+                        nfz_list.append([scenario_name_centr,acid,nfz_name,area_str])
+                        nfz_list.append([scenario_name_hybrid,acid,nfz_name,area_str])
+                        nfz_list.append([scenario_name_decentr,acid,nfz_name,area_str])
+                    
+                    
+                    tmp_list = [flst_id,scenario_name_centr, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,cruising_speed,priority,loitering,base_2d_dist,base_vertical_dist,base_ascending_dist,\
+                                base_3d_dist,base_flight_time,base_arrival_time,dest_x,dest_y]
+                    flst_id=flst_id+1
+                    flint_list.append(tmp_list)
+                    tmp_list = [flst_id,scenario_name_hybrid, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,cruising_speed,priority,loitering,base_2d_dist,base_vertical_dist,base_ascending_dist,\
+                                base_3d_dist,base_flight_time,base_arrival_time,dest_x,dest_y]
+                    flst_id=flst_id+1
+                    flint_list.append(tmp_list)
+                    tmp_list = [flst_id,scenario_name_decentr, acid,origin_lat,origin_lon,dest_lat,dest_lon,time,cruising_speed,priority,loitering,base_2d_dist,base_vertical_dist,base_ascending_dist,\
+                                base_3d_dist,base_flight_time,base_arrival_time,dest_x,dest_y]
+                    flst_id=flst_id+1
+                    flint_list.append(tmp_list)
         flstlog_data_frame = pd.DataFrame(flint_list, columns=col_list)
         
         loitering_nfz_data_frame = pd.DataFrame(nfz_list, columns=loitering_nfz_col_list)
@@ -539,7 +583,7 @@ class DataframeCreator():
         output_file=open("dills/loitering_nfz_dataframe.dill", 'wb')
         dill.dump(loitering_nfz_data_frame,output_file)
         output_file.close()
-        return flstlog_data_frame
+        return flstlog_data_frame,loitering_nfz_data_frame
     
 
     ####
@@ -926,22 +970,106 @@ class DataframeCreator():
         return time_data_frame
 
     ####
+    
 
     ##metrics dataframe
     def create_metrics_dataframe(self):
-        col_list = ["Scenario_name", "#Aircraft_number","#Succeful_aircraft_number","#Spawned_aircraft_number", "AEQ1", "AEQ1_1", "AEQ2", "AEQ2_1", "AEQ3", "AEQ4", "AEQ5",
-                    "AEQ5_1", "CAP1", "CAP2", "ENV1", "SAF1", "SAF2", "SAF2_1", "SAF3",
-                    "SAF4", "SAF5", "SAF6", "SAF6_1" \
-                                    ,"EFF1", "EFF2", "EFF3", "EFF4", "EFF5", "EFF6",  "PRI1", "PRI2"]
+        col_list = ["Scenario_name","SAF1", "SAF2", "SAF2_1", "SAF3","SAF4", "SAF5", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
             
-        #TODO : add the rest of the geoviolations metrics 
+ 
         dataframe_cnt=0
+        
+        input_file=open("dills/geolog_dataframe.dill", 'wb')
+        geo_log_dataframe=dill.load(input_file)
+        input_file.close()
+        input_file=open("dills/loslog_dataframe.dill", 'wb')
+        los_log_dataframe=dill.load(input_file)
+        input_file.close()
+        input_file=open("dills/conflog_dataframe.dill", 'wb')
+        conf_log_dataframe=dill.load(input_file)
+        input_file.close()
 
+        metrics_list = list
+          
+        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
+            log_type = file_name.split("_")[0]
+            if log_type=="GEOLOG":
+                if ii<len(self.centralised_log_names):
+                    log_file=path_to_logs+"Centralised/"+file_name
+                    concept="1" ##CENTRALISED
+                elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
+                    log_file=path_to_logs+"Decentralised/"+file_name
+                    concept="3" ##DECENTRALISED
+                else:
+                    log_file=path_to_logs+"Hybrid/"+file_name
+                    concept="2" ##HYBRID 
+                    
+                scenario_var = file_name.split("_")
+                if scenario_var[3]=="very": 
+                    density="very_low"
+                    distribution=scenario_var[5]
+                    repetition=scenario_var[6]
+                    uncertainty=scenario_var[7]
+                else:
+                    density=scenario_var[3]
+                    distribution=scenario_var[4]
+                    repetition=scenario_var[5]
+                    uncertainty=scenario_var[6]       
+                if uncertainty[0]!="R"and uncertainty[0]!="W":
+                    uncertainty=""
+                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
+                
+            
+                
+                filtered_geo_dataframe=geo_log_dataframe[geo_log_dataframe["scenario_name"]==scenario_name]
+                filtered_los_dataframe=los_log_dataframe[los_log_dataframe["scenario_name"]==scenario_name] 
+                filtered_conf_dataframe=conf_log_dataframe[conf_log_dataframe["scenario_name"]==scenario_name] 
+    
+            
+                saf1=SAF_metrics.compute_saf1(filtered_conf_dataframe) 
+                saf2=SAF_metrics.compute_saf2(filtered_los_dataframe) 
+                saf2_1=SAF_metrics.compute_saf2_1(filtered_los_dataframe) 
+                saf3=(saf1-saf2)/saf2
+                saf4=SAF_metrics.compute_saf4(filtered_los_dataframe) 
+                saf5=SAF_metrics.compute_saf5(filtered_los_dataframe)
+                saf6=SAF_metrics.compute_saf6(filtered_geo_dataframe)
+                saf6_1=SAF_metrics.compute_saf6_1(filtered_geo_dataframe)
+                saf6_2=SAF_metrics.compute_saf6_2(filtered_geo_dataframe)
+                saf6_3=SAF_metrics.compute_saf6_3(filtered_geo_dataframe)
+                saf6_4=SAF_metrics.compute_saf6_4(filtered_geo_dataframe)
+                saf6_5=SAF_metrics.compute_saf6_5(filtered_geo_dataframe)
+                saf6_6=SAF_metrics.compute_saf6_6(filtered_geo_dataframe)
+                saf6_7=SAF_metrics.compute_saf6_7(filtered_geo_dataframe)
+
+
+                tmp_list = [scenario_name, saf1,saf2,saf2_1,saf3,saf4,saf5,saf6,saf6_1,saf6_2,saf6_3,saf6_4,saf6_5,saf6_6,saf6_7]
+                    
+                
+                metrics_list.append(tmp_list)
+                
+
+        
+        metrics_data_frame = pd.DataFrame(metrics_list, columns=col_list)
+        
+        del geo_log_dataframe
+        del los_log_dataframe
+        del conf_log_dataframe
+        
+        input_file=open("dills/flstlog_dataframe.dill", 'wb')
+        flst_log_dataframe=dill.load(input_file)
+        input_file.close()
+        
+
+        
+        
+        col_list = ["Scenario_name", "#Aircraft_number","#Succeful_aircraft_number","#Spawned_aircraft_number", "AEQ1", "AEQ1_1", "AEQ2", "AEQ2_1", "AEQ3", "AEQ4", "AEQ5",
+                    "AEQ5_1", "CAP1", "ENV1","EFF1", "EFF2", "EFF3", "EFF4", "EFF5", "EFF6",  "PRI1", "PRI2"]        
+        
         metrics_list = list
         prio_metrics_list = list()  
         prio_col_list=["PRI3","PRI4","PRI5"]             
         
-        ##Read GEOLOGs
+  
         for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
             log_type = file_name.split("_")[0]
             if log_type=="GEOLOG":
@@ -971,14 +1099,9 @@ class DataframeCreator():
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
                 
                 #Filtered flstlog by scenario name
-                filtered_flst_dataframe=self.flst_log_dataframe[self.flst_log_dataframe["scenario_name"]==scenario_name]
-                #filtered_reg_dataframe=self.reg_log_dataframe[self.reg_log_dataframe["scenario_name"]==scenario_name]
-                filtered_geo_dataframe=self.geo_log_dataframe[self.geo_log_dataframe["scenario_name"]==scenario_name]
-                filtered_los_dataframe=self.los_log_dataframe[self.los_log_dataframe["scenario_name"]==scenario_name] 
-                filtered_conf_dataframe=self.conf_log_dataframe[self.conf_log_dataframe["scenario_name"]==scenario_name] 
-                #TODO :maybe ,make those load and unload to avoid memeory problems
+                filtered_flst_dataframe=flst_log_dataframe[flst_log_dataframe["scenario_name"]==scenario_name]
                 
-        
+
                 aircraft_number=filtered_flst_dataframe.count() 
                 aircraft_succesful_number=filtered_flst_dataframe[filtered_flst_dataframe["Mission_completed"]==True].count() 
                 aircraft_spawned_number=filtered_flst_dataframe[filtered_flst_dataframe["Spawned"]==True].count()
@@ -1000,27 +1123,16 @@ class DataframeCreator():
                 
                 pri1=PRI_metrics.compute_pri1(filtered_flst_dataframe) 
                 pri2=PRI_metrics.compute_pri2(filtered_flst_dataframe) 
-                
-               
-                
-                saf1=SAF_metrics.compute_saf1(filtered_conf_dataframe) 
-                saf2=SAF_metrics.compute_saf2(filtered_los_dataframe) 
-                saf2_1=SAF_metrics.compute_saf2_1(filtered_los_dataframe) 
-                saf3=(saf1-saf2)/saf2
-                saf4=SAF_metrics.compute_saf4(filtered_los_dataframe) 
-                saf5=SAF_metrics.compute_saf5(filtered_los_dataframe)
-                saf6=SAF_metrics.compute_saf6(filtered_geo_dataframe)
-                saf6_1=SAF_metrics.compute_saf6_1(filtered_geo_dataframe)
-
+            
                 
                 cap1=CAP_metrics.compute_cap1(filtered_flst_dataframe) 
-                cap2=saf2/aircraft_spawned_number
+                
                 
                 env1=ENV_metrics.compute_env1(filtered_flst_dataframe)
                 
 
                 tmp_list = [scenario_name, aircraft_number,aircraft_succesful_number,aircraft_spawned_number, aeq1,aeq1_1, aeq2, aeq2_1, aeq3,aeq4,aeq5,
-                            aeq5_1,cap1,cap2,env1,saf1,saf2,saf2_1,saf3,saf4,saf5,saf6,saf6_1,eff1,eff2,eff3,eff4,eff5,eff6,pri1,pri2]
+                            aeq5_1,cap1,env1,eff1,eff2,eff3,eff4,eff5,eff6,pri1,pri2]
                     
                 
                 metrics_list.append(tmp_list)
@@ -1033,11 +1145,13 @@ class DataframeCreator():
                     
                     prio_metrics_list.append([scenario_name,priority,pri3,pri4,pri5])
         
-        metrics_data_frame = pd.DataFrame(metrics_list, columns=col_list)
+        metrics_data_frame2 = pd.DataFrame(metrics_list, columns=col_list)
         prio_metrics_data_frame = pd.DataFrame(prio_metrics_list, columns=prio_col_list)
+        metrics_data_frame=pd.merge(metrics_data_frame,metrics_data_frame2,on=["Scenario_name"],how="outer")
+        
+        metrics_data_frame["CAP2"]=metrics_data_frame["SAF2"]/metrics_data_frame["#Spawned_aircraft_number"]
 
-
-                    
+        del flst_log_dataframe            
                     
         col_list = ["Scenario_name","CAP3", "CAP4"]
         dataframe_cnt=0
@@ -1092,11 +1206,18 @@ class DataframeCreator():
     
 
         metrics_data_frame=pd.merge(metrics_data_frame,cap_data_frame,on=["Scenario_name"],how="outer")
-        ##TODO :merge with env metrics dataframe
+        
+        input_file=open("dills/env_metrics_dataframe.dill", 'wb')
+        env_metrics_dataframe=dill.load(input_file)
+        input_file.close()
+        
+        metrics_data_frame=pd.merge(metrics_data_frame,env_metrics_dataframe,on=["Scenario_name"],how="outer")
+        
         
         print("Metrics dataframes created!")
         
         
+         
         output_file=open("dills/metrics_dataframe.dill", 'wb')
         dill.dump(metrics_data_frame,output_file)
         output_file.close()
@@ -1105,8 +1226,9 @@ class DataframeCreator():
         dill.dump(prio_metrics_data_frame,output_file)
         output_file.close()
         
-        #return metrics_data_frame
+        return metrics_data_frame
 
     ####
 
+ 
 

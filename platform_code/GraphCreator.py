@@ -5,7 +5,7 @@ Created on Tue Apr 12 15:07:06 2022
 @author: nipat
 """
 import matplotlib.pyplot as plt 
-from pyspark.sql import SparkSession
+import dill
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -48,7 +48,7 @@ def adjust_box_widths(g, fac):
                         l.set_xdata([xmin_new, xmax_new])
 
 
-diagrams_path=""
+diagrams_path="output_graphs/"
 
 concepts=["1_","2_","3_"]
 concept_names=["Centralised","Hybrid","Decentralised"]
@@ -89,12 +89,13 @@ def metric_boxplots_baseline(metric,dataframe):
                     scenario_name=conc+density+t_mix+rep
                     try:
                         metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                        vals.append(tmp)
                     except:
-                        metric_value=240+random.randint(-5,5)
-                        #print("No value for scenario",scenario_name)
+                        #metric_value=240+random.randint(-5,5)
+                        print("No value for scenario",scenario_name)
                     
-                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                    vals.append(tmp)
+                    
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric])
     
@@ -105,7 +106,7 @@ def metric_boxplots_baseline(metric,dataframe):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for traffic mix "+t_mix)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        #plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_"+t_mix)
+        plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_"+t_mix)
         
     ##Create one graph for every density
     for dens in density_names:
@@ -114,7 +115,7 @@ def metric_boxplots_baseline(metric,dataframe):
          sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         #plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_"+dens)
 
 
 def metric_boxplots_wind(metric,dataframe,t_mix):
@@ -126,12 +127,13 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
                     scenario_name=conc+density+t_mix+rep+wind
                     try:
                         metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                        vals.append(tmp)
                     except:
-                        metric_value=240+random.randint(-5,5)
-                        #print("No value for scenario",scenario_name)
+                        #metric_value=240+random.randint(-5,5)
+                        print("No value for scenario",scenario_name)
                     
-                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                    vals.append(tmp)
+                    
  
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Wind level"])
@@ -143,7 +145,7 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for wind level "+uncertainties_names_dict[r])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        #plt.savefig(diagrams_path+"boxplots/winds/by_wind_level/"+metric+"_"+r)
+        plt.savefig(diagrams_path+"boxplots/winds/by_wind_level/"+metric+"_"+r)
         
     ##Create one graph for every density
     for dens in density_names:
@@ -152,7 +154,7 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
          sns.boxplot(y=metric, x='Wind level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         #plt.savefig(diagrams_path+"boxplots/wind/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/wind/by_density/"+metric+"_"+dens)
          
 def metric_boxplots_rogues(metric,dataframe,t_mix):
     vals=[]
@@ -163,12 +165,13 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
                     scenario_name=conc+density+t_mix+rep+rogue
                     try:
                         metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                        vals.append(tmp)
                     except:
-                        metric_value=240+random.randint(-5,5)
-                        #print("No value for scenario",scenario_name)
+                        #metric_value=240+random.randint(-5,5)
+                        print("No value for scenario",scenario_name)
                     
-                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                    vals.append(tmp)
+                    
 
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Rogue level"])
@@ -180,7 +183,7 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for rogue level "+uncertainties_names_dict[r])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        #plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r)
+        plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r)
         
     ##Create one graph for every density
     for dens in density_names:
@@ -189,7 +192,7 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
          sns.boxplot(y=metric, x='Rogue level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         #plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens)
    
     
 def special_metric_boxplots_rogues(metric,dataframe,t_mix):
@@ -204,12 +207,13 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
                     scenario_name=conc+density+t_mix+rep+rogue
                     try:
                         metric_value=dataframe[dataframe["Scenario"]==scenario_name][metric].values[0]
+                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                        vals.append(tmp)
                     except:
-                        metric_value=240+random.randint(-5,5)
-                        #print("No value for scenario",scenario_name)
+                        #metric_value=240+random.randint(-5,5)
+                        print("No value for scenario",scenario_name)
                     
-                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                    vals.append(tmp)
+                    
 
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Rogue level"])
@@ -221,7 +225,7 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for rogue level "+uncertainties_names_dict[r])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        #plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r)
+        plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r)
         
     ##Create one graph for every density
     for dens in density_names:
@@ -230,7 +234,7 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
          sns.boxplot(y=metric, x='Rogue level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         #plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens)
    
 def metric_boxplots_priority(metric,dataframe,priority):
     ##Only for PRI3, PRI4, PRI5
@@ -242,12 +246,13 @@ def metric_boxplots_priority(metric,dataframe,priority):
                     scenario_name=conc+density+t_mix+rep
                     try:
                         metric_value=dataframe[(dataframe["Scenario"]==scenario_name)&(dataframe["Priority"]==priority)][metric].values[0]
+                        tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
+                        vals.append(tmp)
                     except:
-                        metric_value=240+random.randint(-5,5)
-                        #print("No value for scenario",scenario_name)
+                        #metric_value=240+random.randint(-5,5)
+                        print("No value for scenario",scenario_name)
                     
-                    tmp=[concept_names_dict[conc],density_names_dict[density],traffic_mix_names_dict[t_mix],rep,metric_value]
-                    vals.append(tmp)
+                    
 
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric])
@@ -259,7 +264,7 @@ def metric_boxplots_priority(metric,dataframe,priority):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for traffic mix "+t_mix+" for priority "+priority)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        #plt.savefig(diagrams_path+"boxplots/priority/by_traffic_mix/"+metric+"_"+t_mix)
+        plt.savefig(diagrams_path+"boxplots/priority/by_traffic_mix/"+metric+"_"+t_mix)
         
     ##Create one graph for every density
     for dens in density_names:
@@ -268,7 +273,7 @@ def metric_boxplots_priority(metric,dataframe,priority):
          sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens+" for priority "+priority)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         #plt.savefig(diagrams_path+"boxplots/priority/by_density/"+metric+"_"+dens)      
+         plt.savefig(diagrams_path+"boxplots/priority/by_density/"+metric+"_"+dens)      
     
 def density_graph(density, t_mix,rep,dataframe):
     vals=[]
@@ -280,11 +285,12 @@ def density_graph(density, t_mix,rep,dataframe):
            time_stamp+=30
            try:
                metric_value=dataframe[(dataframe["Scenario"]==scenario_name)&(dataframe["Time_stamp"]==time_stamp)]["Alive_aircraft"].values[0]
+               vals.append(metric_value)
            except:
-               metric_value=240+random.randint(-5,5)
-               #print("No value for scenario",scenario_name)
+               #metric_value=240+random.randint(-5,5)
+               print("No value for scenario",scenario_name)
       
-           vals.append(metric_value)
+           
 
                
        vals.append(data)
@@ -301,66 +307,58 @@ def density_graph(density, t_mix,rep,dataframe):
     #plt.xticks(monthList)
     #plt.yticks([1000, 2000, 4000, 6000, 8000, 10000, 12000, 15000, 18000])
     plt.title('Aircraft density for density '+density_names_dict[density])
-    plt.show()
+    plt.savefig(diagrams_path+"density_graph/"+density+"_"+t_mix+"_"+rep)  
+    #plt.show()
        
        
        
        
 
 ##Load the metrics
-spark = SparkSession.builder.getOrCreate()
+input_file=open("dills/metrics_dataframe.dill", 'wb')
+scenario_metrics_df=dill.load(input_file)
+input_file.close()
 
-scenario_metrics_df=spark.read.parquet("../output/scenario_results.parquet")
+input_file=open("dills/prio_metrics_dataframe.dill", 'wb')
+scenario_priority_metrics_df=dill.load(input_file)
+input_file.close()
 
-#scenario_metrics_df.show()
+input_file=open("dills/densitylog_dataframe.dill", 'wb')
+density_metrics_dataframe=dill.load(input_file)
+input_file.close()
 
 
-scenario_priority_metrics_df=spark.read.parquet("../output/scenario_priority_results.parquet")
-#scenario_priority_metrics_df.show()
-
-
-#scenario_timestep_metrics_df=spark.read.parquet("../output/scenario_timestep_results.parquet")
-#scenario_priority_metrics_df.show()
 
 
 ## Create the graphs
-boxplot_metrics=["AEQ-1","AEQ-1_1","AEQ-2","AEQ-2_1","AEQ-3","AEQ-4","AEQ-5","AEQ-5_1","CAP-1","CAP-2","EFF-1","EFF-2"\
-                 "EFF-3","EFF-4","EFF-5","EFF-6","ENV-1","ENV-2","ENV-3","SAF-1","SAF-2","SAF-2_1","SAF-3","SAF-4","SAF-5","SAF-6"\
-                     "SAF-6_1","PRI-1","PRI-2"]
+boxplot_metrics=["AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","EFF1","EFF2"\
+                 "EFF3","EFF4","EFF5","EFF6","ENV1","ENV2","ENV3","SAF1","SAF2","SAF2_1","SAF3","SAF4","SAF5","SAF6"\
+                     "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7","PRI1","PRI2"]
 
-boxplot_metrics_rogues=["CAP-3","CAP-4"]
+boxplot_metrics_rogues=["CAP3","CAP4"]
 
-boxplot_metrics_priority=["PRI-3","PRI-4","PRI-5"]
-
+boxplot_metrics_priority=["PRI3","PRI4","PRI5"]
 
 #metric_boxplots_baseline("AEQ-1",scenario_metrics_df)
 #metric_boxplots_rogues("AEQ-1",scenario_metrics_df,"40_")
 #metric_boxplots_wind("AEQ-1",scenario_metrics_df,"40_")
 
-# =============================================================================
-# for metric in boxplot_metrics:
-#     metric_boxplots_baseline(metric,scenario_metrics_df)
-#     metric_boxplots_rogues("AEQ-1",scenario_metrics_df,"40_")
-#     metric_boxplots_wind("AEQ-1",scenario_metrics_df,"40_")
-# =============================================================================
+for metric in boxplot_metrics:
+    metric_boxplots_baseline(metric,scenario_metrics_df)
+    metric_boxplots_rogues("AEQ-1",scenario_metrics_df,"40_")
+    metric_boxplots_wind("AEQ-1",scenario_metrics_df,"40_")
 
 
-# =============================================================================
-# for metric in boxplot_metrics_rogues:
-#     special_metric_boxplots_rogues(metric,scenario_metrics_df,"40_")
-# =============================================================================
+for metric in boxplot_metrics_rogues:
+    special_metric_boxplots_rogues(metric,scenario_metrics_df,"40_")
 
-# =============================================================================
-# for metric in boxplot_metrics_priority:
-#     for priority in ["1","2","3","4"]:
-#         metric_boxplots_priority(metric,scenario_priority_metrics_df,priority)
-# =============================================================================
+for metric in boxplot_metrics_priority:
+    for priority in ["1","2","3","4"]:
+        metric_boxplots_priority(metric,scenario_priority_metrics_df,priority)
 
 
-# =============================================================================
-# t_mix="40_"
-# rep="0"
-# for dens in densities:
-#     density_graph(dens, t_mix,rep,dataframe)
-# =============================================================================
+t_mix="40_"
+rep="0"
+for dens in densities:
+    density_graph(dens, t_mix,rep,density_metrics_dataframe)
     

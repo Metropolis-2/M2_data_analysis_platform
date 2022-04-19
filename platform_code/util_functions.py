@@ -6,6 +6,9 @@ Created on Fri Apr 15 19:25:26 2022
 """
 import geopy.distance
 
+import shapely
+from pyproj import Transformer
+
 FEET_TO_METERS_SCALE=0.3048
 def get_coordinates_distance(origin_latitude: float, origin_longitude: float,
                              destination_latitude: float, destination_longitude: float) -> float:
@@ -55,4 +58,39 @@ def compute_baseline_vertical_distance(loitering):
 def compute_baseline_ascending_distance():
     baseline_ascending_distance=9.144 # 30 feet
     return baseline_ascending_distance
+
+loitering_violation_time_threshold=180 # 3 minutes
+
+def is_in_area_when_applied(nfz_applied_time,violation_time):
+ 
+    if violation_time-nfz_applied_time<loitering_violation_time_threshold:
+        return True
+    
+    return False
+
+def has_orig_dest_in_nfz(dataframe, nfz_area):
+    nfz_area_list=nfz_area.split("-")
+    transformer = Transformer.from_crs('epsg:4326', 'epsg:32633')
+    lat1=float(nfz_area_list[0])
+    lon1=float(nfz_area_list[1])
+    lat2=float(nfz_area_list[2])
+    lon2=float(nfz_area_list[3])
+    
+    p1=transformer.transform(lat1,lon1)
+    p2=transformer.transform(lat2,lon2)
+    
+    nfz_poly=shapely.geometry.Polygon([(p1[0],p1[1]),(p1[0],p2[1]),(p2[0],p2[1]),(p2[0],p1[1])])
+    
+    origin_lat=dataframe["Origin_LAT"].values(0)
+    origin_lon=dataframe["Origin_LON"].values(0)
+    p_origin=transformer.transform(origin_lat,origin_lon)
+
+    dest_lat=dataframe["Dest_LAT"].values(0)
+    dest_lon=dataframe["Dest_LON"].values(0)
+    p_dest=transformer.transform(dest_lat,dest_lon)    
+    
+    if nfz_poly.contains(p_origin) or nfz_poly.contains(p_dest):
+        return True
+    
+    return False
 

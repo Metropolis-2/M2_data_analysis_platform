@@ -78,7 +78,7 @@ def compute_saf6(df):
 
 
 def compute_saf6_1(df):
-    """ SAF-6: Severe Geofence violations
+    """ SAF-6_1: Severe Geofence violations
 
     The number of severe geofence/building area violations.
     Every geofence violation in the GEOlog has a severity flag.
@@ -87,5 +87,83 @@ def compute_saf6_1(df):
     :return: query result with the SAF6-1 metric per scenario.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])].count()
+
+    return saf6
+
+def compute_saf6_2(df):
+    """ SAF-6_2: Severe loitering Geofence violations
+
+    The number of severe geofence/building area violations in loitering.
+    Every geofence violation in the GEOlog has a severity flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-2 metric per scenario.
+    """
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])].count()
+
+    return saf6
+
+def compute_saf6_3(df):
+    """ SAF-6_3: Severe not loitering Geofence violations
+
+    The number of severe geofence/building area violations not loitering.
+    Every geofence violation in the GEOlog has a severity flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-3 metric per scenario.
+    """
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz']==False)].count()
+
+    return saf6
+
+def compute_saf6_4(df):
+    """ SAF-6_4: Severe openloitering Geofence violations
+
+    The number of severe geofence/building area violations in open.
+    Every geofence violation in the GEOlog has a severity flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-4 metric per scenario.
+    """
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace'])].count()
+
+    return saf6
+
+def compute_saf6_5(df):
+    """ SAF-6_5: Severe constrained Geofence violations
+
+    The number of severe geofence/building area violations in loitering.
+    Every geofence violation in the GEOlog has a severity flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-5 metric per scenario.
+    """
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace']==False)].count()
+
+    return saf6
+
+def compute_saf6_6(df):
+    """ SAF-6_2: Severe loitering Geofence violations
+
+    The number of severe geofence/building area violations in loitering.
+    Every geofence violation in the GEOlog has a severity flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-2 metric per scenario.
+    """
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['Node_in_nfz'])].count()
+
+    return saf6
+
+def compute_saf6_7(df):
+    """ SAF-6_2: Severe loitering Geofence violations
+
+    The number of severe geofence/building area violations in loitering.
+    Every geofence violation in the GEOlog has a severity flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-2 metric per scenario.
+    """
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['In_nfz_applied'])].count()
 
     return saf6
