@@ -6,7 +6,7 @@ Created on Fri Apr 15 19:25:26 2022
 """
 import geopy.distance
 
-import shapely
+import shapely.geometry
 from pyproj import Transformer
 
 FEET_TO_METERS_SCALE=0.3048
@@ -81,15 +81,15 @@ def has_orig_dest_in_nfz(dataframe, nfz_area):
     
     nfz_poly=shapely.geometry.Polygon([(p1[0],p1[1]),(p1[0],p2[1]),(p2[0],p2[1]),(p2[0],p1[1])])
     
-    origin_lat=dataframe["Origin_LAT"].values(0)
-    origin_lon=dataframe["Origin_LON"].values(0)
+    origin_lat=dataframe["Origin_LAT"].values[0]
+    origin_lon=dataframe["Origin_LON"].values[0]
     p_origin=transformer.transform(origin_lat,origin_lon)
 
-    dest_lat=dataframe["Dest_LAT"].values(0)
-    dest_lon=dataframe["Dest_LON"].values(0)
+    dest_lat=dataframe["Dest_LAT"].values[0]
+    dest_lon=dataframe["Dest_LON"].values[0]
     p_dest=transformer.transform(dest_lat,dest_lon)    
     
-    if nfz_poly.contains(p_origin) or nfz_poly.contains(p_dest):
+    if nfz_poly.contains(shapely.geometry.Point(p_origin)) or nfz_poly.contains(shapely.geometry.Point((p_dest)):
         return True
     
     return False

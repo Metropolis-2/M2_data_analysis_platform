@@ -251,11 +251,11 @@ class DataframeCreator():
     ##GEOLOG dataframe
     def create_geolog_dataframe(self):
         
-        input_file=open("dills/loitering_nfz_dataframe.dill", 'wb')
+        input_file=open("dills/loitering_nfz_dataframe.dill", 'rb')
         loitering_nfz_data_frame=dill.load(input_file)
         input_file.close()
         
-        input_file=open("dills/flstlog_dataframe.dill", 'wb')
+        input_file=open("dills/flstlog_dataframe.dill", 'rb')
         flstlog_data_frame=dill.load(input_file)
         input_file.close()
         #drop unused columns
@@ -347,7 +347,7 @@ class DataframeCreator():
                         loiter_filtered=loitering_nfz_data_frame[(loitering_nfz_data_frame["Scenario_name"]==scenario_name)&(loitering_nfz_data_frame["NFZ_name"]==line_list[3])]
                         nfz_applied_time=loiter_filtered["Applied_time"].values[0]
                         nfz_area=loiter_filtered["NFZ_area"].values[0]
-                        flstlog_data_frame_filtered=flstlog_data_frame[(flstlog_data_frame["Scenario_name"]==scenario_name)&(flstlog_data_frame["ACID"]==line_list[1])]
+                        flstlog_data_frame_filtered=flstlog_data_frame[(flstlog_data_frame["scenario_name"]==scenario_name)&(flstlog_data_frame["ACID"]==line_list[1])]
                         
                         in_nfz_applied=util_functions.is_in_area_when_applied(nfz_applied_time,float(value[:-2]))
                         node_in_nfz=util_functions.has_orig_dest_in_nfz(flstlog_data_frame_filtered,nfz_area)
@@ -666,10 +666,12 @@ class DataframeCreator():
                     if float(acid_line_list[0])>5400:
                         break
                     
-
-                    alt_line_list = alt_lines_list[i].split(",")
-                    lat_line_list = lat_lines_list[i].split(",")
-                    lon_line_list = lon_lines_list[i].split(",")
+                    try :
+                        alt_line_list = alt_lines_list[i].split(",")
+                        lat_line_list = lat_lines_list[i].split(",")
+                        lon_line_list = lon_lines_list[i].split(",")
+                    except:
+                        print('Problem with',file_name)
                     
                     ##The next lines where in the outer intention
                     if i>len(lon_lines_list)-1:
@@ -979,13 +981,13 @@ class DataframeCreator():
  
         dataframe_cnt=0
         
-        input_file=open("dills/geolog_dataframe.dill", 'wb')
+        input_file=open("dills/geolog_dataframe.dill", 'rb')
         geo_log_dataframe=dill.load(input_file)
         input_file.close()
-        input_file=open("dills/loslog_dataframe.dill", 'wb')
+        input_file=open("dills/loslog_dataframe.dill", 'rb')
         los_log_dataframe=dill.load(input_file)
         input_file.close()
-        input_file=open("dills/conflog_dataframe.dill", 'wb')
+        input_file=open("dills/conflog_dataframe.dill", 'rb')
         conf_log_dataframe=dill.load(input_file)
         input_file.close()
 
@@ -1055,7 +1057,7 @@ class DataframeCreator():
         del los_log_dataframe
         del conf_log_dataframe
         
-        input_file=open("dills/flstlog_dataframe.dill", 'wb')
+        input_file=open("dills/flstlog_dataframe.dill", 'rb')
         flst_log_dataframe=dill.load(input_file)
         input_file.close()
         
@@ -1207,7 +1209,7 @@ class DataframeCreator():
 
         metrics_data_frame=pd.merge(metrics_data_frame,cap_data_frame,on=["Scenario_name"],how="outer")
         
-        input_file=open("dills/env_metrics_dataframe.dill", 'wb')
+        input_file=open("dills/env_metrics_dataframe.dill", 'rb')
         env_metrics_dataframe=dill.load(input_file)
         input_file.close()
         
