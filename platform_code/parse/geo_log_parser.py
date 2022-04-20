@@ -3,7 +3,7 @@ from pyspark.sql.functions import when, col
 
 from schemas.geo_log_schema import GEO_LOG_COLUMNS, COLUMNS_TO_DROP
 from schemas.tables_attributes import (VIOLATION_SEVERITY, MAX_INTRUSION, GEOFENCE_NAME, OPEN_AIRSPACE, GEO_ID,
-                                       LOITERING_NFZ)
+                                       LOITERING_NFZ, SIMT_VALID, INTRUSION_TIME)
 from utils.config import settings
 from utils.parser_utils import add_dataframe_counter
 
@@ -15,6 +15,17 @@ def add_geo_log_counter(dataframe: DataFrame) -> DataFrame:
     :return: dataframe with the column loss duration added.
     """
     return add_dataframe_counter(dataframe, GEO_ID)
+
+def add_simt_flag(dataframe: DataFrame) -> DataFrame:
+    """ Add a simulation time flag column to the GEOLOG dataframe.
+
+    :param dataframe: dataframe with the GEOLOG data read from the file.
+    :return: dataframe with the column SIMT_VALID added.
+    """
+    return dataframe \
+        .withColumn(SIMT_VALID,
+                    when(col(INTRUSION_TIME) > settings.simulation.max_time, False)
+                    .otherwise(True))
 
 
 def remove_geo_log_unused_columns(dataframe: DataFrame) -> DataFrame:
@@ -62,5 +73,5 @@ def reorder_geo_log_columns(dataframe: DataFrame) -> DataFrame:
     return dataframe.select(GEO_LOG_COLUMNS)
 
 
-GEO_LOG_TRANSFORMATIONS = [add_geo_log_counter, check_geofence_location, check_intrusion_severity,
+GEO_LOG_TRANSFORMATIONS = [add_geo_log_counter, add_simt_flag, check_geofence_location, check_intrusion_severity,
                            remove_geo_log_unused_columns, reorder_geo_log_columns]

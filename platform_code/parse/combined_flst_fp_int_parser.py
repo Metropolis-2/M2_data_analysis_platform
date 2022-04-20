@@ -99,9 +99,9 @@ def calculate_work_done(dataframe: DataFrame) -> DataFrame:
     """
     # For the moment the formula is work_done = 2 * ascending_distance + flight_time
     return dataframe.withColumn(WORK_DONE,
-                                2 * col(ASCENDING_DISTANCE) + col(FLIGHT_TIME))
+                                col(FLIGHT_TIME) + col(ASCENDING_DISTANCE)/col(VERTICAL_SPEED))
 
-
+º
 def calculate_arrival_delay(dataframe: DataFrame) -> DataFrame:
     """ Calculates the delay in the arrival with respect to the baseline.
 
@@ -126,7 +126,10 @@ def was_spawned(dataframe: DataFrame) -> DataFrame:
     :param dataframe: dataframe with the FLSTLOG data and flight intentions read from the files.
     :return: dataframe with the check of the takeoff column added.
     """
-    return dataframe.withColumn(SPAWNED, when(col(SPAWN_TIME).isNull(), False).otherwise(True))
+    return dataframe.withColumn(SPAWNED,
+                            when(col(SPAWN_TIME).isNull(), False)
+                            .otherwise(when(col(SPAWN_TIME) > settings.simulation.max_time, False)
+                            .otherwise(True)))
 
 
 def was_mission_completed(dataframe: DataFrame) -> DataFrame:
@@ -142,7 +145,9 @@ def was_mission_completed(dataframe: DataFrame) -> DataFrame:
                         (col(DESTINATION_X) - col(DEL_X)) * (col(DESTINATION_X) - col(DEL_X)) +
                         ((col(DESTINATION_Y) - col(DEL_Y)) * (col(DESTINATION_Y) - col(DEL_Y)))
                         <= settings.thresholds.destination_distance, True)
-                               .otherwise(False)))
+                    .otherwise(when(
+                        col(SPAWN_TIME) > settings.simulation.max_time, False)
+                    .otherwise(False))))
 
 
 def create_priority_weights(dataframe: DataFrame) -> DataFrame:

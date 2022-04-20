@@ -52,6 +52,9 @@ thresholds.crash_horizontal_distance = 1.7 # meters
 thresholds.intrusion_distance = 1 # meters
 threshold.AEQ5 = 50
 
+#SIMULATION PARAMS
+simulation.max_time = 5400 # 5400sec --> 90min --> 1.5h
+
 # WEIGHTS
 weights.priority_1 = 1
 weights.priority_2 = 2

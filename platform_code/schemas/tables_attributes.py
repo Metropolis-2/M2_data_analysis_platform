@@ -7,6 +7,7 @@ ALTITUDE = 'ALT'
 DISTANCE = 'DIST'
 DEL_TIME = 'Deletion_Time'
 VERTICAL_SPEED = 'Vertical_Speed'
+SIMT_VALID = "Simt_valid"
 
 # LOS LOG
 LOS_ID = 'LOS_ID'

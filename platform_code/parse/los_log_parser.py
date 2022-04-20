@@ -3,7 +3,7 @@ from pyspark.sql.functions import when, col, abs
 
 from schemas.los_log_schema import LOS_LOG_COLUMNS
 from schemas.tables_attributes import (CRASH, DISTANCE, ALTITUDE, LOS_DURATION_TIME,
-                                       LOS_EXIT_TIME, LOS_START_TIME, LOS_ID)
+                                       LOS_EXIT_TIME, LOS_START_TIME, LOS_ID, SIMT_VALID)
 from utils.config import settings
 from utils.parser_utils import add_dataframe_counter, convert_feet_to_meters
 
@@ -15,6 +15,17 @@ def add_loss_log_counter(los_log_dataframe: DataFrame):
     :return: dataframe with the column loss duration added.
     """
     return add_dataframe_counter(los_log_dataframe, LOS_ID)
+
+def add_simt_flag(los_log_dataframe: DataFrame) -> DataFrame:
+    """ Add a simulation time flag column to the LOSLOG dataframe.
+
+    :param los_log_dataframe: dataframe with the LOSLOG data read from the file.
+    :return: dataframe with the column SIMT_VALID added.
+    """
+    return los_log_dataframe \
+        .withColumn(SIMT_VALID,
+                    when(col(LOS_START_TIME) > settings.simulation.max_time, False)
+                    .otherwise(True))
 
 
 def generate_loss_duration_column(los_log_dataframe):
@@ -62,4 +73,4 @@ def reorder_loss_log_columns(dataframe: DataFrame) -> DataFrame:
 
 
 LOS_LOG_TRANSFORMATIONS = [generate_loss_duration_column, generate_crash_column,
-                           add_loss_log_counter, convert_altitudes_to_meter, reorder_loss_log_columns]
+                           add_loss_log_counter, add_simt_flag, convert_altitudes_to_meter, reorder_loss_log_columns]

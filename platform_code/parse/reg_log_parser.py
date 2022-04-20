@@ -1,6 +1,7 @@
 from itertools import islice
 from pathlib import Path
 from typing import Tuple, List, Union
+from pyspark.sql.functions import when, col, abs
 
 from loguru import logger
 from pyspark.pandas import DataFrame
@@ -8,8 +9,22 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
 from tqdm import tqdm
 
-from schemas.tables_attributes import ALTITUDE
+from utils.config import settings
+from schemas.tables_attributes import ALTITUDE, SIMT_VALID, SIMULATION_TIME
 from utils.parser_utils import build_scenario_name, convert_feet_to_meters
+
+
+
+def add_simt_flag(los_log_dataframe: DataFrame) -> DataFrame:
+    """ Add a simulation time flag column to the LOSLOG dataframe.
+
+    :param los_log_dataframe: dataframe with the LOSLOG data read from the file.
+    :return: dataframe with the column SIMT_VALID added.
+    """
+    return los_log_dataframe \
+        .withColumn(SIMT_VALID,
+                    when(col(SIMULATION_TIME) > settings.simulation.max_time, False)
+                    .otherwise(True))
 
 
 def convert_altitude_to_meter(dataframe: DataFrame) -> DataFrame:
@@ -22,7 +37,7 @@ def convert_altitude_to_meter(dataframe: DataFrame) -> DataFrame:
     return convert_feet_to_meters(dataframe, ALTITUDE)
 
 
-REG_LOG_TRANSFORMATIONS = [convert_altitude_to_meter]
+REG_LOG_TRANSFORMATIONS = [add_simt_flag, convert_altitude_to_meter]
 
 
 def read_reglog(log_file: Union[str, Path]) -> Tuple[List[float], List[str], List[str], List[str], List[str]]:
