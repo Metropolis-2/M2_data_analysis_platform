@@ -23,12 +23,13 @@ def compute_pri1(df):
     """
     
     pri1=0
-    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
-    
-    pri1+=prio_weight_1*df_filtered[df_filtered["Priority"]==1]["FLIGHT_time"].sum()
-    pri1+=prio_weight_2*df_filtered[df_filtered["Priority"]==2]["FLIGHT_time"].sum()
-    pri1+=prio_weight_3*df_filtered[df_filtered["Priority"]==3]["FLIGHT_time"].sum()
-    pri1+=prio_weight_4*df_filtered[df_filtered["Priority"]==4]["FLIGHT_time"].sum()
+    df_filtered=df[(df['Spawned']==True)]
+    df_filtered=df_filtered[df_filtered["Mission_completed"]==True]
+
+    pri1+=prio_weight_1*(df_filtered[df_filtered["Priority"]=="1"]["FLIGHT_time"].sum())
+    pri1+=prio_weight_2*(df_filtered[df_filtered["Priority"]=="2"]["FLIGHT_time"].sum())
+    pri1+=prio_weight_3*(df_filtered[df_filtered["Priority"]=="3"]["FLIGHT_time"].sum())
+    pri1+=prio_weight_4*(df_filtered[df_filtered["Priority"]=="4"]["FLIGHT_time"].sum())
 
     return pri1
 
@@ -43,14 +44,17 @@ def compute_pri2(df):
     :return: query result with the PRI2 per scenario and priority.
     """
     pri2=0
-    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
+    df_filtered=df[(df['Spawned']==True)]
+    df_filtered=df_filtered[df_filtered["Mission_completed"]==True]
     
-    pri2+=prio_weight_1*df_filtered[df_filtered["Priority"]==1]["3D_dist"].sum()
-    pri2+=prio_weight_2*df_filtered[df_filtered["Priority"]==2]["3D_dist"].sum()
-    pri2+=prio_weight_3*df_filtered[df_filtered["Priority"]==3]["3D_dist"].sum()
-    pri2+=prio_weight_4*df_filtered[df_filtered["Priority"]==4]["3D_dist"].sum()
+ 
+    
+    pri2+=prio_weight_1*df_filtered[df_filtered["Priority"]=="1"]["3D_dist"].sum()
+    pri2+=prio_weight_2*df_filtered[df_filtered["Priority"]=="2"]["3D_dist"].sum()
+    pri2+=prio_weight_3*df_filtered[df_filtered["Priority"]=="3"]["3D_dist"].sum()
+    pri2+=prio_weight_4*df_filtered[df_filtered["Priority"]=="4"]["3D_dist"].sum()
 
-    return 
+    return pri2
 
 def compute_pri3(df,priority):
     """ PRI-3: Average mission duration per priority level

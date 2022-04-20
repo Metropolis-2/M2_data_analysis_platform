@@ -23,7 +23,7 @@ def calc_flst_spawn_col(row):
         return True
     
 def calc_flst_mission_completed_col(row):
-    if (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["DEL_y"]-row ["DEL_y"])>400 or row["SPAWN_time"]>5400 or row["DEL_time"]>5400 or row["Spawned"] :
+    if (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["DEL_y"]-row ["DEL_y"])>400 or row["SPAWN_time"]>5400 or row["DEL_time"]>5400 or row["Spawned"]==False :
         return False
     else:
         return True
@@ -55,14 +55,14 @@ class DataframeCreator():
         #self.create_metrics_dataframe()
 
         
-        self.flst_log_dataframe,self.loitering_nfz_data_frame = self.create_flstlog_dataframe() 
-        self.los_log_dataframe = self.create_loslog_dataframe() 
-        self.conf_log_dataframe = self.create_conflog_dataframe() 
-        self.geo_log_dataframe = self.create_geolog_dataframe()
+        #self.flst_log_dataframe,self.loitering_nfz_data_frame = self.create_flstlog_dataframe() 
+        #self.los_log_dataframe = self.create_loslog_dataframe() 
+        #self.conf_log_dataframe = self.create_conflog_dataframe() 
+        #self.geo_log_dataframe = self.create_geolog_dataframe()
         
         #self.reg_log_dataframe = self.create_reglog_dataframe()
-        self.env_metrics_dataframe=self.create_env_metrics_dataframe()
-        self.dens_log_dataframe=self.create_density_dataframe()
+        #self.env_metrics_dataframe=self.create_env_metrics_dataframe()
+        #self.dens_log_dataframe=self.create_density_dataframe()
         #self.time_log_dataframe=self.create_time_object_dataframe() 
         self.metrics_dataframe=self.create_metrics_dataframe()
         return
@@ -465,7 +465,7 @@ class DataframeCreator():
                     if flight_data[9]!="":
                         area_str=flight_data[10]+"-"+flight_data[11]+"-"+flight_data[12]+"-"+flight_data[13]
                         nfz_name="LOITER"+acid
-                        print(nfz_name)
+                        #print(nfz_name)
                         nfz_list.append([scenario_name_centr,acid,nfz_name,area_str])
                         nfz_list.append([scenario_name_hybrid,acid,nfz_name,area_str])
                         nfz_list.append([scenario_name_decentr,acid,nfz_name,area_str])
@@ -1046,8 +1046,10 @@ class DataframeCreator():
 
                 tmp_list = [scenario_name, saf1,saf2,saf2_1,saf3,saf4,saf5,saf6,saf6_1,saf6_2,saf6_3,saf6_4,saf6_5,saf6_6,saf6_7]
                     
-                
+ 
+
                 metrics_list.append(tmp_list)
+                #print(metrics_list)
                 
 
         
@@ -1069,7 +1071,7 @@ class DataframeCreator():
         
         metrics_list = list()
         prio_metrics_list = list()  
-        prio_col_list=["PRI3","PRI4","PRI5"]             
+        prio_col_list=["Scenario_name","Priority","PRI3","PRI4","PRI5"]             
         
   
         for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
@@ -1099,14 +1101,14 @@ class DataframeCreator():
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
-                print(scenario_name,"2")
+                #print(scenario_name,"2")
                 #Filtered flstlog by scenario name
                 filtered_flst_dataframe=flst_log_dataframe[flst_log_dataframe["scenario_name"]==scenario_name]
                 
 
-                aircraft_number=filtered_flst_dataframe.count() 
-                aircraft_succesful_number=filtered_flst_dataframe[filtered_flst_dataframe["Mission_completed"]==True].count() 
-                aircraft_spawned_number=filtered_flst_dataframe[filtered_flst_dataframe["Spawned"]==True].count()
+                aircraft_number=filtered_flst_dataframe.shape[0]
+                aircraft_succesful_number=filtered_flst_dataframe[filtered_flst_dataframe["Mission_completed"]==True].shape[0]
+                aircraft_spawned_number=filtered_flst_dataframe[filtered_flst_dataframe["Spawned"]==True].shape[0]
                 aeq1=AEQ_metrics.compute_aeq1(filtered_flst_dataframe) 
                 aeq1_1=aeq1/aircraft_number
                 aeq2=AEQ_metrics.compute_aeq2(filtered_flst_dataframe)
@@ -1135,11 +1137,10 @@ class DataframeCreator():
 
                 tmp_list = [scenario_name, aircraft_number,aircraft_succesful_number,aircraft_spawned_number, aeq1,aeq1_1, aeq2, aeq2_1, aeq3,aeq4,aeq5,
                             aeq5_1,cap1,env1,eff1,eff2,eff3,eff4,eff5,eff6,pri1,pri2]
-                    
-                
+        
                 metrics_list.append(tmp_list)
                 
-                for priority in [1,2,3,4]:
+                for priority in ["1","2","3","4"]:
                 
                     pri3=PRI_metrics.compute_pri3(filtered_flst_dataframe,priority) 
                     pri4=PRI_metrics.compute_pri4(filtered_flst_dataframe,priority) 

@@ -14,7 +14,8 @@ def compute_saf1(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF1 metric per scenario.
     """
-    saf1=df[df['in_time']].count()
+
+    saf1=df[df['in_time']].shape[0]
     return saf1
 
 def compute_saf2(df):
@@ -25,7 +26,7 @@ def compute_saf2(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF2 metric per scenario.
     """
-    saf2=df[df['in_time']].count()
+    saf2=df[df['in_time']].shape[0]
     return saf2
 
 
@@ -38,7 +39,7 @@ def compute_saf2_1(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF2-1 metric per scenario.
     """
-    saf2=df[(df['in_time'])&(df['crash'])].count()
+    saf2=df[(df['in_time'])&(df['crash'])].shape[0]
     return saf2
 
 def compute_saf4(df):
@@ -49,7 +50,7 @@ def compute_saf4(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF4 metric per scenario.
     """
-    saf4=df[(df['in_time'])&(df['DIST'])].min()
+    saf4=df[df['in_time']]['DIST'].min()
     return saf4
 
 def compute_saf5(df):
@@ -60,7 +61,7 @@ def compute_saf5(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF5 metric per scenario.
     """
-    saf5=df[(df['in_time'])&(df['LOS_duration_time'])].sum()
+    saf5=df[df['in_time']]['LOS_duration_time'].sum()
     return saf5
 
 def compute_saf6(df):
@@ -72,7 +73,7 @@ def compute_saf6(df):
     :return: query result with the SAF6 metric per scenario.
     """
     
-    saf6=df[df['in_time']].count()
+    saf6=df[df['in_time']].shape[0]
 
     return saf6
 
@@ -86,7 +87,7 @@ def compute_saf6_1(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-1 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])].shape[0]
 
     return saf6
 
@@ -99,7 +100,7 @@ def compute_saf6_2(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-2 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])].shape[0]
 
     return saf6
 
@@ -112,7 +113,7 @@ def compute_saf6_3(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-3 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz']==False)].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz']==False)].shape[0]
 
     return saf6
 
@@ -125,7 +126,7 @@ def compute_saf6_4(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-4 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace'])].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace'])].shape[0]
 
     return saf6
 
@@ -138,7 +139,7 @@ def compute_saf6_5(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-5 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace']==False)].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace']==False)].shape[0]
 
     return saf6
 
@@ -151,7 +152,7 @@ def compute_saf6_6(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-2 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['Node_in_nfz'])].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['Node_in_nfz'])].shape[0]
 
     return saf6
 
@@ -164,6 +165,6 @@ def compute_saf6_7(df):
     :param input_dataframes: dataframes with the logs data.
     :return: query result with the SAF6-2 metric per scenario.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['In_nfz_applied'])].count()
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['In_nfz_applied'])].shape[0]
 
     return saf6

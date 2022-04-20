@@ -50,7 +50,7 @@ def compute_eff3(df):
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
     sum_ideal_length=df_filtered["Baseline_ascending_distance"].sum()
-    sum_actual_length=df_filtered["Ascending_dist"].sum()
+    sum_actual_length=df_filtered["Ascend_dist"].sum()
     eff3=sum_ideal_length/sum_actual_length
     return eff3
 

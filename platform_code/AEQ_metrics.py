@@ -17,21 +17,21 @@ aeq_5_threshold=50
 def compute_aeq1(df):
     aeq1=0
     
-    aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_loitering) & (df["loitering"]) & (df["Spawned"])  & (df["Mission_completed"])].count()
+    aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_loitering) & (df["loitering"]) & (df["Spawned"])  & (df["Mission_completed"])].shape[0]
     
-    aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_emergency) & (df["Priority"]==4) & (df["Spawned"])  & (df["Mission_completed"])].count()
+    aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_emergency) & (df["Priority"]==4) & (df["Spawned"])  & (df["Mission_completed"])].shape[0]
     
-    aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_delivery) & (df["Priority"]!=4)& (df["Spawned"])  & (df["Mission_completed"]) ].count()
+    aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_delivery) & (df["Priority"]!=4)& (df["Spawned"])  & (df["Mission_completed"]) ].shape[0]
     
-    aeq1+=df[  df["Spawned"]==False ].count()
-    aeq1+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].count()
+    aeq1+=df[  df["Spawned"]==False ].shape[0]
+    aeq1+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].shape[0]
 
     return aeq1
 
 def compute_aeq2(df):
     aeq2=0
     
-    aeq2+=df[(df["FLIGHT_time"] >aeq_2_drone_autonomy)].count()
+    aeq2+=df[(df["FLIGHT_time"] >aeq_2_drone_autonomy)].shape[0]
 
     return aeq2
 
@@ -96,11 +96,11 @@ def compute_aeq5(df):
    
     aeq5=0
     
-    aeq5+=df[(abs(df['Arrival_delay']-average_delay )>aeq_5_threshold) & (df["Spawned"])  & (df["Mission_completed"])].count()
+    aeq5+=df[(abs(df['Arrival_delay']-average_delay )>aeq_5_threshold) & (df["Spawned"])  & (df["Mission_completed"])].shape[0]
 
     
-    aeq5+=df[  df["Spawned"]==False ].count()
-    aeq5+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].count()  
+    aeq5+=df[  df["Spawned"]==False ].shape[0]
+    aeq5+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].shape[0] 
     
     
     return aeq5
