@@ -56,15 +56,15 @@ class DataframeCreator():
 
         
         self.flst_log_dataframe,self.loitering_nfz_data_frame = self.create_flstlog_dataframe() 
-        #self.los_log_dataframe = self.create_loslog_dataframe() 
-        #self.conf_log_dataframe = self.create_conflog_dataframe() 
-        #self.geo_log_dataframe = self.create_geolog_dataframe()
+        self.los_log_dataframe = self.create_loslog_dataframe() 
+        self.conf_log_dataframe = self.create_conflog_dataframe() 
+        self.geo_log_dataframe = self.create_geolog_dataframe()
         
         #self.reg_log_dataframe = self.create_reglog_dataframe()
-        #self.env_metrics_dataframe=self.create_env_metrics_dataframe()
-        #self.dens_log_dataframe=self.create_density_dataframe()
+        self.env_metrics_dataframe=self.create_env_metrics_dataframe()
+        self.dens_log_dataframe=self.create_density_dataframe()
         #self.time_log_dataframe=self.create_time_object_dataframe() 
-        #self.metrics_dataframe=self.create_metrics_dataframe()
+        self.metrics_dataframe=self.create_metrics_dataframe()
         return
     
     def get_file_names(self):

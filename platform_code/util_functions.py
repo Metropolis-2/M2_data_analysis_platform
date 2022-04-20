@@ -89,7 +89,7 @@ def has_orig_dest_in_nfz(dataframe, nfz_area):
     dest_lon=dataframe["Dest_LON"].values[0]
     p_dest=transformer.transform(dest_lat,dest_lon)    
     
-    if nfz_poly.contains(shapely.geometry.Point(p_origin)) or nfz_poly.contains(shapely.geometry.Point((p_dest)):
+    if nfz_poly.contains(shapely.geometry.Point(p_origin)) or nfz_poly.contains(shapely.geometry.Point(p_dest)):
         return True
     
     return False

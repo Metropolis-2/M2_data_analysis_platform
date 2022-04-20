@@ -315,15 +315,15 @@ def density_graph(density, t_mix,rep,dataframe):
        
 
 ##Load the metrics
-input_file=open("dills/metrics_dataframe.dill", 'wb')
+input_file=open("dills/metrics_dataframe.dill", 'rb')
 scenario_metrics_df=dill.load(input_file)
 input_file.close()
 
-input_file=open("dills/prio_metrics_dataframe.dill", 'wb')
+input_file=open("dills/prio_metrics_dataframe.dill", 'rb')
 scenario_priority_metrics_df=dill.load(input_file)
 input_file.close()
 
-input_file=open("dills/densitylog_dataframe.dill", 'wb')
+input_file=open("dills/densitylog_dataframe.dill", 'rb')
 density_metrics_dataframe=dill.load(input_file)
 input_file.close()
 
