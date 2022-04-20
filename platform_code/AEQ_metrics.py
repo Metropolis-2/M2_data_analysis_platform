@@ -49,8 +49,8 @@ def compute_aeq3(df):
     Realized arrival time comes directly from the simulations.
     The missions not completed are filtered from this metric.
 
-    :param df: filtered  by scenario name FLST_log_datframe.
-    :return: aeq3
+    :param dataframe: combined FLST log and Flight intention dataframe.
+    :return: query result with the AEQ3 metric per scenario.
     
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]

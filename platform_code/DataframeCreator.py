@@ -991,7 +991,7 @@ class DataframeCreator():
         conf_log_dataframe=dill.load(input_file)
         input_file.close()
 
-        metrics_list = list
+        metrics_list = list()
           
         for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
             log_type = file_name.split("_")[0]
@@ -1020,12 +1020,12 @@ class DataframeCreator():
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
-                
+                print(scenario_name)
             
                 
-                filtered_geo_dataframe=geo_log_dataframe[geo_log_dataframe["scenario_name"]==scenario_name]
-                filtered_los_dataframe=los_log_dataframe[los_log_dataframe["scenario_name"]==scenario_name] 
-                filtered_conf_dataframe=conf_log_dataframe[conf_log_dataframe["scenario_name"]==scenario_name] 
+                filtered_geo_dataframe=geo_log_dataframe[geo_log_dataframe["Scenario_name"]==scenario_name]
+                filtered_los_dataframe=los_log_dataframe[los_log_dataframe["Scenario_name"]==scenario_name] 
+                filtered_conf_dataframe=conf_log_dataframe[conf_log_dataframe["Scenario_name"]==scenario_name] 
     
             
                 saf1=SAF_metrics.compute_saf1(filtered_conf_dataframe) 
@@ -1067,7 +1067,7 @@ class DataframeCreator():
         col_list = ["Scenario_name", "#Aircraft_number","#Succeful_aircraft_number","#Spawned_aircraft_number", "AEQ1", "AEQ1_1", "AEQ2", "AEQ2_1", "AEQ3", "AEQ4", "AEQ5",
                     "AEQ5_1", "CAP1", "ENV1","EFF1", "EFF2", "EFF3", "EFF4", "EFF5", "EFF6",  "PRI1", "PRI2"]        
         
-        metrics_list = list
+        metrics_list = list()
         prio_metrics_list = list()  
         prio_col_list=["PRI3","PRI4","PRI5"]             
         
@@ -1099,7 +1099,7 @@ class DataframeCreator():
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
-                
+                print(scenario_name,"2")
                 #Filtered flstlog by scenario name
                 filtered_flst_dataframe=flst_log_dataframe[flst_log_dataframe["scenario_name"]==scenario_name]
                 
@@ -1188,7 +1188,7 @@ class DataframeCreator():
                    continue
                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
                deterministic_scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+""
-
+               print(scenario_name,"3")
 
                cap1_rogue=metrics_data_frame[metrics_data_frame["Scenario_name"]==scenario_name].iloc[0]["CAP1"]
                cap1_determ=metrics_data_frame[metrics_data_frame["Scenario_name"]==deterministic_scenario_name].iloc[0]["CAP1"]
