@@ -7,9 +7,9 @@ from pyspark.sql.functions import col, min, sum
 from parse.parser_constants import CONF_LOG_PREFIX, LOS_LOG_PREFIX, GEO_LOG_PREFIX
 from results.result_dataframes import build_result_df_by_scenario
 from results.results_constants import (SAF_METRICS_RESULTS, COUNT, SAF1, SAF2,
-                                       SAF2_1, SAF3, SAF4, SAF5, SAF6, SAF6_1)
+                                       SAF2_1, SAF3, SAF4, SAF5, SAF6, SAF6_1, SAF6_4, SAF6_5, SAF6_3, SAF6_2)
 from schemas.tables_attributes import (SCENARIO_NAME, DISTANCE, LOS_DURATION_TIME,
-                                       VIOLATION_SEVERITY, CRASH)
+                                       VIOLATION_SEVERITY, CRASH, OPEN_AIRSPACE, LOITERING_NFZ)
 
 
 @logger.catch
@@ -128,7 +128,7 @@ def compute_saf6_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs
 
 @logger.catch
 def compute_saf6_1_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
-    """ SAF-6: Severe Geofence violations
+    """ SAF-6_1: Severe Geofence violations
 
     The number of severe geofence/building area violations.
     Every geofence violation in the GEOlog has a severity flag.
@@ -144,8 +144,84 @@ def compute_saf6_1_metric(input_dataframes: Union[str, DataFrame], *args, **kwar
         .select([SCENARIO_NAME, col('count').alias(SAF6_1)])
 
 
+@logger.catch
+def compute_saf6_2_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """ SAF-6_2: Severe and Open Geofence violations
+
+    The number of severe and open geofence/building area violations.
+    Every geofence violation in the GEOlog has a severity flag and open flag.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-2 metric per scenario.
+    """
+    dataframe = input_dataframes[GEO_LOG_PREFIX]
+    return dataframe \
+        .where(col(VIOLATION_SEVERITY)) \
+        .where(col(OPEN_AIRSPACE)) \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF6_2)])
+
+@logger.catch
+def compute_saf6_3_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """ SAF-6_3: Severe and non Open and non Loitering Geofence violations
+
+    The number of severe and not open and not loitering geofence/building area violations.
+    Every geofence violation in the GEOlog has a severity flag and false open and false loitering flags.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-3 metric per scenario.
+    """
+    dataframe = input_dataframes[GEO_LOG_PREFIX]
+    return dataframe \
+        .where(col(VIOLATION_SEVERITY)) \
+        .where(~col(OPEN_AIRSPACE)) \
+        .where(~col(LOITERING_NFZ)) \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF6_3)])
+
+@logger.catch
+def compute_saf6_4_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """ SAF-6_4: Severe and Loitering Geofence violations
+
+    The number of severe and loitering geofence/building area violations.
+    Every geofence violation in the GEOlog has a severity and loitering flags.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-4 metric per scenario.
+    """
+    dataframe = input_dataframes[GEO_LOG_PREFIX]
+    return dataframe \
+        .where(col(VIOLATION_SEVERITY)) \
+        .where(col(LOITERING_NFZ)) \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF6_4)])
+
+@logger.catch
+def compute_saf6_5_metric(input_dataframes: Union[str, DataFrame], *args, **kwargs):
+    """ SAF-6_5: Severe and non Loitering Geofence violations
+
+    The number of severe and non loitering geofence/building area violations.
+    Every geofence violation in the GEOlog has a severity and non loitering flags.
+
+    :param input_dataframes: dataframes with the logs data.
+    :return: query result with the SAF6-5 metric per scenario.
+    """
+    dataframe = input_dataframes[GEO_LOG_PREFIX]
+    return dataframe \
+        .where(col(VIOLATION_SEVERITY)) \
+        .where(~col(LOITERING_NFZ)) \
+        .groupBy(SCENARIO_NAME) \
+        .count() \
+        .select([SCENARIO_NAME, col('count').alias(SAF6_5)])
+
+
+
+
 SAF_METRICS = [compute_saf1_metric, compute_saf2_metric, compute_saf2_1_metric, compute_saf3_metric,
-               compute_saf4_metric, compute_saf5_metric, compute_saf6_metric, compute_saf6_1_metric]
+               compute_saf4_metric, compute_saf5_metric, compute_saf6_metric, compute_saf6_1_metric, compute_saf6_2_metric, compute_saf6_3_metric]
 
 
 def compute_safety_metrics(input_dataframes: Dict[str, DataFrame],

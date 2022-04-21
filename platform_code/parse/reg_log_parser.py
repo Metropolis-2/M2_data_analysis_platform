@@ -26,6 +26,19 @@ def add_simt_flag(los_log_dataframe: DataFrame) -> DataFrame:
                     when(col(SIMULATION_TIME) > settings.simulation.max_time, False)
                     .otherwise(True))
 
+#TODO: evaluate how many drones per timestamp
+# def countACIDSperTime(los_log_dataframe: DataFrame) -> DataFrame:
+#     """ Add a simulation time flag column to the LOSLOG dataframe.
+#
+#     :param los_log_dataframe: dataframe with the LOSLOG data read from the file.
+#     :return: dataframe with the column SIMT_VALID added.
+#     """
+#     return los_log_dataframe \
+#         .withColumn(SIMT_VALID,
+#                     when(col(SIMULATION_TIME) > settings.simulation.max_time, False)
+#                     .otherwise(True))
+
+
 
 def convert_altitude_to_meter(dataframe: DataFrame) -> DataFrame:
     """ Converts all the altitudes fields from feet to meters.

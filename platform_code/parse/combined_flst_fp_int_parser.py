@@ -101,7 +101,6 @@ def calculate_work_done(dataframe: DataFrame) -> DataFrame:
     return dataframe.withColumn(WORK_DONE,
                                 col(FLIGHT_TIME) + col(ASCENDING_DISTANCE)/col(VERTICAL_SPEED))
 
-º
 def calculate_arrival_delay(dataframe: DataFrame) -> DataFrame:
     """ Calculates the delay in the arrival with respect to the baseline.
 

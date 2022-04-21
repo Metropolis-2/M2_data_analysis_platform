@@ -3,6 +3,7 @@ from pathlib import Path
 
 from loguru import logger
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 from tqdm import tqdm
 
 from metrics.AEQ_metrics import compute_accessibility_and_equality_metrics
@@ -24,6 +25,7 @@ from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
 from schemas.los_log_schema import LOS_LOG_FILE_SCHEMA
 from schemas.reg_log_schema import REG_LOG_SCHEMA
+from schemas.tables_attributes import SIMT_VALID
 from utils.config import settings
 from utils.io_utils import load_dataframes, save_dataframes_dict
 
@@ -58,6 +60,12 @@ if __name__ == "__main__":
     else:
         logger.info('The preprocessed files in folder `{}` will be loaded.', Path(settings.saving_path).resolve())
         input_dataframes = load_dataframes(DATAFRAMES_NAMES, spark)
+
+    for key, value in input_dataframes.items():
+        if(not key == FLST_LOG_PREFIX):
+            input_dataframes[key] = value.where(SIMT_VALID)
+
+
 
     # results = dict()
     # results = compute_safety_metrics(input_dataframes, results)
