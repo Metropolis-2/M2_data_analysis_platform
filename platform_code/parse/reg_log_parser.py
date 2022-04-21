@@ -1,7 +1,6 @@
 from itertools import islice
 from pathlib import Path
 from typing import Tuple, List, Union
-from pyspark.sql.functions import when, col, abs
 
 from loguru import logger
 from pyspark.pandas import DataFrame
@@ -9,48 +8,12 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
 from tqdm import tqdm
 
+from parse.parser_constants import FEET_TO_METERS_SCALE
 from utils.config import settings
-from schemas.tables_attributes import ALTITUDE, SIMT_VALID, SIMULATION_TIME
-from utils.parser_utils import build_scenario_name, convert_feet_to_meters
+from utils.parser_utils import build_scenario_name
 
-
-
-def add_simt_flag(los_log_dataframe: DataFrame) -> DataFrame:
-    """ Add a simulation time flag column to the LOSLOG dataframe.
-
-    :param los_log_dataframe: dataframe with the LOSLOG data read from the file.
-    :return: dataframe with the column SIMT_VALID added.
-    """
-    return los_log_dataframe \
-        .withColumn(SIMT_VALID,
-                    when(col(SIMULATION_TIME) > settings.simulation.max_time, False)
-                    .otherwise(True))
-
-#TODO: evaluate how many drones per timestamp
-# def countACIDSperTime(los_log_dataframe: DataFrame) -> DataFrame:
-#     """ Add a simulation time flag column to the LOSLOG dataframe.
-#
-#     :param los_log_dataframe: dataframe with the LOSLOG data read from the file.
-#     :return: dataframe with the column SIMT_VALID added.
-#     """
-#     return los_log_dataframe \
-#         .withColumn(SIMT_VALID,
-#                     when(col(SIMULATION_TIME) > settings.simulation.max_time, False)
-#                     .otherwise(True))
-
-
-
-def convert_altitude_to_meter(dataframe: DataFrame) -> DataFrame:
-    """ Converts all the altitudes fields from feet to meters.
-
-    :param dataframe: dataframe with the REG log data read from the file.
-    :return: dataframe with the columns in feet transformed to meter.
-    """
-    # The altitude distance comprises both up and down movements
-    return convert_feet_to_meters(dataframe, ALTITUDE)
-
-
-REG_LOG_TRANSFORMATIONS = [add_simt_flag, convert_altitude_to_meter]
+# No transformations
+REG_LOG_TRANSFORMATIONS = []
 
 
 def read_reglog(log_file: Union[str, Path]) -> Tuple[List[float], List[str], List[str], List[str], List[str]]:
@@ -121,11 +84,22 @@ def generate_reg_log_dataframe(log_files: List[Path],
         logger.debug('Processing file: `{}` with scenario name: {}.', log_file.name, scenario_name)
 
         for timestamp, acids, alts, lats, lons in zip(*reg_log_data):
+            # Check that the timestamp is still valid for the calculation of metrics
+            valid_simulation_time = True
+            if timestamp > settings.simulation.max_time:
+                valid_simulation_time = False
+
             for acid, alt, lat, lon in zip(acids, alts, lats, lons):
                 logger.trace('Creating regular log line for ACID `{}` flying in `{}, {}` at {} meters.',
                              acid, lat, lon, alt)
+
+                # Convert altitude to meters
+                alt_in_meters = float(alt) * FEET_TO_METERS_SCALE
+
                 data_line = [reg_log_object_counter, scenario_name,
-                             timestamp, acid, float(alt), float(lat), float(lon)]
+                             acid, timestamp, valid_simulation_time,
+                             float(alt_in_meters), float(lat), float(lon)]
+
                 reg_log_object_counter += 1
                 reg_log_list.append(data_line)
 
