@@ -98,6 +98,7 @@ MISSION_COMPLETED = 'Mission_completed'
 # REGLOG
 REG_ID = 'REG_ID'
 SIMULATION_TIME = 'Simulation_time'
+DENSITY = 'Density'
 
 # METRICS RESULT DATAFRAME
 OUTPUT_ID = 'Output_id'

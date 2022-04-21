@@ -3,15 +3,7 @@ from pathlib import Path
 
 from loguru import logger
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
-from tqdm import tqdm
 
-from metrics.AEQ_metrics import compute_accessibility_and_equality_metrics
-from metrics.CAP_metrics import compute_capacity_metrics
-from metrics.EFF_metrics import compute_efficiency_metrics
-from metrics.ENV_metrics import compute_environment_metrics
-from metrics.PRI_metrics import compute_priority_metrics
-from metrics.SAF_metrics import compute_safety_metrics
 from parse.conf_log_parser import CONF_LOG_TRANSFORMATIONS
 from parse.flst_log_parser import FLST_LOG_TRANSFORMATIONS
 from parse.generic_parser import parse_flight_intentions, parse_log_files
@@ -20,6 +12,7 @@ from parse.los_log_parser import LOS_LOG_TRANSFORMATIONS
 from parse.parser_constants import (CONF_LOG_PREFIX, GEO_LOG_PREFIX, LOS_LOG_PREFIX,
                                     REG_LOG_PREFIX, FLST_LOG_PREFIX)
 from parse.reg_log_parser import REG_LOG_TRANSFORMATIONS
+from results.result_dataframes import generate_density_dataframe
 from schemas.conf_log_schema import CONF_LOG_FILE_SCHEMA
 from schemas.flst_log_schema import FLST_LOG_FILE_SCHEMA
 from schemas.geo_log_schema import GEO_LOG_FILE_SCHEMA
@@ -27,7 +20,7 @@ from schemas.los_log_schema import LOS_LOG_FILE_SCHEMA
 from schemas.reg_log_schema import REG_LOG_SCHEMA
 from schemas.tables_attributes import SIMT_VALID
 from utils.config import settings
-from utils.io_utils import load_dataframes, save_dataframes_dict
+from utils.io_utils import load_dataframes
 
 # Configuration for the log names with the schema associated and the transformations
 # required after the read of the log file.
@@ -60,6 +53,8 @@ if __name__ == "__main__":
     else:
         logger.info('The preprocessed files in folder `{}` will be loaded.', Path(settings.saving_path).resolve())
         input_dataframes = load_dataframes(DATAFRAMES_NAMES, spark)
+
+    density_dataframe = generate_density_dataframe(input_dataframes)
 
     for key, value in input_dataframes.items():
         if(not key == FLST_LOG_PREFIX):

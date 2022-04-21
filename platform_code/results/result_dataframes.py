@@ -3,11 +3,13 @@ from typing import Dict
 
 from loguru import logger
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col
 from tqdm import tqdm
 
-from parse.parser_constants import FLST_LOG_PREFIX
-from results.results_constants import SCENARIO_DATAFRAMES, SCENARIO_RESULTS, SCENARIO_PRIORITY_RESULTS
-from schemas.tables_attributes import SCENARIO_NAME, PRIORITY
+from parse.parser_constants import FLST_LOG_PREFIX, REG_LOG_PREFIX
+from results.results_constants import SCENARIO_DATAFRAMES, SCENARIO_RESULTS, SCENARIO_PRIORITY_RESULTS, COUNT, \
+    DENSITY_DATAFRAME
+from schemas.tables_attributes import SCENARIO_NAME, PRIORITY, SIMULATION_TIME, DENSITY
 from utils.config import settings
 
 
@@ -68,3 +70,24 @@ def build_result_df_by_scenario_and_priority(log_dataframes: Dict[str, DataFrame
     result_df = dataframe.select(SCENARIO_NAME, PRIORITY).distinct()
 
     return result_df
+
+
+def generate_density_dataframe(log_dataframes: Dict[str, DataFrame]) -> DataFrame:
+    """ Generates the density dataframe, which contains the number of aircraft
+    flying at a given timestamp.
+
+    :param log_dataframes: log dataframes.
+    :return: density dataframe
+    """
+    dataframe = log_dataframes[REG_LOG_PREFIX]
+    density_dataframe = dataframe \
+        .groupby(SCENARIO_NAME, SIMULATION_TIME) \
+        .count() \
+        .select(SCENARIO_NAME, SIMULATION_TIME, col(COUNT).alias(DENSITY))
+
+    # Save the file
+    saving_path = Path(settings.saving_path, f'{DENSITY_DATAFRAME}.parquet')
+    logger.info('Saving density dataframe in `{}`.', saving_path)
+    density_dataframe.write.parquet(str(saving_path))
+
+    return density_dataframe

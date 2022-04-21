@@ -9,6 +9,7 @@ SAF_METRICS_RESULTS = 'safety_metrics'
 
 SCENARIO_RESULTS = 'scenario_results'
 SCENARIO_PRIORITY_RESULTS = 'scenario_priority_results'
+DENSITY_DATAFRAME = 'density_dataframe'
 
 SCENARIO_DATAFRAMES = [AEQ_METRICS_RESULTS, CAP_METRICS_RESULTS,
                        EFF_METRICS_RESULTS, ENV_METRICS_RESULTS,
