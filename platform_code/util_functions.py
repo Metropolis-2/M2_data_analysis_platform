@@ -52,7 +52,7 @@ def compute_baseline_vertical_distance(loitering):
     if loitering:
         baseline_vertical_distance=9.144 # 30 feet
     else:
-        baseline_vertical_distance=0
+        baseline_vertical_distance=2*9.144 # 60 feet
     return baseline_vertical_distance
 
 def compute_baseline_ascending_distance():

@@ -144,10 +144,10 @@ def compute_saf6_5(df):
     return saf6
 
 def compute_saf6_6(df):
-    """ SAF-6_2: Severe loitering Geofence violations
+    """ SAF-6_6: Severe loitering Geofence violations which occured 
+    because the aircraft's origin or destination was in the nfz area
 
-    The number of severe geofence/building area violations in loitering.
-    Every geofence violation in the GEOlog has a severity flag.
+
 
     :param input_dataframes: the filtered by scenario geolog_datframe.
     :return: the computed SAF6-6 metric.
@@ -157,10 +157,10 @@ def compute_saf6_6(df):
     return saf6
 
 def compute_saf6_7(df):
-    """ SAF-6_2: Severe loitering Geofence violations
+    """ SAF-6_7: Severe loitering Geofence violations which occured 
+    because the aircraft was already in the nfz area
 
-    The number of severe geofence/building area violations in loitering.
-    Every geofence violation in the GEOlog has a severity flag.
+
 
     :param input_dataframes: the filtered by scenario geolog_datframe.
     :return: the computed SAF6-7 metric.

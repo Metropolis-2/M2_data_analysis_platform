@@ -16,6 +16,8 @@ import util_functions
 
 import dill
 
+path_to_logs="input_logs/"
+
 def calc_flst_spawn_col(row):
     if type(row["SPAWN_time"])!=float or row["SPAWN_time"]>5400:
         return False
@@ -28,7 +30,7 @@ def calc_flst_mission_completed_col(row):
     else:
         return True
 
-path_to_logs="input_logs/"
+
 
 class DataframeCreator():
 
@@ -1031,7 +1033,7 @@ class DataframeCreator():
                 saf1=SAF_metrics.compute_saf1(filtered_conf_dataframe) 
                 saf2=SAF_metrics.compute_saf2(filtered_los_dataframe) 
                 saf2_1=SAF_metrics.compute_saf2_1(filtered_los_dataframe) 
-                saf3=(saf1-saf2)/saf2
+                saf3=(saf1-saf2)/saf1
                 saf4=SAF_metrics.compute_saf4(filtered_los_dataframe) 
                 saf5=SAF_metrics.compute_saf5(filtered_los_dataframe)
                 saf6=SAF_metrics.compute_saf6(filtered_geo_dataframe)

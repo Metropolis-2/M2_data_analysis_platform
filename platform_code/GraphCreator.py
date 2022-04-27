@@ -14,18 +14,24 @@ import numpy as np
 import random ##imported for testing purposes
 from matplotlib.patches import PathPatch
 import matplotlib
+import matplotlib.colors as mc
+import colorsys
+
+diagrams_path="output_graphs/"
+dills_path="dills/"
+
 matplotlib.use('Agg')
 def adjust_box_widths(g, fac):
     """
     Adjust the withs of a seaborn-generated boxplot.
     """
+    k=0
 
     # iterating through Axes instances
     for ax in g.axes:
 
         # iterating through axes artists:
         for c in ax.get_children():
-
             # searching for PathPatches
             if isinstance(c, PathPatch):
                 # getting current width of box:
@@ -42,14 +48,34 @@ def adjust_box_widths(g, fac):
                 xmax_new = xmid+fac*xhalf
                 verts_sub[verts_sub[:, 0] == xmin, 0] = xmin_new
                 verts_sub[verts_sub[:, 0] == xmax, 0] = xmax_new
+                
+                # Set the linecolor on the artist to the facecolor, and set the facecolor to None
+                col = lighten_color(c.get_facecolor(), 1.3)
+                c.set_edgecolor(col) 
 
-                # setting new width of median line
+                for j in range((k)*6,(k)*6+6):
+                   line = ax.lines[j]
+                   line.set_color(col)
+                   line.set_mfc(col)
+                   line.set_mec(col)
+                   line.set_linewidth(0.7)
+                    
                 for l in ax.lines:
                     if np.all(l.get_xdata() == [xmin, xmax]):
                         l.set_xdata([xmin_new, xmax_new])
+                k+=1
+
+def lighten_color(color, amount=0.5):  
+    # --------------------- SOURCE: @IanHincks ---------------------
+    try:
+        c = mc.cnames[color]
+    except:
+        c = color
+    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+    return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
 
 
-diagrams_path="output_graphs/"
+
 
 concepts=["1_","2_","3_"]
 concept_names=["Centralised","Hybrid","Decentralised"]
@@ -104,7 +130,7 @@ def metric_boxplots_baseline(metric,dataframe):
     for t_mix in traffic_mix_names:
         df1=metric_pandas_df[metric_pandas_df["Traffic mix"]==t_mix]
         fig=plt.figure()
-        sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for traffic mix "+t_mix)
+        sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for "+t_mix+" traffic mix")
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
         plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_"+t_mix,bbox_inches='tight')
@@ -114,7 +140,7 @@ def metric_boxplots_baseline(metric,dataframe):
     for dens in density_names:
          df1=metric_pandas_df[metric_pandas_df["Density"]==dens]
          fig=plt.figure()
-         sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
+         sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" for "+dens+" density")
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
          plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_"+dens,bbox_inches='tight')
@@ -134,7 +160,7 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
                         vals.append(tmp)
                     except:
                         #metric_value=240+random.randint(-5,5)
-                        print("No value for scenario",scenario_name)
+                        print("No value for scenario",scenario_name,metric)
                     
                     
  
@@ -155,7 +181,7 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
     for dens in density_names:
          df1=metric_pandas_df[metric_pandas_df["Density"]==dens]
          fig=plt.figure()
-         sns.boxplot(y=metric, x='Wind level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
+         sns.boxplot(y=metric, x='Wind level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" for "+dens+" density")
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
          plt.savefig(diagrams_path+"boxplots/winds/by_density/"+metric+"_"+dens,bbox_inches='tight')
@@ -174,7 +200,7 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
                         vals.append(tmp)
                     except:
                         #metric_value=240+random.randint(-5,5)
-                        print("No value for scenario",scenario_name)
+                        print("No value for scenario",scenario_name,metric)
                     
                     
 
@@ -196,7 +222,7 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
     for dens in density_names:
          df1=metric_pandas_df[metric_pandas_df["Density"]==dens]
          fig=plt.figure()
-         sns.boxplot(y=metric, x='Rogue_level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
+         sns.boxplot(y=metric, x='Rogue_level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" for "+dens+" density")
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
          plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens,bbox_inches='tight')
@@ -220,7 +246,7 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
                         vals.append(tmp)
                     except:
                         #metric_value=240+random.randint(-5,5)
-                        print("No value for scenario",scenario_name)
+                        print("No value for scenario",scenario_name,metric)
                     
                     
 
@@ -243,7 +269,7 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
     for dens in density_names:
          df1=metric_pandas_df[metric_pandas_df["Density"]==dens]
          fig=plt.figure()
-         sns.boxplot(y=metric, x='Rogue_level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
+         sns.boxplot(y=metric, x='Rogue_level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" for "+dens+" density")
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
          plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens,bbox_inches='tight')
@@ -263,7 +289,7 @@ def metric_boxplots_priority(metric,dataframe,priority):
                         vals.append(tmp)
                     except:
                         #metric_value=240+random.randint(-5,5)
-                        print("No value for scenario",scenario_name)
+                        print("No value for scenario",scenario_name,metric)
                     
                     
 
@@ -333,15 +359,15 @@ def density_graph(density, t_mix,rep,dataframe):
        
 
 ##Load the metrics
-input_file=open("dills/metrics_dataframe.dill", 'rb')
+input_file=open(dills_path+"metrics_dataframe.dill", 'rb')
 scenario_metrics_df=dill.load(input_file)
 input_file.close()
 
-input_file=open("dills/prio_metrics_dataframe.dill", 'rb')
+input_file=open(dills_path+"prio_metrics_dataframe.dill", 'rb')
 scenario_priority_metrics_df=dill.load(input_file)
 input_file.close()
 
-input_file=open("dills/densitylog_dataframe.dill", 'rb')
+input_file=open(dills_path+"densitylog_dataframe.dill", 'rb')
 density_metrics_dataframe=dill.load(input_file)
 input_file.close()
 #scenario_metrics_df.to_csv("metrics.csv")
