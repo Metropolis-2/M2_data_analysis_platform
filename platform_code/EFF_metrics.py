@@ -11,8 +11,8 @@ def compute_eff1(df):
     Ratio representing the length of the ideal horizontal route to the actual
     horizontal route.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF1 per scenario and drone id.
+    :param dataframe:filtered by sceanrio flst_dataframe.
+    :return: the computed EFF1 metric.
     """
     
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
@@ -28,8 +28,8 @@ def compute_eff2(df):
     Ratio representing the length of the ideal vertical route to the actual
     vertical route.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF2 per scenario and drone id.
+    :param dataframe:filtered by sceanrio flst_dataframe.
+    :return: the computed EFF2 metric.
     """
     
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
@@ -45,8 +45,8 @@ def compute_eff3(df):
     Ratio representing the length of the ascending distance in the ideal route
     to the length of the ascending distance of the actual route.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF3 per scenario and drone id.
+    :param dataframe:filtered by sceanrio flst_dataframe.
+    :return: the computed EFF3 metric.
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
     sum_ideal_length=df_filtered["Baseline_ascending_distance"].sum()
@@ -60,8 +60,8 @@ def compute_eff4(df):
     Ratio representing the 3D length of the ideal route to the 3D length
     of the actual route.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF4 per scenario and drone id.
+    :param dataframe:filtered by sceanrio flst_dataframe.
+    :return: the computed EFF4 metric.
     """
     
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
@@ -76,8 +76,8 @@ def compute_eff5(df):
     Ratio representing the time duration of the ideal route to the time
     duration of the actual route.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF5 per scenario and drone id.
+    :param dataframe:filtered by sceanrio flst_dataframe.
+    :return: the computed EFF5 metric.
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
     sum_ideal_time=df_filtered["Baseline_flight_time"].sum()
@@ -91,9 +91,8 @@ def compute_eff6(df):
 
     Time duration from the planned departure time until the actual
     departure time of the aircraft.
-
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the EFF6 per scenario and drone id.
+    :param dataframe:filtered by sceanrio flst_dataframe.
+    :return: the computed EFF6 metric.
     """
     
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]

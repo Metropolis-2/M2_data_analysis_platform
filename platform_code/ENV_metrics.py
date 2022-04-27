@@ -12,8 +12,8 @@ def compute_env1(df):
     Representing total energy needed to perform all flight intentions,
     computed by integrating the thrust (force) over the route displacement.
 
-    :param input_dataframes: dictionary with the dataframes from the log files.
-    :return: query result with the ENV-1 metric per scenario.
+    :param input_dataframes: filter by scenario flst_dataframe.
+    :return: teh computed ENV1 metric.
     """
     df_filtered=df[df['Spawned']]
     env1=df_filtered["work_done"].sum()

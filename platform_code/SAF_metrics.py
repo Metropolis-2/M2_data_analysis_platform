@@ -11,8 +11,8 @@ def compute_saf1(df):
     Number of aircraft pairs that will experience a loss of separation
     within the look-ahead time.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF1 metric per scenario.
+    :param input_dataframes: the filtered by scenario conflog_datframe.
+    :return: the computed SAF1 metric.
     """
 
     saf1=df[df['in_time']].shape[0]
@@ -22,9 +22,9 @@ def compute_saf2(df):
     """ SAF-2: Number of intrusions
 
     Number of aircraft pairs that experience loss of separation.
-
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF2 metric per scenario.
+    
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF2 metric.
     """
     saf2=df[df['in_time']].shape[0]
     return saf2
@@ -36,8 +36,8 @@ def compute_saf2_1(df):
     Count of crashes for each scenario (each aircraft logged in the FLSTlog has a boolean flag called crash)
     if that is true ir counts as a crash and the number of the times crash is true is the result of this metric.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF2-1 metric per scenario.
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF2-1 metric.
     """
     saf2=df[(df['in_time'])&(df['crash'])].shape[0]
     return saf2
@@ -47,8 +47,8 @@ def compute_saf4(df):
 
     The minimum separation between aircraft during conflicts.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF4 metric per scenario.
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF4 metric.
     """
     saf4=df[df['in_time']]['DIST'].min()
     return saf4
@@ -58,8 +58,8 @@ def compute_saf5(df):
 
     Total time spent in a state of intrusion.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF5 metric per scenario.
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF5 metric.
     """
     saf5=df[df['in_time']]['LOS_duration_time'].sum()
     return saf5
@@ -69,8 +69,8 @@ def compute_saf6(df):
 
     The number of geofence/building area violations.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6 metric.
     """
     
     saf6=df[df['in_time']].shape[0]
@@ -84,8 +84,8 @@ def compute_saf6_1(df):
     The number of severe geofence/building area violations.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-1 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-1 metric.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])].shape[0]
 
@@ -97,8 +97,8 @@ def compute_saf6_2(df):
     The number of severe geofence/building area violations in loitering.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-2 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-2 metric.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])].shape[0]
 
@@ -110,8 +110,8 @@ def compute_saf6_3(df):
     The number of severe geofence/building area violations not loitering.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-3 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-3 metric.    
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz']==False)].shape[0]
 
@@ -123,8 +123,8 @@ def compute_saf6_4(df):
     The number of severe geofence/building area violations in open.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-4 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-4 metric.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace'])].shape[0]
 
@@ -136,8 +136,8 @@ def compute_saf6_5(df):
     The number of severe geofence/building area violations in loitering.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-5 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-5 metric.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace']==False)].shape[0]
 
@@ -149,8 +149,8 @@ def compute_saf6_6(df):
     The number of severe geofence/building area violations in loitering.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-2 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-6 metric.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['Node_in_nfz'])].shape[0]
 
@@ -162,8 +162,8 @@ def compute_saf6_7(df):
     The number of severe geofence/building area violations in loitering.
     Every geofence violation in the GEOlog has a severity flag.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the SAF6-2 metric per scenario.
+    :param input_dataframes: the filtered by scenario geolog_datframe.
+    :return: the computed SAF6-7 metric.
     """
     saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Loitering_nfz'])&(df['In_nfz_applied'])].shape[0]
 

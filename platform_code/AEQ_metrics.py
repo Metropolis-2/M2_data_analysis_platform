@@ -15,6 +15,16 @@ aeq_2_drone_autonomy=1800 #30 minutes
 aeq_5_threshold=50
 
 def compute_aeq1(df):
+    """ AEQ-1: Number of cancelled demands
+
+    Number of situations when realized arrival time of a given flight intention 
+    is greater than ideal expected arrival time by more or equal than 
+    some given cancellation delay limit that depends on mission type.
+
+    :param input_dataframes:filtered by scenario flst_datframe.
+    :return: the computed AEQ1 metric.
+    """
+
     aeq1=0
     
     aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_loitering) & (df["loitering"]) & (df["Spawned"])  & (df["Mission_completed"])].shape[0]
@@ -29,6 +39,14 @@ def compute_aeq1(df):
     return aeq1
 
 def compute_aeq2(df):
+    """ AEQ-2: Number of inoperative trajectories
+
+     Number of situations when realized total 
+     mission duration is greater than specific drone autonomy. 
+
+    :param input_dataframes:filtered by scenario flst_datframe.
+    :return: the computed AEQ2 metric.
+    """
     aeq2=0
     
     aeq2+=df[(df["FLIGHT_time"] >aeq_2_drone_autonomy)].shape[0]
@@ -49,8 +67,8 @@ def compute_aeq3(df):
     Realized arrival time comes directly from the simulations.
     The missions not completed are filtered from this metric.
 
-    :param dataframe: combined FLST log and Flight intention dataframe.
-    :return: query result with the AEQ3 metric per scenario.
+    :param input_dataframes:filtered by scenario flst_datframe.
+    :return: the computed AEQ3 metric.
     
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
@@ -67,9 +85,8 @@ def compute_aeq4(df):
 
     The missions not started and completed are filtered from this metric.
 
-    :param dataframe: combined FLST log and Flight intention dataframe.
-    :param avg_delay: average delay per dataframe per scenario.
-    :return: query result with the AEQ4 metric per scenario.
+    :param input_dataframes:filtered by scenario flst_datframe.
+    :return: the computed AEQ4 metric.
     """
     
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
@@ -87,9 +104,8 @@ def compute_aeq5(df):
     where delay for each flight intention is calculated as the difference between
     realized arrival time and ideal expected arrival time.
 
-    :param dataframe: combined FLST log and Flight intention dataframe.
-    :param avg_delay: average delay per dataframe per scenario.
-    :return: query result with the AEQ5 metric per scenario.
+    :param input_dataframes:filtered by scenario flst_datframe.
+    :return: the computed AEQ5 metric.
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
     average_delay=df_filtered["Arrival_delay"].mean()

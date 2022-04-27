@@ -18,8 +18,8 @@ def compute_pri1(df):
 
     Total duration of missions weighted in function of priority level.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the PRI1 per scenario and priority.
+    :param dataframe: filtered by scenario flst_dataframe.
+    :return: the computed PRI1 metric.
     """
     
     pri1=0
@@ -40,8 +40,8 @@ def compute_pri2(df):
 
     Total distance travelled weighted in function of priority level.
 
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the PRI2 per scenario and priority.
+    :param dataframe: filtered by scenario flst_dataframe.
+    :return:the computed PRI2 metric.
     """
     pri2=0
     df_filtered=df[(df['Spawned']==True)]
@@ -61,9 +61,9 @@ def compute_pri3(df,priority):
 
     The average mission duration for each priority level per aircraft.
 
-    :param dataframe: data required to calculate the metrics.
-    :param flights_per_priority: number of flights spawned per priority.
-    :return: query result with the PRI3 per scenario and priority.
+    :param dataframe: filtered by scenario  flst_dataframe.
+    :param priority: priority level.
+    :return: the computed PRI3 metric.
     """
     
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])&(df['Priority']==priority)]
@@ -77,9 +77,9 @@ def compute_pri4(df,priority):
 
     The average distance travelled for each priority level per aircraft.
 
-    :param dataframe: data required to calculate the metrics.
-    :param flights_per_priority: number of flights spawned per priority.
-    :return: query result with the PRI4 per scenario and priority.
+    :param dataframe: filtered by scenario  flst_dataframe.
+    :param priority: priority level.
+    :return: the computed PRI4 metric.
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])&(df['Priority']==priority)]
     pri4=df_filtered["3D_dist"].mean()
@@ -93,9 +93,9 @@ def compute_pri5(df,priority):
 
     The total delay experienced by aircraft in a certain priority category
     relative to ideal conditions.
-
-    :param dataframe: data required to calculate the metrics.
-    :return: query result with the PRI5 per scenario and priority.
+    :param dataframe: filtered by scenario  flst_dataframe.
+    :param priority: priority level.
+    :return: the computed PRI5 metric.
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])&(df['Priority']==priority)]
     pri5=df_filtered["Arrival_delay"].sum()

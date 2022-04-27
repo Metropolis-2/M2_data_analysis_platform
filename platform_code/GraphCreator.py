@@ -107,7 +107,8 @@ def metric_boxplots_baseline(metric,dataframe):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for traffic mix "+t_mix)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_"+t_mix)
+        plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_"+t_mix,bbox_inches='tight')
+        plt.clf()
         
     ##Create one graph for every density
     for dens in density_names:
@@ -116,7 +117,8 @@ def metric_boxplots_baseline(metric,dataframe):
          sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_"+dens,bbox_inches='tight')
+         plt.clf()
 
 
 def metric_boxplots_wind(metric,dataframe,t_mix):
@@ -146,7 +148,8 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for wind level "+uncertainties_names_dict[r])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        plt.savefig(diagrams_path+"boxplots/winds/by_wind_level/"+metric+"_"+r)
+        plt.savefig(diagrams_path+"boxplots/winds/by_wind_level/"+metric+"_"+r,bbox_inches='tight')
+        plt.clf()
         
     ##Create one graph for every density
     for dens in density_names:
@@ -155,7 +158,8 @@ def metric_boxplots_wind(metric,dataframe,t_mix):
          sns.boxplot(y=metric, x='Wind level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         plt.savefig(diagrams_path+"boxplots/winds/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/winds/by_density/"+metric+"_"+dens,bbox_inches='tight')
+         plt.clf()
          
 def metric_boxplots_rogues(metric,dataframe,t_mix):
     vals=[]
@@ -185,7 +189,8 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for rogue level "+uncertainties_names_dict[r])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r)
+        plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r,bbox_inches='tight')
+        plt.clf()
         
     ##Create one graph for every density
     for dens in density_names:
@@ -194,7 +199,8 @@ def metric_boxplots_rogues(metric,dataframe,t_mix):
          sns.boxplot(y=metric, x='Rogue_level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens,bbox_inches='tight')
+         plt.clf()
    
     
 def special_metric_boxplots_rogues(metric,dataframe,t_mix):
@@ -220,7 +226,7 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
 
     
     metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric,"Rogue_level"])
-    print(metric_pandas_df)
+    #print(metric_pandas_df)
     ##Create one graph for every rogue level
     for r in rogue_uncertainties[1:]:
         #print(uncertainties_names_dict[r])
@@ -230,7 +236,8 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for rogue level "+uncertainties_names_dict[r])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r)
+        plt.savefig(diagrams_path+"boxplots/rogues/by_rogue_level/"+metric+"_"+r,bbox_inches='tight')
+        plt.clf()
         
     ##Create one graph for every density
     for dens in density_names:
@@ -239,7 +246,8 @@ def special_metric_boxplots_rogues(metric,dataframe,t_mix):
          sns.boxplot(y=metric, x='Rogue_level', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens)
+         plt.savefig(diagrams_path+"boxplots/rogues/by_density/"+metric+"_"+dens,bbox_inches='tight')
+         plt.clf()
    
 def metric_boxplots_priority(metric,dataframe,priority):
     ##Only for PRI3, PRI4, PRI5
@@ -269,7 +277,8 @@ def metric_boxplots_priority(metric,dataframe,priority):
         sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=metric+" for traffic mix "+t_mix+" for priority "+priority)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         adjust_box_widths(fig, 0.5)
-        plt.savefig(diagrams_path+"boxplots/priority/by_traffic_mix/"+metric+"_"+t_mix)
+        plt.savefig(diagrams_path+"boxplots/priority/by_traffic_mix/"+metric+"_"+t_mix,bbox_inches='tight')
+        plt.clf()
         
     ##Create one graph for every density
     for dens in density_names:
@@ -278,7 +287,8 @@ def metric_boxplots_priority(metric,dataframe,priority):
          sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=metric+" density "+dens+" for priority "+priority)
          plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
          adjust_box_widths(fig, 0.5)
-         plt.savefig(diagrams_path+"boxplots/priority/by_density/"+metric+"_"+dens)      
+         plt.savefig(diagrams_path+"boxplots/priority/by_density/"+metric+"_"+dens,bbox_inches='tight')    
+         plt.clf()
     
 def density_graph(density, t_mix,rep,dataframe):
     vals=[]
@@ -300,8 +310,9 @@ def density_graph(density, t_mix,rep,dataframe):
 
                
        vals.append(data)
-       
+
     time_stamps=range(30,10830,30)
+    plt.clf()
     
     plt.plot(time_stamps, vals[0],   label = 'Centralised', marker='o',color=concepts_colours[0], linewidth=3)
     plt.plot(time_stamps, vals[1],   label = 'Hyrbid',  marker='o',color=concepts_colours[1], linewidth=3)
@@ -309,7 +320,7 @@ def density_graph(density, t_mix,rep,dataframe):
     
     plt.xlabel('Time')
     plt.ylabel('Traffic density')
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper right')
     #plt.xticks(monthList)
     #plt.yticks([1000, 2000, 4000, 6000, 8000, 10000, 12000, 15000, 18000])
     plt.title('Aircraft density for density '+density_names_dict[density])
@@ -345,7 +356,6 @@ boxplot_metrics=["AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","
 boxplot_metrics_rogues=["CAP3","CAP4"]
 
 boxplot_metrics_priority=["PRI3","PRI4","PRI5"]
-
 
 
 for metric in boxplot_metrics:

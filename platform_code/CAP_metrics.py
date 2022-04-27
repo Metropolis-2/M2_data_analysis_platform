@@ -11,8 +11,8 @@ def compute_cap1(df):
     Average demand delay is computed as the arithmetic mean of the delays
     of all flight intentions in a scenario.
 
-    :param input_dataframes: dataframes with the logs data.
-    :return: query result with the CAP1 metric per scenario.
+    :param input_dataframes:filtered by scenario flst_datframe.
+    :return: the computed CAP1 metric.
     """
     df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
     cap_1=df_filtered["Arrival_delay"].mean()
