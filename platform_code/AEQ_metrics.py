@@ -7,8 +7,8 @@ Created on Fri Apr 15 16:44:11 2022
 import pandas as pd
 
 aeq_1_threshold_emergency=300 # 5 minutes
-aeq_1_threshold_delivery=600 # 10 minutes
-aeq_1_threshold_loitering=1200 # 20 minutes
+aeq_1_threshold_delivery=900 # 15 minutes
+aeq_1_threshold_loitering=1500 # 25 minutes
 
 aeq_2_drone_autonomy=1800 #30 minutes
 

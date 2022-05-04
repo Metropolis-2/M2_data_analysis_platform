@@ -133,13 +133,13 @@ def compute_saf6_4(df):
 def compute_saf6_5(df):
     """ SAF-6_5: Severe constrained Geofence violations
 
-    The number of severe geofence/building area violations in loitering.
+    The number of severe building area violations.
     Every geofence violation in the GEOlog has a severity flag.
 
     :param input_dataframes: the filtered by scenario geolog_datframe.
     :return: the computed SAF6-5 metric.
     """
-    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace']==False)].shape[0]
+    saf6=df[(df['in_time'])&(df['Violation_severity'])&(df['Open_airspace']==False)&(df['Loitering_nfz']==False)].shape[0]
 
     return saf6
 

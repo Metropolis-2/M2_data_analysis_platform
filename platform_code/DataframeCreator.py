@@ -13,23 +13,26 @@ import ENV_metrics
 import SAF_metrics
 import PRI_metrics 
 import util_functions
+import math
 
 import dill
 
 path_to_logs="input_logs/"
+time_filtering=False #If true the data are filtered for the first 1.5 hours of simulation
+
 
 def calc_flst_spawn_col(row):
-    if type(row["SPAWN_time"])!=float or row["SPAWN_time"]>5400:
+
+    if type(row["SPAWN_time"])!=float or math.isnan(row["SPAWN_time"]) or (row["SPAWN_time"]>5400 and time_filtering):
         return False
     else:
         return True
     
 def calc_flst_mission_completed_col(row):
-    if (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["DEL_y"]-row ["DEL_y"])>400 or row["SPAWN_time"]>5400 or row["DEL_time"]>5400 or row["Spawned"]==False :
+    if (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["DEL_y"]-row ["DEL_y"])>400 or (row["SPAWN_time"]>5400 and time_filtering) or (row["DEL_time"]>5400 and time_filtering) or row["Spawned"]==False :
         return False
     else:
         return True
-
 
 
 class DataframeCreator():
@@ -47,26 +50,26 @@ class DataframeCreator():
         self.baseline_length_dict=dill.load(input_file)
         
         ##The datframes  generation function shod be called in order,
-        #as soem of teh em require already created dataframes
+        #as some of them require already created dataframes
         #the order is self.create_flstlog_dataframe() 
-        # self.create_loslog_dataframe() 
+        #self.create_loslog_dataframe() 
         #self.create_conflog_dataframe() 
         #self.create_geolog_dataframe()
         #self.create_env_metrics_dataframe()
+        #self.create_env3_metric_dataframe()
         #self.create_density_dataframe()
+        #self.create_density_constrained_dataframe()
         #self.create_metrics_dataframe()
 
-        
-        self.flst_log_dataframe,self.loitering_nfz_data_frame = self.create_flstlog_dataframe() 
-        self.los_log_dataframe = self.create_loslog_dataframe() 
-        self.conf_log_dataframe = self.create_conflog_dataframe() 
-        self.geo_log_dataframe = self.create_geolog_dataframe()
-        
-        #self.reg_log_dataframe = self.create_reglog_dataframe()
-        self.env_metrics_dataframe=self.create_env_metrics_dataframe()
-        self.dens_log_dataframe=self.create_density_dataframe()
-        #self.time_log_dataframe=self.create_time_object_dataframe() 
-        self.metrics_dataframe=self.create_metrics_dataframe()
+        self.create_flstlog_dataframe() 
+        self.create_loslog_dataframe() 
+        self.create_conflog_dataframe() 
+        self.create_geolog_dataframe()
+        self.create_env_metrics_dataframe()
+        self.create_env3_metric_dataframe()
+        self.create_density_dataframe()
+        self.create_density_constrained_dataframe()
+        self.create_metrics_dataframe()
         return
     
     def get_file_names(self):
@@ -145,28 +148,24 @@ class DataframeCreator():
                         
                     tmp_list.append(crash)
                     
-                    in_time=False
-                    if tmp_list[3]<=5400:
-                        in_time=True
+                    in_time=True
+                    if time_filtering:
+                        if tmp_list[3]>5400:
+                            in_time=False
                     
                     tmp_list.append(in_time)
                     loslog_list.append(tmp_list)
         
-        
-    
 
         loslog_data_frame = pd.DataFrame(loslog_list, columns=col_list)
-
                 
         print("LOSLOG dataframe created!")
-        
+    
         
         output_file=open("dills/loslog_dataframe.dill", 'wb')
         dill.dump(loslog_data_frame,output_file)
         output_file.close()
-        
 
-        return loslog_data_frame
 
     ####
 
@@ -225,9 +224,10 @@ class DataframeCreator():
                         elif iv==10:
                             tmp_list.append(float(value[:-2]))
                             
-                    in_time=False
-                    if tmp_list[2]<=5400:
-                        in_time=True
+                    in_time=True
+                    if time_filtering:
+                        if tmp_list[2]>5400:
+                            in_time=False
                     
                     tmp_list.append(in_time)
         
@@ -245,8 +245,7 @@ class DataframeCreator():
         dill.dump(conflog_data_frame,output_file)
         output_file.close()
         
-        
-        return conflog_data_frame
+
 
     ####
 
@@ -339,9 +338,10 @@ class DataframeCreator():
                         loitering=True
                     tmp_list.append(loitering)
                     
-                    in_time=False
-                    if tmp_list[4]<=5400:
-                        in_time=True
+                    in_time=True
+                    if time_filtering:
+                        if tmp_list[4]>5400:
+                            in_time=False
                         
                     node_in_nfz=False
                     in_nfz_applied=False
@@ -363,8 +363,6 @@ class DataframeCreator():
                     geolog_list.append(tmp_list)
         
         
-        
-        
         geolog_data_frame = pd.DataFrame(geolog_list, columns=col_list)
 
                 
@@ -375,11 +373,7 @@ class DataframeCreator():
         dill.dump(geolog_data_frame,output_file)
         output_file.close()
         
-        
-        return geolog_data_frame
 
-    ####
-    
     
     ##FLSTLOG dataframe
     def create_flstlog_dataframe(self):
@@ -461,7 +455,8 @@ class DataframeCreator():
                     base_vertical_dist=util_functions.compute_baseline_vertical_distance(loitering)
                     base_ascending_dist=util_functions.compute_baseline_ascending_distance()
                     base_3d_dist=base_2d_dist+base_vertical_dist
-                    base_flight_time=base_2d_dist/cruising_speed
+                    base_flight_time= util_functions.compute_baseline_flight_time(base_2d_dist,aircraft_type)
+                
                     base_arrival_time=base_flight_time+time
                 
                     if flight_data[9]!="":
@@ -576,6 +571,10 @@ class DataframeCreator():
         print("FLSTLOG Dataframe created!")
         
 
+        ##check if baseline flight time is larger than actual flight time
+        df_shape=flstlog_data_frame[flstlog_data_frame["FLIGHT_time"]<flstlog_data_frame["Baseline_flight_time"]].shape[0]
+        if df_shape:
+            print("Baseline_flight_time is larger than actual flight time in ",df_shape," cases")
         
         
         output_file=open("dills/flstlog_dataframe.dill", 'wb')
@@ -585,7 +584,6 @@ class DataframeCreator():
         output_file=open("dills/loitering_nfz_dataframe.dill", 'wb')
         dill.dump(loitering_nfz_data_frame,output_file)
         output_file.close()
-        return flstlog_data_frame,loitering_nfz_data_frame
     
 
     ####
@@ -619,6 +617,105 @@ class DataframeCreator():
         return acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list
 
     ####
+##REGLOG dataframe
+    def create_env3_metric_dataframe(self):
+        
+        col_list1 = ["Scenario_name","ENV3_1"]
+        col_list2 = ["Scenario_name","ENV3_2"]
+        
+        env3_1_mertic_list = list()
+        env3_2_mertic_list = list()
+        ##Read REGLOGs
+        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
+ 
+            log_type = file_name.split("_")[0]
+            if log_type=="REGLOG":
+                if ii<len(self.centralised_log_names):
+                    log_file=path_to_logs+"Centralised/"+file_name
+                    concept="1" ##CENTRALISED
+                elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
+                    log_file=path_to_logs+"Decentralised/"+file_name
+                    concept="3" ##DECENTRALISED
+                else:
+                    log_file=path_to_logs+"Hybrid/"+file_name
+                    concept="2" ##HYBRID              
+                scenario_var = file_name.split("_")
+                if scenario_var[3]=="very": 
+                    density="very_low"
+                    distribution=scenario_var[5]
+                    repetition=scenario_var[6]
+                    uncertainty=scenario_var[7]
+                else:
+                    density=scenario_var[3]
+                    distribution=scenario_var[4]
+                    repetition=scenario_var[5]
+                    uncertainty=scenario_var[6]      
+                if uncertainty[0]!="R"and uncertainty[0]!="W":
+                    uncertainty=""
+                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
+                #print(scenario_name)        
+                acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
+
+            
+                env3_mertic_list=[]
+                for i, line in enumerate(acid_lines_list):
+                    acid_line_list = line.split(",")
+                    if float(acid_line_list[0])>5400 and time_filtering:
+                        break
+                    
+                    try :
+                        alt_line_list = alt_lines_list[i].split(",")
+                        lat_line_list = lat_lines_list[i].split(",")
+                        lon_line_list = lon_lines_list[i].split(",")
+                    except:
+                        print('Problem with',file_name)
+                    
+                    ##The next lines where in the outer intention
+                    if i>len(lon_lines_list)-1:
+                        print('Problem with',file_name)
+                        continue
+                    positions_list=[]
+            
+                    for iv, value in enumerate(acid_line_list):
+                        if iv == 0:
+                            time_stamp=float(acid_line_list[0])
+                            #print(time_stamp)
+                            continue
+                        
+                        tmp=[float(lat_line_list[iv]),float(lon_line_list[iv]),float(alt_line_list[iv])]
+                        positions_list.append(tmp)
+     
+                
+     
+                    env3_list=ENV_metrics.compute_i_scpt(positions_list)
+  
+                    env3_mertic_list.append(env3_list) 
+               
+                lscp=ENV_metrics.compute_env3_1(env3_mertic_list)
+                env3_2=ENV_metrics.compute_env3_2(env3_mertic_list)
+                env3_1_tmp_list=[scenario_name,lscp]  
+                env3_2_tmp_list=[scenario_name,env3_2]  
+                env3_1_mertic_list.append(env3_1_tmp_list) 
+                env3_2_mertic_list.append(env3_2_tmp_list) 
+
+        
+        
+        env3_1_metric_data_frame = pd.DataFrame(env3_1_mertic_list, columns=col_list1)
+        env3_2_metric_data_frame = pd.DataFrame(env3_2_mertic_list, columns=col_list2)
+
+
+        print("ENV3_MERTICS Dataframe created!")
+        
+        
+        output_file=open("dills/env3_1_metric_dataframe.dill", 'wb')
+        dill.dump(env3_1_metric_data_frame,output_file)
+        output_file.close()
+        
+        output_file=open("dills/env3_2_metric_dataframe.dill", 'wb')
+        dill.dump(env3_2_metric_data_frame,output_file)
+        output_file.close()
+                        
+                        
 ##REGLOG dataframe
     def create_env_metrics_dataframe(self):
         
@@ -654,7 +751,7 @@ class DataframeCreator():
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
-                print(scenario_name)
+                #print(scenario_name)
                 
                 
         
@@ -665,7 +762,7 @@ class DataframeCreator():
         
                 for i, line in enumerate(acid_lines_list):
                     acid_line_list = line.split(",")
-                    if float(acid_line_list[0])>5400:
+                    if float(acid_line_list[0])>5400 and time_filtering:
                         break
                     
                     try :
@@ -732,19 +829,12 @@ class DataframeCreator():
         
         env_emtrics_data_frame = pd.DataFrame(env_mertics_list, columns=col_list)
 
-# =============================================================================
-#         pd.set_option('display.max_columns', 7)
-# 
-#         print(reglog_data_frame.head(50))
-# =============================================================================
         print("ENV_MERTICS Dataframe created!")
-        
         
         output_file=open("dills/env_metrics_dataframe.dill", 'wb')
         dill.dump(env_emtrics_data_frame,output_file)
         output_file.close()
-
-        return env_emtrics_data_frame    
+ 
     
 ##REGLOG dataframe
     def create_reglog_dataframe(self):
@@ -832,6 +922,91 @@ class DataframeCreator():
 
         return reglog_data_frame
     
+    ##DENSITY dataframe
+    def create_density_constrained_dataframe(self):
+        utils=util_functions.Constrained_airspace()
+        
+        col_list = [ "scenario_name", "Time_stamp", "Density_constrained"]
+        
+        densitylog_list = list()
+        
+        ##Read REGLOGs
+        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
+ 
+            log_type = file_name.split("_")[0]
+            if log_type=="REGLOG":
+                if ii<len(self.centralised_log_names):
+                    log_file=path_to_logs+"Centralised/"+file_name
+                    concept="1" ##CENTRALISED
+                elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
+                    log_file=path_to_logs+"Decentralised/"+file_name
+                    concept="3" ##DECENTRALISED
+                else:
+                    log_file=path_to_logs+"Hybrid/"+file_name
+                    concept="2" ##HYBRID              
+                scenario_var = file_name.split("_")
+                if scenario_var[3]=="very": 
+                    density="very_low"
+                    distribution=scenario_var[5]
+                    repetition=scenario_var[6]
+                    uncertainty=scenario_var[7]
+                else:
+                    density=scenario_var[3]
+                    distribution=scenario_var[4]
+                    repetition=scenario_var[5]
+                    uncertainty=scenario_var[6]   
+                if distribution!="40":
+                    continue #do not process scenarios with other distributions
+                if uncertainty[0]!="R"and uncertainty[0]!="W":
+                    uncertainty=""
+                else:
+                    continue #do not process scenarios with uncertainties
+                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty       
+                acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
+
+            
+        
+                for i, line in enumerate(acid_lines_list):
+                    acid_line_list = line.split(",")
+                    try :
+                        alt_line_list = alt_lines_list[i].split(",")
+                        lat_line_list = lat_lines_list[i].split(",")
+                        lon_line_list = lon_lines_list[i].split(",")
+                    except:
+                        print('Problem with',file_name)
+                    
+                    ##The next lines where in the outer intention
+                    if i>len(lon_lines_list)-1:
+                        print('Problem with',file_name)
+                        continue
+                    
+                    dens=0
+            
+                    for iv, value in enumerate(acid_line_list):
+                        if iv == 0:
+                            continue
+                        
+                        if utils.inConstrained([float(lon_line_list[iv]),float(lat_line_list[iv])]):
+                            dens+=1
+                        
+                     
+                    tmp_list = [ scenario_name, float(acid_line_list[0]),dens]
+            
+                    densitylog_list.append(tmp_list)  
+
+        
+        
+        desnistylog_data_frame = pd.DataFrame(densitylog_list, columns=col_list)
+
+
+        print("Density constrained Dataframe created!")
+
+        
+        
+        output_file=open("dills/density_constrained_dataframe.dill", 'wb')
+        dill.dump(desnistylog_data_frame,output_file)
+        output_file.close()
+               
     
     ##DENSITY dataframe
     def create_density_dataframe(self):
@@ -870,7 +1045,6 @@ class DataframeCreator():
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty       
                 
                 
-        
                 acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
 
             
@@ -886,99 +1060,18 @@ class DataframeCreator():
         
         desnistylog_data_frame = pd.DataFrame(densitylog_list, columns=col_list)
 
-# =============================================================================
-#         pd.set_option('display.max_columns', 7)
-# 
-#         print(reglog_data_frame.head(50))
-# =============================================================================
+
         print("DensityLOG Dataframe created!")
-        print(desnistylog_data_frame.count())
         
         
         output_file=open("dills/densitylog_dataframe.dill", 'wb')
         dill.dump(desnistylog_data_frame,output_file)
         output_file.close()
-
-        return desnistylog_data_frame
-
-    ##time object dataframe
-    def create_time_object_dataframe(self):
-
-        col_list = ["Time_object_id", "scenario_name", "Time_stamp", "#Aircaft_Alive", "Sound_exposure_p1",
-                    "Sound_exposure_p2",
-                    "Sound_exposure_p3"]  ## add as many "Sound_exposure_p1" as the points of interest
-        dataframe_cnt=0
-        df = pd.DataFrame([col_list], columns=col_list)
-        time_data_frame  =self.spark.createDataFrame(df)
-        time_object_cnt = 0
-        
-        ##Read REGLOGs
-        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
-            log_type = file_name.split("_")[0]
-            if log_type=="REGLOG":
-                if ii<len(self.centralised_log_names):
-                    log_file=path_to_logs+"Centralised/"+file_name
-                    concept="1" ##CENTRALISED
-                elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
-                    log_file=path_to_logs+"Decentralised/"+file_name
-                    concept="3" ##DECENTRALISED
-                else:
-                    log_file=path_to_logs+"Hybrid/"+file_name
-                    concept="2" ##HYBRID              
-                scenario_var = file_name.split("_")
-                if scenario_var[3]=="very": 
-                    density="very_low"
-                    distribution=scenario_var[5]
-                    repetition=scenario_var[6]
-                    uncertainty=scenario_var[7]
-                else:
-                    density=scenario_var[3]
-                    distribution=scenario_var[4]
-                    repetition=scenario_var[5]
-                    uncertainty=scenario_var[6]   
-                if uncertainty[0]!="R"and uncertainty[0]!="W":
-                    uncertainty=""
-                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
-        
-
-                acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
-        
-                
-                time_list = list()
-        
-                for line in acid_lines_list:
-                    line_list = line.split(",")
-                    
-                    aircraft_counter = len(line_list) - 1
-        
-                    sound_exp_p1=0 #TODO : create a function to compute that with inputs the point p1, and the regolog_dataframe, same for teh rest of the points
-                    sound_exp_p2=0
-                    sound_exp_p3=0
-                    #TODO : we need to define the points 
-                    tmp_list = [time_object_cnt, scenario_name, float(line_list[0]),aircraft_counter,sound_exp_p1,sound_exp_p2,sound_exp_p3]
-                    time_object_cnt = time_object_cnt + 1
-                    time_list.append(tmp_list)
-
-
-
-                df = pd.DataFrame(time_list, columns=col_list)
-                if dataframe_cnt==0:
-                    time_data_frame = self.spark.createDataFrame(df)
-                    dataframe_cnt=1
-                else:
-                    time_data_frame_tmp = self.spark.createDataFrame(df)
-                    time_data_frame=time_data_frame.union(time_data_frame_tmp)
-                    
-
-        #time_data_frame.show()
-        return time_data_frame
-
-    ####
-    
+ 
 
     ##metrics dataframe
     def create_metrics_dataframe(self):
-        col_list = ["Scenario_name","SAF1", "SAF2", "SAF2_1", "SAF3","SAF4", "SAF5", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
+        col_list = ["Scenario_name","SAF1", "SAF2", "SAF2_1","SAF3","SAF4", "SAF5", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
             
  
         dataframe_cnt=0
@@ -1033,7 +1126,7 @@ class DataframeCreator():
                 saf1=SAF_metrics.compute_saf1(filtered_conf_dataframe) 
                 saf2=SAF_metrics.compute_saf2(filtered_los_dataframe) 
                 saf2_1=SAF_metrics.compute_saf2_1(filtered_los_dataframe) 
-                saf3=(saf1-saf2)/saf1
+                saf3=((saf1-saf2)/saf1)*100
                 saf4=SAF_metrics.compute_saf4(filtered_los_dataframe) 
                 saf5=SAF_metrics.compute_saf5(filtered_los_dataframe)
                 saf6=SAF_metrics.compute_saf6(filtered_geo_dataframe)
@@ -1112,13 +1205,13 @@ class DataframeCreator():
                 aircraft_succesful_number=filtered_flst_dataframe[filtered_flst_dataframe["Mission_completed"]==True].shape[0]
                 aircraft_spawned_number=filtered_flst_dataframe[filtered_flst_dataframe["Spawned"]==True].shape[0]
                 aeq1=AEQ_metrics.compute_aeq1(filtered_flst_dataframe) 
-                aeq1_1=aeq1/aircraft_number
+                aeq1_1=(aeq1/aircraft_number)*100
                 aeq2=AEQ_metrics.compute_aeq2(filtered_flst_dataframe)
-                aeq2_1=aeq2/aircraft_spawned_number
+                aeq2_1=(aeq2/aircraft_spawned_number)*100
                 aeq3=AEQ_metrics.compute_aeq3(filtered_flst_dataframe)
                 aeq4=AEQ_metrics.compute_aeq4(filtered_flst_dataframe)
                 aeq5=AEQ_metrics.compute_aeq5(filtered_flst_dataframe)
-                aeq5_1=aeq5/aircraft_number
+                aeq5_1=(aeq5/aircraft_number)*100
                 
                 eff1=EFF_metrics.compute_eff1(filtered_flst_dataframe) 
                 eff2=EFF_metrics.compute_eff2(filtered_flst_dataframe) 
@@ -1155,6 +1248,7 @@ class DataframeCreator():
         metrics_data_frame=pd.merge(metrics_data_frame,metrics_data_frame2,on=["Scenario_name"],how="outer")
         
         metrics_data_frame["CAP2"]=metrics_data_frame["SAF2"]/metrics_data_frame["#Spawned_aircraft_number"]
+        metrics_data_frame["SAF1_2"]=metrics_data_frame["SAF1"]/metrics_data_frame["#Spawned_aircraft_number"]
 
         del flst_log_dataframe            
                     
@@ -1218,6 +1312,12 @@ class DataframeCreator():
         
         metrics_data_frame=pd.merge(metrics_data_frame,env_metrics_dataframe,on=["Scenario_name"],how="outer")
         
+        input_file=open("dills/env3_2_metric_dataframe.dill", 'rb')
+        env_metrics_dataframe=dill.load(input_file)
+        input_file.close()
+        
+        metrics_data_frame=pd.merge(metrics_data_frame,env_metrics_dataframe,on=["Scenario_name"],how="outer")
+
         
         print("Metrics dataframes created!")
         
@@ -1231,6 +1331,8 @@ class DataframeCreator():
         dill.dump(prio_metrics_data_frame,output_file)
         output_file.close()
         
+        
+        metrics_data_frame.to_csv("metrics.csv")
         return metrics_data_frame
 
     ####

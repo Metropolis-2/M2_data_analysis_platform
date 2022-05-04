@@ -19,7 +19,7 @@ def compute_eff1(df):
     sum_ideal_length=df_filtered["Baseline_2D_distance"].sum()
     sum_actual_length=df_filtered["2D_dist"].sum()
     eff1=sum_ideal_length/sum_actual_length
-    return eff1
+    return eff1*100
 
 
 def compute_eff2(df):
@@ -32,12 +32,12 @@ def compute_eff2(df):
     :return: the computed EFF2 metric.
     """
     
-    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
+    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])&(df['ALT_dist']!=-1)]
 
     sum_ideal_length=df_filtered["Baseline_vertical_distance"].sum()
     sum_actual_length=df_filtered["ALT_dist"].sum()
     eff2=sum_ideal_length/sum_actual_length
-    return eff2
+    return eff2*100
 
 def compute_eff3(df):
     """ EFF-3: Ascending route efficiency
@@ -48,11 +48,11 @@ def compute_eff3(df):
     :param dataframe:filtered by sceanrio flst_dataframe.
     :return: the computed EFF3 metric.
     """
-    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
+    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])&(df['Ascend_dist']!=-1)]
     sum_ideal_length=df_filtered["Baseline_ascending_distance"].sum()
     sum_actual_length=df_filtered["Ascend_dist"].sum()
     eff3=sum_ideal_length/sum_actual_length
-    return eff3
+    return eff3*100
 
 def compute_eff4(df):
     """ EFF-4: 3D distance route efficiency
@@ -64,11 +64,11 @@ def compute_eff4(df):
     :return: the computed EFF4 metric.
     """
     
-    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])]
+    df_filtered=df[(df['Spawned'])&(df['Mission_completed'])&(df['3D_dist']!=-1)]
     sum_ideal_length=df_filtered["Baseline_3D_distance"].sum()
     sum_actual_length=df_filtered["3D_dist"].sum()
     eff4=sum_ideal_length/sum_actual_length
-    return eff4
+    return eff4*100
 
 def compute_eff5(df):
     """ EFF-5: Route duration efficiency
@@ -83,7 +83,7 @@ def compute_eff5(df):
     sum_ideal_time=df_filtered["Baseline_flight_time"].sum()
     sum_actual_time=df_filtered["FLIGHT_time"].sum()
     eff5=sum_ideal_time/sum_actual_time
-    return eff5
+    return eff5*100
 
 
 def compute_eff6(df):
