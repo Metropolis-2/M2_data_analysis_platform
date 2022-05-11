@@ -78,22 +78,41 @@ def lighten_color(color, amount=0.5):
     c = colorsys.rgb_to_hls(*mc.to_rgb(c))
     return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
 
+##Initialisation of the scenario types to be graphed
+
+##Initialisation of the concept types to be graphed
+#If you do not want to graph for all three concepts, you may delete the unwanted concept from the variables  concepts and concept_names and concepts_colours
 concepts=["1_","2_","3_"]
 concept_names=["Centralised","Hybrid","Decentralised"]
+concepts_colours=['r','g','b']
+
+##Initialisation of the density types to be graphed
+#If you do not want to graph for all five density types, you may delete the unwanted densities from the variables  densities and density_names
 densities=["very_low_","low_","medium_","high_","ultra_"]
 density_names=["very_low","low","medium","high","very_high"]
+
+##Initialisation of the traffic mix types to be graphed
+#If you do not want to graph for all three traffic mix types, you may delete the unwanted traffic mix from the variables  traffic_mix and traffic_mix_names
 traffic_mix=["40_","50_","60_"]
 traffic_mix_names=["40%","50%","60%"]
+
+##Initialisation of the repetition number to be graphed
+#If you do not want to graph for all nine repetitions, you may delete the unwanted repetitions from the variable repetitions
 repetitions=["0_","1_","2_","3_","4_","5_","6_","7_","8_"]
+
+##Initialisation of the uncertaity type to be graphed
+#If you do not want to graph for all seven uncertainy types, you may delete the unwanted uncertainty types from the variables uncertainties,rogue_uncertainties,wind_uncertainties and uncertainties_names
 uncertainties=["","R1","R2","R3","W1","W3","W5"]
 rogue_uncertainties=["","R1","R2","R3"]
 wind_uncertainties=["","W1","W3","W5"]
 uncertainties_names=["No uncertainty","R1","R2","R3","W1","W3","W5"]
-concepts_colours=['r','g','b']
+
+
+
 percentage_metrics=["AEQ1_1","AEQ2_1","AEQ5_1","EFF1","EFF2","EFF3","EFF4","EFF5","SAF3"]    
 metrics_units=[""," (%)",""," (%)"," (sec)"," (sec)",""," (%)"," (sec)",""," (%)"," (%)"," (%)"," (%)"," (%)"," (sec)"," (sec)",\
-                       " (m)","ENV3_1","","","","","",""," (%)"," (m)"," (sec)","","","","","","","",\
-                           ""," (sec)"," (m)"," (sec)",""," (sec)"," (m)"," (sec) "] #TODO decide on ENV3_1 measuremnt unit
+                       " (m)","","","","","","",""," (%)"," (m)"," (sec)","","","","","","","",\
+                           ""," (sec)"," (m)"," (sec)",""," (sec)"," (m)"," (sec) "] 
         
 metrics_title=["Number of cancelled demands","Percentage of cancelled demands","Number of inoperative trajectories","Percentage of inoperative trajectories"\
                        ,"Demand delay dispersion","The worst demand delay","Number of inequitable delayed demands","Percentage of inequitable delayed demands",\
@@ -102,7 +121,7 @@ metrics_title=["Number of cancelled demands","Percentage of cancelled demands","
                        "Weighted average altitude","Sound exposure","Number of points with significant sound exposure","Altitude dispersion","Number of conflicts","Number of conflicts per flight","Number of intrusions","Number of severe intrusions",\
                            "Intrusion prevention rate","Minimum separation","Time spent in LOS","Number of geofence violations","Number of severe geofence violations"\
                                ,"Number of severe loitering NFZ violations","Number of severe buildings/static geofences violations","Number of severe open airspace geofences violations "\
-                                   ,"Number of severe buildings violations ","Number of severe loitering NFZ violations, with origin/destination in NFZ",\
+                                   ,"Number of severe building violations ","Number of severe loitering NFZ violations, with origin/destination in NFZ",\
                            "Number of severe loitering NFZ violations within 3 minutes of the NFZ activation","Weighted mission duration","Weighted mission track length",\
                                "Additional demand delay","Additional number of intrusions",\
                                "Average mission duration per priority level","Average mission track length per priority level","Total delay per priority level"]    

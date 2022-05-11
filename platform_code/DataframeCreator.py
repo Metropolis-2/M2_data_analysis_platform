@@ -50,6 +50,10 @@ class DataframeCreator():
         input_file=open("data/baseline_routes.dill", 'rb')
         self.baseline_length_dict=dill.load(input_file)
         
+    def compute_env3_statistics(self):
+        self.create_env3_metric_statistics() 
+    
+    def create_dataframes(self):
         ##The datframes  generation function shod be called in order,
         #as some of them require already created dataframes
         #the order is self.create_flstlog_dataframe() 
@@ -652,7 +656,127 @@ class DataframeCreator():
 
     ####
 ##REGLOG dataframe
+#env3 metrics thread
+    def ce3_stats_thread(self,x):
+        file_name = x[1]
+        ii=x[0]
+        if ii<len(self.centralised_log_names):
+            log_file=path_to_logs+"Centralised/"+file_name
+            concept="1" ##CENTRALISED
+        elif ii<len(self.centralised_log_names)+len(self.decentralised_log_names):
+            log_file=path_to_logs+"Decentralised/"+file_name
+            concept="3" ##DECENTRALISED
+        else:
+            log_file=path_to_logs+"Hybrid/"+file_name
+            concept="2" ##HYBRID              
+        scenario_var = file_name.split("_")
+        if scenario_var[3]=="very": 
+            density="very_low"
+            distribution=scenario_var[5]
+            repetition=scenario_var[6]
+            uncertainty=scenario_var[7]
+        else:
+            density=scenario_var[3]
+            distribution=scenario_var[4]
+            repetition=scenario_var[5]
+            uncertainty=scenario_var[6]      
+        if uncertainty[0]!="R"and uncertainty[0]!="W":
+            uncertainty=""
 
+        scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
+      
+        acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
+
+    
+        env3_statistics_list=[]
+        max_list=[]
+
+        for i, line in enumerate(acid_lines_list):
+            acid_line_list = line.split(",")
+            if float(acid_line_list[0])>5400 and time_filtering:
+                break
+            
+            try :
+                alt_line_list = alt_lines_list[i].split(",")
+                lat_line_list = lat_lines_list[i].split(",")
+                lon_line_list = lon_lines_list[i].split(",")
+            except:
+                print('Problem with',file_name)
+            
+            ##The next lines where in the outer intention
+            if i>len(lon_lines_list)-1:
+                print('Problem with',file_name)
+                continue
+            positions_list=[]
+    
+            for iv, value in enumerate(acid_line_list):
+                if iv == 0:
+                    time_stamp=float(acid_line_list[0])
+                    #print(time_stamp)
+                    continue
+                
+                tmp=[float(lat_line_list[iv]),float(lon_line_list[iv]),float(alt_line_list[iv])]
+                positions_list.append(tmp)
+ 
+        
+ 
+            env3_list=ENV_metrics.compute_i_scpt(positions_list)
+            max_list.append(max(env3_list))
+     
+
+            env3_statistics_list+=env3_list
+       
+        min_noise=min(env3_statistics_list) 
+        max_noise=max(env3_statistics_list) 
+        max_avg=sum(max_list)/len(max_list)
+        avg_noise=sum(env3_statistics_list)/len(env3_statistics_list)
+        return [scenario_name,density,min_noise,max_noise,max_avg,avg_noise]         
+    
+    def create_env3_metric_statistics(self):
+        
+        col_list = ["Scenario_name","density","min_noise","max_noise","max_avg","avg_noise"]
+
+        
+        env3_statistics_list = list()
+
+        agg_list=list()
+        maplist=[]
+        ##Read REGLOGs
+        for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
+ 
+            log_type = file_name.split("_")[0]
+            if log_type=="REGLOG":
+                maplist.append([ii,file_name])       
+        pool = Pool(processes=self.threads) 
+        agg_list=pool.map(self.ce3_stats_thread, maplist)
+        pool.close()
+        pool.join()        
+        env3_statistics_list = [x for x in agg_list]
+
+        env3_statistics_dataframe = pd.DataFrame(env3_statistics_list, columns=col_list)  
+
+        print("ENV3_MERTICS statics computed!")
+        
+        
+        densities=["very_low","low","medium","high","ultra"]
+        for dens in densities:
+            
+            print("For "+dens+" density:")
+            filtered=env3_statistics_dataframe[env3_statistics_dataframe['density']==dens]
+            min_noise=filtered["min_noise"].min()
+            avg_min_noise=filtered["min_noise"].mean()
+            max_noise=filtered["max_noise"].max()
+            max_avg=filtered["max_avg"].mean()
+            avg_noise=filtered["avg_noise"].mean()
+            print("Overall minimum noise: ",min_noise)
+            print("Average minimum noise: ",avg_min_noise)
+            print("Overall maximum noise: ",max_noise)
+            print("Average maximum noise: ",max_avg)
+            print("Average noise: ",avg_noise)
+        
+        
+
+        
 #env3 metrics thread
     def ce3mthread(self,x):
         file_name = x[1]
