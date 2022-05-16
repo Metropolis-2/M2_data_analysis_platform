@@ -14,7 +14,7 @@ from pyproj import Transformer
 env3_radius_threshold=16 # in meters
 env3_reference_altitude=9.144 # 30 feet
 
-sound_exposure_threshold=2 #TODO rethink that value
+sound_exposure_threshold=0.01517 #TODO rethink that value
 
 transformer = Transformer.from_crs('epsg:4326', 'epsg:32633')
 
@@ -60,7 +60,7 @@ def compute_eucledean_distance(lat1,lon1,lat2,lon2):
     return math.sqrt((p1[0]-p2[0])*(p1[0]-p2[0])+(p1[1]-p2[1])*(p1[1]-p2[1]))
 
 
-def compute_env3_1(i_scpt_list):
+def compute_env3_1(i_scpt_list,number_of_time_steps):
     """ ENV-3_1:  Equivalent Noise Level
 
     Represent total sound exposure at the given point on city area surface.
@@ -83,7 +83,7 @@ def compute_env3_1(i_scpt_list):
             #print("no exposure")
             
         else:
-            env3_1[i]/=180 #number of time steps
+            env3_1[i]/=number_of_time_steps
             #env3_1[i]=10*math.log10(env3_1[i])
             #print(env3_1[i])
  

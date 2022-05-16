@@ -842,7 +842,7 @@ class DataframeCreator():
   
             env3_mertic_list.append(env3_list) 
        
-        lscp=ENV_metrics.compute_env3_1(env3_mertic_list)
+        lscp=ENV_metrics.compute_env3_1(env3_mertic_list,len(lon_lines_list))
         env3_2=ENV_metrics.compute_env3_2(env3_mertic_list)
         env3_1_tmp_list=[scenario_name,lscp]  
         env3_2_tmp_list=[scenario_name,env3_2]  

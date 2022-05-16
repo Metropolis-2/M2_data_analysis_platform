@@ -16,6 +16,7 @@ from matplotlib.patches import PathPatch
 import matplotlib
 import matplotlib.colors as mc
 import colorsys
+import math
 
 diagrams_path="output_graphs/"
 dills_path="dills/"
@@ -105,7 +106,7 @@ repetitions=["0_","1_","2_","3_","4_","5_","6_","7_","8_"]
 uncertainties=["","R1","R2","R3","W1","W3","W5"]
 rogue_uncertainties=["","R1","R2","R3"]
 wind_uncertainties=["","W1","W3","W5"]
-uncertainties_names=["No uncertainty","R1","R2","R3","W1","W3","W5"]
+uncertainties_names=["No uncertainty","R33","R66","R100","W1","W3","W5"]
 
 
 
@@ -254,6 +255,7 @@ class GraphCreator():
 
     def all_values_boxplots_baseline(self,metric,dataframe):
         vals=[]
+        db_vals=[]
         for density in densities:
             for t_mix in traffic_mix:
                 for conc in concepts:
@@ -265,11 +267,16 @@ class GraphCreator():
                                 for metric_value in metric_list:
                                     tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,metric_value]
                                     vals.append(tmp)
+                                    if metric_value>0:
+                                        metric_in_db=10*math.log10(metric_value)
+                                        tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,metric_in_db]
+                                        db_vals.append(tmp)
                         except:
                             #metric_value=240+random.randint(-5,5)
                             print("No value for scenario baseline",scenario_name,metric)
     
         metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric])
+        metric_db_pandas_df=pd.DataFrame(db_vals,columns=["Concept","Density","Traffic mix","repetition",metric])
         ##Create one graph for every traffic mix
         for t_mix in traffic_mix_names:
             df1=metric_pandas_df[metric_pandas_df["Traffic mix"]==t_mix]
@@ -281,6 +288,15 @@ class GraphCreator():
             plt.savefig(diagrams_path+"pdfs/boxplots/by_traffic_mix/"+metric+"_"+t_mix+".pdf",bbox_inches='tight')
             plt.clf()
             
+            df1=metric_db_pandas_df[metric_db_pandas_df["Traffic mix"]==t_mix]
+            fig=plt.figure()
+            sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=self.metrics_titles_dict[metric]+" for "+t_mix+" traffic mix",ylabel = metric+" (dB)")
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+            adjust_box_widths(fig, 0.5)
+            plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_in_dB_"+t_mix,bbox_inches='tight')
+            plt.savefig(diagrams_path+"pdfs/boxplots/by_traffic_mix/"+metric+"_in_dB_"+t_mix+".pdf",bbox_inches='tight')
+            plt.clf()            
+            
         ##Create one graph for every density
         for dens in density_names:
              df1=metric_pandas_df[metric_pandas_df["Density"]==dens]
@@ -291,6 +307,15 @@ class GraphCreator():
              plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_"+dens,bbox_inches='tight')
              plt.savefig(diagrams_path+"pdfs/boxplots/by_density/"+metric+"_"+dens+".pdf",bbox_inches='tight')
              plt.clf()
+             
+             df1=metric_db_pandas_df[metric_db_pandas_df["Density"]==dens]
+             fig=plt.figure()
+             sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=self.metrics_titles_dict[metric]+" for "+dens+" density",ylabel = metric+" (dB)")
+             plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+             adjust_box_widths(fig, 0.5)
+             plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_in_dB_"+dens,bbox_inches='tight')
+             plt.savefig(diagrams_path+"pdfs/boxplots/by_density/"+metric+"_in_dB_"+dens+".pdf",bbox_inches='tight')
+             plt.clf()             
 
     def metric_boxplots_wind(self,metric,dataframe,t_mix):
         vals=[]
