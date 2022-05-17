@@ -23,6 +23,8 @@ dills_path="dills/"
 
 scale_y=True
 
+reference_drone_noise=73 #dB
+
 matplotlib.use('Agg')
 
 
@@ -256,6 +258,7 @@ class GraphCreator():
     def all_values_boxplots_baseline(self,metric,dataframe):
         vals=[]
         db_vals=[]
+        db_vals_with_0=[]
         for density in densities:
             for t_mix in traffic_mix:
                 for conc in concepts:
@@ -268,15 +271,20 @@ class GraphCreator():
                                     tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,metric_value]
                                     vals.append(tmp)
                                     if metric_value>0:
-                                        metric_in_db=10*math.log10(metric_value)
+                                        metric_in_db=10*math.log10(metric_value)+reference_drone_noise
                                         tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,metric_in_db]
                                         db_vals.append(tmp)
+                                        db_vals_with_0.append(tmp)
+                                    else:
+                                        tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,0]
+                                        db_vals_with_0.append(tmp)
                         except:
                             #metric_value=240+random.randint(-5,5)
                             print("No value for scenario baseline",scenario_name,metric)
     
         metric_pandas_df=pd.DataFrame(vals,columns=["Concept","Density","Traffic mix","repetition",metric])
         metric_db_pandas_df=pd.DataFrame(db_vals,columns=["Concept","Density","Traffic mix","repetition",metric])
+        metric_with_zero_db_pandas_df=pd.DataFrame(db_vals_with_0,columns=["Concept","Density","Traffic mix","repetition",metric])
         ##Create one graph for every traffic mix
         for t_mix in traffic_mix_names:
             df1=metric_pandas_df[metric_pandas_df["Traffic mix"]==t_mix]
@@ -295,7 +303,16 @@ class GraphCreator():
             adjust_box_widths(fig, 0.5)
             plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_in_dB_"+t_mix,bbox_inches='tight')
             plt.savefig(diagrams_path+"pdfs/boxplots/by_traffic_mix/"+metric+"_in_dB_"+t_mix+".pdf",bbox_inches='tight')
-            plt.clf()            
+            plt.clf()   
+            
+            df1=metric_with_zero_db_pandas_df[metric_with_zero_db_pandas_df["Traffic mix"]==t_mix]
+            fig=plt.figure()
+            sns.boxplot(y=metric, x='Density', data=df1, palette=concepts_colours,hue='Concept').set(title=self.metrics_titles_dict[metric]+" for "+t_mix+" traffic mix",ylabel = metric+" (dB)")
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+            adjust_box_widths(fig, 0.5)
+            plt.savefig(diagrams_path+"boxplots/by_traffic_mix/"+metric+"_in_dB_with_zeroes_"+t_mix,bbox_inches='tight')
+            plt.savefig(diagrams_path+"pdfs/boxplots/by_traffic_mix/"+metric+"_in_dB_with_zeroes_"+t_mix+".pdf",bbox_inches='tight')
+            plt.clf()  
             
         ##Create one graph for every density
         for dens in density_names:
@@ -315,7 +332,16 @@ class GraphCreator():
              adjust_box_widths(fig, 0.5)
              plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_in_dB_"+dens,bbox_inches='tight')
              plt.savefig(diagrams_path+"pdfs/boxplots/by_density/"+metric+"_in_dB_"+dens+".pdf",bbox_inches='tight')
-             plt.clf()             
+             plt.clf
+
+             df1=metric_with_zero_db_pandas_df[metric_with_zero_db_pandas_df["Density"]==dens]
+             fig=plt.figure()
+             sns.boxplot(y=metric, x='Traffic mix', data=df1, palette=concepts_colours,hue='Concept',width=0.7).set(title=self.metrics_titles_dict[metric]+" for "+dens+" density",ylabel = metric+" (dB)")
+             plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+             adjust_box_widths(fig, 0.5)
+             plt.savefig(diagrams_path+"boxplots/by_density/"+metric+"_in_dB_with_zeroes_"+dens,bbox_inches='tight')
+             plt.savefig(diagrams_path+"pdfs/boxplots/by_density/"+metric+"_in_dB_with_zeroes_"+dens+".pdf",bbox_inches='tight')
+             plt.clf()                    
 
     def metric_boxplots_wind(self,metric,dataframe,t_mix):
         vals=[]

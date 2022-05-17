@@ -30,7 +30,11 @@ def create_gpkg_noise():
         interest_points = json.load(f)
     
     scenario_names=env3_1_metric_dataframe["Scenario_name"].values
-    for scenario in scenario_names:
+    
+
+    #for scenario in scenario_names:
+    if 1:
+        scenario=scenario_names[0]
         print(scenario)
         noise_values=env3_1_metric_dataframe[env3_1_metric_dataframe["Scenario_name"]==scenario]["ENV3_1"].values[0]
   
@@ -38,16 +42,25 @@ def create_gpkg_noise():
         noise=[]
         for i,n in enumerate(noise_values):
       
+
             if n >0:
                 nn=10*math.log10(n)+reference_noise
                 lat,lon,p_type=interest_points[str(i)]
                 p1 = transformer.transform(lat, lon)
                 pp=Point(p1)
-                noise.append(str(nn))
+                noise.append(nn)
+                #pp.noise_level=nn
+                noise_db_points.append(pp)
+            else:
+                lat,lon,p_type=interest_points[str(i)]
+                p1 = transformer.transform(lat, lon)
+                pp=Point(p1)
+                noise.append(0)
                 #pp.noise_level=nn
                 noise_db_points.append(pp)
                 
-        gdf2 = gpd.GeoDataFrame(noise,geometry=noise_db_points ,crs='epsg:32633')
+        gdf2 = gpd.GeoDataFrame(geometry=noise_db_points ,crs='epsg:32633')
+        gdf2["noise"]=noise
 
         gdf2.to_file(gkpg_path+scenario+"noise.gpkg", driver="GPKG")
         print(gdf2)
