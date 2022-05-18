@@ -33,8 +33,8 @@ def convert_feet_to_meters(distance_in_feet):
 
 drone_vertical_speed=5 #5 m/s
 
-mp20_cruisng_speed=0.9*10.29 #m/s
-mp30_cruisng_speed=0.9*15.43 #m/s
+mp20_cruisng_speed=  0.95*10.29 #m/s 0.9*10.29 #m/s
+mp30_cruisng_speed=0.95*15.43 #m/s  0.9*15.43 #m/s
 
 
 def compute_work_done(ascend_dist,flight_time):

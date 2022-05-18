@@ -17,6 +17,7 @@ import math
 from functools import partial
 from multiprocessing import Pool
 import dill
+import numpy as np
 
 path_to_logs="input_logs/"
 time_filtering=False #If true the data are filtered for the first 1.5 hours of simulation
@@ -30,10 +31,27 @@ def calc_flst_spawn_col(row):
         return True
     
 def calc_flst_mission_completed_col(row):
-    if (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["DEL_y"]-row ["DEL_y"])>400 or (row["SPAWN_time"]>5400 and time_filtering) or (row["DEL_time"]>5400 and time_filtering) or row["Spawned"]==False :
+
+    if row["DEL_time"]==row["Last_sim_time"] or (row["SPAWN_time"]>5400 and time_filtering) or (row["DEL_time"]>5400 and time_filtering) or row["Spawned"]==False :
         return False
     else:
         return True
+ 
+        
+        
+def calc_flst_del_dest_dist(row):
+    if row["scenario_name"][0]=="2" :
+        return math.sqrt((row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["Dest_y"]-row ["DEL_y"]))+70
+    else:
+        return math.sqrt((row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["Dest_y"]-row ["DEL_y"]))
+        
+def updated_flight_duration_flst(row):
+    return row["Added_2d_dist"]/row["cruising_speed"]+row["FLIGHT_time"]
+
+    
+def updated_deletion_time_flst(row):
+    return row["Added_2d_dist"]/row["cruising_speed"]+row["DEL_time"]
+
 
 
 class DataframeCreator():
@@ -106,18 +124,26 @@ class DataframeCreator():
                     concept="3" ##DECENTRALISED
                 else:
                     log_file=path_to_logs+"Hybrid/"+file_name
-                    concept="2" ##HYBRID              
+                    concept="2" ##HYBRID          
+                    
+                file_name=file_name.split(".")[0]
                 scenario_var = file_name.split("_")
                 if scenario_var[3]=="very": 
                     density="very_low"
                     distribution=scenario_var[5]
                     repetition=scenario_var[6]
-                    uncertainty=scenario_var[7]
+                    if len(scenario_var)==7 :
+                        uncertainty=" "
+                    else:
+                        uncertainty=scenario_var[7]
                 else:
                     density=scenario_var[3]
                     distribution=scenario_var[4]
                     repetition=scenario_var[5]
-                    uncertainty=scenario_var[6]   
+                    if len(scenario_var)==6 :
+                        uncertainty=" "
+                    else:
+                        uncertainty=scenario_var[6] 
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
@@ -186,18 +212,26 @@ class DataframeCreator():
         else:
             log_file=path_to_logs+"Hybrid/"+file_name
             concept="2" ##HYBRID 
+            
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
 
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7 :
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]  
+            if len(scenario_var)==6 :
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6] 
         if uncertainty[0]!="R"and uncertainty[0]!="W":
             uncertainty=""    
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty
@@ -273,17 +307,24 @@ class DataframeCreator():
             log_file=path_to_logs+"Hybrid/"+file_name
             concept="2" ##HYBRID 
             
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7 :
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]   
+            if len(scenario_var)==6 :
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]   
         if uncertainty[0]!="R"and uncertainty[0]!="W":
             uncertainty=""
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty        
@@ -352,9 +393,14 @@ class DataframeCreator():
         loitering_nfz_data_frame=dill.load(input_file)
         input_file.close()
         
+
         input_file=open("dills/flstlog_dataframe.dill", 'rb')
         flstlog_data_frame=dill.load(input_file)
         input_file.close()
+        
+
+
+        
         #drop unused columns
         flstlog_data_frame=flstlog_data_frame.drop(["Baseline_deparure_time", "cruising_speed",
                     "Priority","loitering","Baseline_2D_distance","Baseline_vertical_distance","Baseline_ascending_distance","Baseline_3D_distance",\
@@ -452,7 +498,7 @@ class DataframeCreator():
                 if aircraft_type=="MP30": 
                     cruising_speed=15.43 # m/s
                     
-                base_2d_dist=self.baseline_length_dict[str(origin_lat)+"-"+str(origin_lon)+"-"+str(dest_lat)+"-"+str(dest_lon)]
+                base_2d_dist=self.baseline_length_dict[str(origin_lat)+"-"+str(origin_lon)+"-"+str(dest_lat)+"-"+str(dest_lon)] 
                 base_vertical_dist=util_functions.compute_baseline_vertical_distance(loitering)
                 base_ascending_dist=util_functions.compute_baseline_ascending_distance()
                 base_3d_dist=base_2d_dist+base_vertical_dist
@@ -496,17 +542,25 @@ class DataframeCreator():
             log_file=path_to_logs+"Hybrid/"+file_name
             concept="2" ##HYBRID 
             
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
+
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7 :
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]    
+            if len(scenario_var)==6:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]   
         if uncertainty[0]!="R"and uncertainty[0]!="W":
            uncertainty=""
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty     
@@ -514,7 +568,11 @@ class DataframeCreator():
    
         flstlog_file = open(log_file, "r")
 
-        
+
+        for line in flstlog_file:
+            last_sim_time=line.split(",")[0]
+            
+        flstlog_file = open(log_file, "r")
         cnt = 0
         for line in flstlog_file:
             cnt = cnt + 1
@@ -530,11 +588,31 @@ class DataframeCreator():
             del_x=p[0]
             del_y=p[1]
             
-            tmp_list = [scenario_name, line_list[1], float(line_list[0]), float(line_list[2]),float(line_list[3]),float(line_list[4]), float(line_list[5]), float(line_list[6]),\
-                        float(line_list[8]), float(line_list[9]), float(line_list[10]),ascend_dist,work_done,del_x,del_y]
+        
+            
+            actual_horizontal_distance=float(line_list[4]) 
+            actual_3d_distance=float(line_list[5])
+            actual_flight_duration=float(line_list[3]) 
+            actual_deletion_time=float(line_list[0]) 
+            
+
+            
+            if scenario_name[0]=="2":
+                actual_horizontal_distance+=140
+                actual_3d_distance+=140
+            if scenario_name[0]=="1":
+                actual_horizontal_distance+=70
+                actual_3d_distance+=70
+               
+            
+            
+            tmp_list = [scenario_name, line_list[1], actual_deletion_time, float(line_list[2]),actual_flight_duration,actual_horizontal_distance, actual_3d_distance, float(line_list[6]),\
+                        float(line_list[8]), float(line_list[9]), float(line_list[10]),ascend_dist,work_done,del_x,del_y,last_sim_time]
 
             flstlog_list.append(tmp_list)
+            
             nfz_list.append([scenario_name,line_list[1],float(line_list[0])])
+            
         return [nfz_list,flstlog_list]
     ##FLSTLOG dataframe
     def create_flstlog_dataframe(self):
@@ -572,7 +650,7 @@ class DataframeCreator():
         
         col_list = ["scenario_name", "ACID", "DEL_time", "SPAWN_time",
                      "FLIGHT_time", "2D_dist", "3D_dist", "ALT_dist",  "DEL_LAT" \
-             , "DEL_LON", "DEL_ALT","Ascend_dist","work_done","DEL_x","DEL_y" ]
+             , "DEL_LON", "DEL_ALT","Ascend_dist","work_done","DEL_x","DEL_y" ,"Last_sim_time"]
         flstlog_list = list()
        
         loitering_nfz_col_list=["Scenario_name","ACID","Applied_time"]
@@ -594,25 +672,47 @@ class DataframeCreator():
 
 
         flstlog_data_frame=pd.merge(flst_data_frame,flstlog_data_frame,on=["ACID","scenario_name"],how="outer")
+        
+        flstlog_data_frame['Added_2d_dist'] =flstlog_data_frame.apply(calc_flst_del_dest_dist,axis=1)
+        
+        flstlog_data_frame['2D_dist'] =flstlog_data_frame['2D_dist'] +flstlog_data_frame['Added_2d_dist']
+        flstlog_data_frame['3D_dist'] =flstlog_data_frame['3D_dist'] +flstlog_data_frame['Added_2d_dist']
+        
+
+        
+        flstlog_data_frame['FLIGHT_time'] =flstlog_data_frame.apply(updated_flight_duration_flst,axis=1)
+        flstlog_data_frame['DEL_time'] =flstlog_data_frame.apply(updated_deletion_time_flst,axis=1)
         flstlog_data_frame['Arrival_delay']  =   flstlog_data_frame["DEL_time"] -flstlog_data_frame["Baseline_arrival_time"]
         flstlog_data_frame['Departure_delay']=flstlog_data_frame["SPAWN_time"] -flstlog_data_frame["Baseline_deparure_time"]
         flstlog_data_frame['Spawned'] =flstlog_data_frame.apply(calc_flst_spawn_col,axis=1)
         flstlog_data_frame['Mission_completed'] =flstlog_data_frame.apply(calc_flst_mission_completed_col,axis=1)
         
         
-        flstlog_data_frame=flstlog_data_frame.drop(["Dest_x","Dest_y","DEL_x","DEL_y"],axis=1)  
+
+      
         
+        flstlog_data_frame=flstlog_data_frame.drop(["Dest_x","Dest_y","DEL_x","DEL_y",'Added_2d_dist'],axis=1)  
+        
+
 
         loitering_nfz_data_frame=pd.merge(loitering_nfz_data_frame,nfz_flst_data_frame,on=["Scenario_name","ACID"],how="inner")
 
 
+
         print("FLSTLOG Dataframe created!")
+
+        ##check if baseline 2d distance is larger than actual 2d distance
+        df_shape=flstlog_data_frame[(flstlog_data_frame["2D_dist"]<flstlog_data_frame["Baseline_2D_distance"]) &(flstlog_data_frame["Mission_completed"]) ].shape[0]
+        if df_shape:
+            print("Baseline_2D disatnce is larger than actual 2d distance in ",df_shape," cases")
         
 
         ##check if baseline flight time is larger than actual flight time
-        df_shape=flstlog_data_frame[flstlog_data_frame["FLIGHT_time"]<flstlog_data_frame["Baseline_flight_time"]].shape[0]
+        df_shape=flstlog_data_frame[(flstlog_data_frame["FLIGHT_time"]<flstlog_data_frame["Baseline_flight_time"]) &(flstlog_data_frame["Mission_completed"]) ].shape[0]
         if df_shape:
             print("Baseline_flight_time is larger than actual flight time in ",df_shape," cases")
+        
+        
         
         
         output_file=open("dills/flstlog_dataframe.dill", 'wb')
@@ -668,24 +768,34 @@ class DataframeCreator():
             concept="3" ##DECENTRALISED
         else:
             log_file=path_to_logs+"Hybrid/"+file_name
-            concept="2" ##HYBRID              
+            concept="2" ##HYBRID    
+            
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]      
+            if len(scenario_var)==6:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]    
         if uncertainty[0]!="R"and uncertainty[0]!="W":
             uncertainty=""
 
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
       
         acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
+        
+        
 
     
         env3_statistics_list=[]
@@ -693,7 +803,7 @@ class DataframeCreator():
 
         for i, line in enumerate(acid_lines_list):
             acid_line_list = line.split(",")
-            if float(acid_line_list[0])>5400 and time_filtering:
+            if (float(acid_line_list[0])>5400 and time_filtering) or len(acid_line_list)==1:
                 break
             
             try :
@@ -789,29 +899,38 @@ class DataframeCreator():
             concept="3" ##DECENTRALISED
         else:
             log_file=path_to_logs+"Hybrid/"+file_name
-            concept="2" ##HYBRID              
+            concept="2" ##HYBRID    
+            
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]      
+            if len(scenario_var)==6:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]     
         if uncertainty[0]!="R"and uncertainty[0]!="W":
             uncertainty=""
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
         #print(scenario_name)        
         acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
 
-    
+        
+        
         env3_mertic_list=[]
         for i, line in enumerate(acid_lines_list):
             acid_line_list = line.split(",")
-            if float(acid_line_list[0])>5400 and time_filtering:
+            if (float(acid_line_list[0])>5400 and time_filtering) or len(acid_line_list)==1:
                 break
             
             try :
@@ -895,18 +1014,26 @@ class DataframeCreator():
             concept="3" ##DECENTRALISED
         else:
             log_file=path_to_logs+"Hybrid/"+file_name
-            concept="2" ##HYBRID              
+            concept="2" ##HYBRID   
+            
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]      
+            if len(scenario_var)==6:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]    
         if uncertainty[0]!="R"and uncertainty[0]!="W":
             uncertainty=""
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
@@ -917,11 +1044,10 @@ class DataframeCreator():
         acid_lines_list, alt_lines_list, lon_lines_list, lat_lines_list = self.read_reglog(log_file)
         acid_reg_dict={}
 
-    
 
         for i, line in enumerate(acid_lines_list):
             acid_line_list = line.split(",")
-            if float(acid_line_list[0])>5400 and time_filtering:
+            if (float(acid_line_list[0])>5400 and time_filtering) or len(acid_line_list)==1:
                 break
             
             try :
@@ -1108,18 +1234,26 @@ class DataframeCreator():
             concept="3" ##DECENTRALISED
         else:
             log_file=path_to_logs+"Hybrid/"+file_name
-            concept="2" ##HYBRID              
+            concept="2" ##HYBRID    
+            
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]   
+            if len(scenario_var)==6:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]  
         if distribution!="40":
             return #do not process scenarios with other distributions
         if uncertainty[0]!="R"and uncertainty[0]!="W":
@@ -1133,6 +1267,8 @@ class DataframeCreator():
 
         for i, line in enumerate(acid_lines_list):
             acid_line_list = line.split(",")
+            if len(acid_line_list)==1:
+                break
             try :
                 alt_line_list = alt_lines_list[i].split(",")
                 lat_line_list = lat_lines_list[i].split(",")
@@ -1200,18 +1336,26 @@ class DataframeCreator():
             concept="3" ##DECENTRALISED
         else:
             log_file=path_to_logs+"Hybrid/"+file_name
-            concept="2" ##HYBRID              
+            concept="2" ##HYBRID    
+            
+        file_name=file_name.split(".")[0]
         scenario_var = file_name.split("_")
         if scenario_var[3]=="very": 
             density="very_low"
             distribution=scenario_var[5]
             repetition=scenario_var[6]
-            uncertainty=scenario_var[7]
+            if len(scenario_var)==7:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[7]
         else:
             density=scenario_var[3]
             distribution=scenario_var[4]
             repetition=scenario_var[5]
-            uncertainty=scenario_var[6]      
+            if len(scenario_var)==6:
+                uncertainty=" "
+            else:
+                uncertainty=scenario_var[6]     
         if uncertainty[0]!="R"and uncertainty[0]!="W":
             uncertainty=""
         scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty       
@@ -1282,18 +1426,24 @@ class DataframeCreator():
                 else:
                     log_file=path_to_logs+"Hybrid/"+file_name
                     concept="2" ##HYBRID 
-                    
+                file_name=file_name.split(".")[0]
                 scenario_var = file_name.split("_")
                 if scenario_var[3]=="very": 
                     density="very_low"
                     distribution=scenario_var[5]
                     repetition=scenario_var[6]
-                    uncertainty=scenario_var[7]
+                    if len(scenario_var)==7:
+                        uncertainty=" "
+                    else:
+                        uncertainty=scenario_var[7]
                 else:
                     density=scenario_var[3]
                     distribution=scenario_var[4]
                     repetition=scenario_var[5]
-                    uncertainty=scenario_var[6]       
+                    if len(scenario_var)==6:
+                        uncertainty=" "
+                    else:
+                        uncertainty=scenario_var[6]       
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
@@ -1361,18 +1511,25 @@ class DataframeCreator():
                 else:
                     log_file=path_to_logs+"Hybrid/"+file_name
                     concept="2" ##HYBRID 
-                    
+                
+                file_name=file_name.split(".")[0]
                 scenario_var = file_name.split("_")
                 if scenario_var[3]=="very": 
                     density="very_low"
                     distribution=scenario_var[5]
                     repetition=scenario_var[6]
-                    uncertainty=scenario_var[7]
+                    if len(scenario_var)==7:
+                        uncertainty=" "
+                    else:
+                        uncertainty=scenario_var[7]
                 else:
                     density=scenario_var[3]
                     distribution=scenario_var[4]
                     repetition=scenario_var[5]
-                    uncertainty=scenario_var[6]       
+                    if len(scenario_var)==6:
+                        uncertainty=" "
+                    else:
+                        uncertainty=scenario_var[6]      
                 if uncertainty[0]!="R"and uncertainty[0]!="W":
                     uncertainty=""
                 scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
@@ -1449,18 +1606,25 @@ class DataframeCreator():
                else:
                    log_file=path_to_logs+"Hybrid/"+file_name
                    concept="2" ##HYBRID 
-                   
+                 
+               file_name=file_name.split(".")[0]
                scenario_var = file_name.split("_")
                if scenario_var[3]=="very": 
                    density="very_low"
                    distribution=scenario_var[5]
                    repetition=scenario_var[6]
-                   uncertainty=scenario_var[7]
+                   if len(scenario_var)==7:
+                       uncertainty=" "
+                   else:
+                       uncertainty=scenario_var[7]
                else:
                    density=scenario_var[3]
                    distribution=scenario_var[4]
                    repetition=scenario_var[5]
-                   uncertainty=scenario_var[6]       
+                   if len(scenario_var)==6:
+                       uncertainty=" "
+                   else:
+                       uncertainty=scenario_var[6]      
                if uncertainty[0]!="R":
                    continue
                scenario_name=concept+"_"+density+"_"+distribution+"_"+repetition+"_"+uncertainty  
