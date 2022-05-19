@@ -84,9 +84,9 @@ class DataframeCreator():
         # self.create_density_constrained_dataframe()
         # self.create_metrics_dataframe()
 
-        self.create_flstlog_dataframe() 
-        self.create_loslog_dataframe() 
-        self.create_conflog_dataframe() 
+        #self.create_flstlog_dataframe() 
+        #self.create_loslog_dataframe() 
+        #self.create_conflog_dataframe() 
         self.create_geolog_dataframe()
         self.create_env_metrics_dataframe()
         self.create_env3_metric_dataframe()
@@ -393,6 +393,8 @@ class DataframeCreator():
         loitering_nfz_data_frame=dill.load(input_file)
         input_file.close()
         
+       # print(loitering_nfz_data_frame.shape[0])
+        
 
         input_file=open("dills/flstlog_dataframe.dill", 'rb')
         flstlog_data_frame=dill.load(input_file)
@@ -596,13 +598,15 @@ class DataframeCreator():
             actual_deletion_time=float(line_list[0]) 
             
 
-            
-            if scenario_name[0]=="2":
-                actual_horizontal_distance+=140
-                actual_3d_distance+=140
-            if scenario_name[0]=="1":
-                actual_horizontal_distance+=70
-                actual_3d_distance+=70
+# =============================================================================
+#             
+#             if scenario_name[0]=="2":
+#                 actual_horizontal_distance+=140
+#                 actual_3d_distance+=140
+#             if scenario_name[0]=="1":
+#                 actual_horizontal_distance+=70
+#                 actual_3d_distance+=70
+# =============================================================================
                
             
             
