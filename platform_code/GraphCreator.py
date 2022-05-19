@@ -223,11 +223,11 @@ class GraphCreator():
                     for rep in repetitions:   
                         scenario_name=conc+density+t_mix+rep
                         try:
-                            metric_values=dataframe[(dataframe["Scenario_name"]==scenario_name)&(dataframe['Spawned'])&(dataframe['Mission_completed'])]["Arrival_delay"].values
-                            for metric_list in metric_values:
-                                for metric_value in metric_list:
-                                    tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,metric_value]
-                                    vals.append(tmp)
+                            metric_values=dataframe[(dataframe["scenario_name"]==scenario_name)&(dataframe['Spawned'])&(dataframe['Mission_completed'])]["Arrival_delay"].values
+                            for metric_value in metric_values:
+                                
+                                tmp=[self.concept_names_dict[conc],self.density_names_dict[density],self.traffic_mix_names_dict[t_mix],rep,metric_value]
+                                vals.append(tmp)
                         except:
                             #metric_value=240+random.randint(-5,5)
                             print("No value for scenario baseline",scenario_name,metric)
