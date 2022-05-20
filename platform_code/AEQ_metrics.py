@@ -34,7 +34,7 @@ def compute_aeq1(df):
     aeq1+=df[(df['Arrival_delay'] >aeq_1_threshold_delivery) & (df["Priority"]!=4)& (df["Spawned"])  & (df["Mission_completed"]) ].shape[0]
     
     aeq1+=df[  df["Spawned"]==False ].shape[0]
-    aeq1+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].shape[0]
+    #aeq1+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].shape[0]
 
     return aeq1
 
@@ -116,7 +116,7 @@ def compute_aeq5(df):
 
     
     aeq5+=df[  df["Spawned"]==False ].shape[0]
-    aeq5+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].shape[0] 
+    #aeq5+=df[ ( df["Mission_completed"]==False) & (df["Spawned"])   ].shape[0] 
     
     
     return aeq5

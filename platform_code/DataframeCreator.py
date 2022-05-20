@@ -425,17 +425,19 @@ class DataframeCreator():
     def update_flst_dataframe(self):
 
 
-        input_file=open("dills/flstlog_dataframe.dill", 'rb')
-        flstlog_data_frame=dill.load(input_file)
-        input_file.close()
-        
-        
-        
-        flstlog_data_frame["Mission_completed"]=flstlog_data_frame.apply(update_flst_mission_completed_col_for_rogues,axis=1)
-
-        output_file=open("dills/flstlog_dataframe.dill", 'wb')
-        dill.dump(flstlog_data_frame,output_file)
-        output_file.close()
+# =============================================================================
+#         input_file=open("dills/flstlog_dataframe.dill", 'rb')
+#         flstlog_data_frame=dill.load(input_file)
+#         input_file.close()
+#         
+#         
+#         
+#         flstlog_data_frame["Mission_completed"]=flstlog_data_frame.apply(update_flst_mission_completed_col_for_rogues,axis=1)
+# 
+#         output_file=open("dills/flstlog_dataframe.dill", 'wb')
+#         dill.dump(flstlog_data_frame,output_file)
+#         output_file.close()
+# =============================================================================
          
         self.create_metrics_dataframe()
 
