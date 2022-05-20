@@ -77,6 +77,13 @@ def compute_del_y(row):
     p=transformer_2_utm.transform( row["DEL_LAT"],row["DEL_LON"])
     return p[1]
 
+
+def update_flst_mission_completed_col_for_rogues(row):
+    if row["ACID"][0]=="R":
+        return False
+    else:
+        return row["Mission_completed"]   
+
 class DataframeCreator():
 
     def __init__(self,threadnum):
@@ -423,21 +430,31 @@ class DataframeCreator():
         input_file.close()
         
         
+        
+        flstlog_data_frame["Mission_completed"]=flstlog_data_frame.apply(update_flst_mission_completed_col_for_rogues,axis=1)
 
-        flstlog_data_frame['Dest_x'] =flstlog_data_frame.apply(compute_dest_x,axis=1)
-        flstlog_data_frame['Dest_y'] =flstlog_data_frame.apply(compute_dest_y,axis=1)
-        flstlog_data_frame['DEL_x'] =flstlog_data_frame.apply(compute_del_x,axis=1)
-        flstlog_data_frame['DEL_y'] =flstlog_data_frame.apply(compute_del_y,axis=1)
-        
-        flstlog_data_frame['Mission_completed'] =flstlog_data_frame.apply(update_flst_mission_completed_col,axis=1)
-        
-        flstlog_data_frame=flstlog_data_frame.drop(["Dest_x","Dest_y","DEL_x","DEL_y"],axis=1)  
-        
         output_file=open("dills/flstlog_dataframe.dill", 'wb')
         dill.dump(flstlog_data_frame,output_file)
         output_file.close()
-        
+         
         self.create_metrics_dataframe()
+
+# =============================================================================
+#         flstlog_data_frame['Dest_x'] =flstlog_data_frame.apply(compute_dest_x,axis=1)
+#         flstlog_data_frame['Dest_y'] =flstlog_data_frame.apply(compute_dest_y,axis=1)
+#         flstlog_data_frame['DEL_x'] =flstlog_data_frame.apply(compute_del_x,axis=1)
+#         flstlog_data_frame['DEL_y'] =flstlog_data_frame.apply(compute_del_y,axis=1)
+#         
+#         flstlog_data_frame['Mission_completed'] =flstlog_data_frame.apply(update_flst_mission_completed_col,axis=1)
+#         
+#         flstlog_data_frame=flstlog_data_frame.drop(["Dest_x","Dest_y","DEL_x","DEL_y"],axis=1)  
+#         
+#         output_file=open("dills/flstlog_dataframe.dill", 'wb')
+#         dill.dump(flstlog_data_frame,output_file)
+#         output_file.close()
+#         
+#         self.create_metrics_dataframe()
+# =============================================================================
         
         return
         
@@ -452,7 +469,7 @@ class DataframeCreator():
         
 
 
-        input_file=open("dills/dills/flstlog_dataframe.dill", 'rb')
+        input_file=open("dills/flstlog_dataframe.dill", 'rb')
         flstlog_data_frame=dill.load(input_file)
         input_file.close()
 
