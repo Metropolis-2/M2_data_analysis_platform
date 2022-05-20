@@ -21,7 +21,7 @@ import numpy as np
 
 path_to_logs="input_logs/"
 time_filtering=False #If true the data are filtered for the first 1.5 hours of simulation
-
+transformer_2_utm = Transformer.from_crs('epsg:4326','epsg:32633')
 
 def calc_flst_spawn_col(row):
 
@@ -37,7 +37,7 @@ def calc_flst_mission_completed_col(row):
     else:
         return True
  
-        
+    
         
 def calc_flst_del_dest_dist(row):
     if row["scenario_name"][0]=="2" :
@@ -54,11 +54,35 @@ def updated_deletion_time_flst(row):
 
 
 
+def update_flst_mission_completed_col(row):
+
+    if row["DEL_time"]>float(row["Last_sim_time"]) or (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["Dest_y"]-row ["DEL_y"])>8000*8000 :
+        return False
+    else:
+        return row["Mission_completed"]   
+    
+def compute_dest_x(row):
+    p=transformer_2_utm.transform( row["Dest_LAT"],row["Dest_LON"])
+    return p[0]
+
+def compute_dest_y(row):
+    p=transformer_2_utm.transform( row["Dest_LAT"],row["Dest_LON"])
+    return p[1]
+
+def compute_del_x(row):
+    p=transformer_2_utm.transform( row["DEL_LAT"],row["DEL_LON"])
+    return p[0]
+
+def compute_del_y(row):
+    p=transformer_2_utm.transform( row["DEL_LAT"],row["DEL_LON"])
+    return p[1]
+
 class DataframeCreator():
 
     def __init__(self,threadnum):
 
 
+        
         self.centralised_log_names=[]
         self.decentralised_log_names=[]
         self.hybrid_log_names=[]
@@ -93,6 +117,8 @@ class DataframeCreator():
         self.create_density_dataframe()
         self.create_density_constrained_dataframe()
         self.create_metrics_dataframe()
+        
+        
         return
     
     def get_file_names(self):
@@ -388,7 +414,34 @@ class DataframeCreator():
         return tmp2_list     
 
         
+    ##update flst dataframe
+    def update_flst_dataframe(self):
 
+
+        input_file=open("dills/flstlog_dataframe.dill", 'rb')
+        flstlog_data_frame=dill.load(input_file)
+        input_file.close()
+        
+        
+
+        flstlog_data_frame['Dest_x'] =flstlog_data_frame.apply(compute_dest_x,axis=1)
+        flstlog_data_frame['Dest_y'] =flstlog_data_frame.apply(compute_dest_y,axis=1)
+        flstlog_data_frame['DEL_x'] =flstlog_data_frame.apply(compute_del_x,axis=1)
+        flstlog_data_frame['DEL_y'] =flstlog_data_frame.apply(compute_del_y,axis=1)
+        
+        flstlog_data_frame['Mission_completed'] =flstlog_data_frame.apply(update_flst_mission_completed_col,axis=1)
+        
+        flstlog_data_frame=flstlog_data_frame.drop(["Dest_x","Dest_y","DEL_x","DEL_y"],axis=1)  
+        
+        output_file=open("dills/flstlog_dataframe.dill", 'wb')
+        dill.dump(flstlog_data_frame,output_file)
+        output_file.close()
+        
+        self.create_metrics_dataframe()
+        
+        return
+        
+        
         
     ##GEOLOG dataframe
     def create_geolog_dataframe(self):
@@ -397,16 +450,12 @@ class DataframeCreator():
         loitering_nfz_data_frame=dill.load(input_file)
         input_file.close()
         
-       # print(loitering_nfz_data_frame.shape[0])
-        
 
-        input_file=open("dills/flstlog_dataframe.dill", 'rb')
+
+        input_file=open("dills/dills/flstlog_dataframe.dill", 'rb')
         flstlog_data_frame=dill.load(input_file)
         input_file.close()
-        
 
-
-        
         #drop unused columns
         flstlog_data_frame=flstlog_data_frame.drop(["Baseline_deparure_time", "cruising_speed",
                     "Priority","loitering","Baseline_2D_distance","Baseline_vertical_distance","Baseline_ascending_distance","Baseline_3D_distance",\
@@ -673,13 +722,15 @@ class DataframeCreator():
         
         flstlog_data_frame['Added_2d_dist'] =flstlog_data_frame.apply(calc_flst_del_dest_dist,axis=1)
         
+        
         flstlog_data_frame['2D_dist'] =flstlog_data_frame['2D_dist'] +flstlog_data_frame['Added_2d_dist']
         flstlog_data_frame['3D_dist'] =flstlog_data_frame['3D_dist'] +flstlog_data_frame['Added_2d_dist']
         
 
-        
+
         flstlog_data_frame['FLIGHT_time'] =flstlog_data_frame.apply(updated_flight_duration_flst,axis=1)
         flstlog_data_frame['DEL_time'] =flstlog_data_frame.apply(updated_deletion_time_flst,axis=1)
+
         
         flstlog_data_frame['Arrival_delay']  =   flstlog_data_frame["DEL_time"] -flstlog_data_frame["Baseline_arrival_time"]
         flstlog_data_frame['Departure_delay']=flstlog_data_frame["SPAWN_time"] -flstlog_data_frame["Baseline_deparure_time"]

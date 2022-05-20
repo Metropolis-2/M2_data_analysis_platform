@@ -49,7 +49,7 @@ def compute_aeq2(df):
     """
     aeq2=0
     
-    aeq2+=df[(df["FLIGHT_time"] >aeq_2_drone_autonomy)].shape[0]
+    aeq2+=df[(df["FLIGHT_time"] >aeq_2_drone_autonomy) & (df["Spawned"])  & (df["Mission_completed"])].shape[0]
 
     return aeq2
 
