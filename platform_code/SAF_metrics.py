@@ -109,6 +109,18 @@ def compute_saf5(df):
     saf5=df[df['in_time']]['LOS_duration_time'].sum()
     return saf5
 
+def compute_saf5_1(df):
+    """ SAF-5_1: Average Time spent in LOS
+
+    Total time spent in a state of intrusion.
+
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF5 metric.
+    """
+    saf5_1=df[df['in_time']]['LOS_duration_time'].sum()
+    saf5_1/=df[df['in_time']]['LOS_duration_time'].shape[0]
+    return saf5_1
+
 def compute_saf6(df):
     """ SAF-6: Geofence violations
 

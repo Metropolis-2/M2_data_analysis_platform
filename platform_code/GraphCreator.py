@@ -114,7 +114,7 @@ uncertainties_names=["No uncertainty","R33","R66","R100","W1","W3","W5"]
 
 percentage_metrics=["AEQ1_1","AEQ2_1","AEQ5_1","EFF1","EFF2","EFF3","EFF4","EFF5","SAF3"]    
 metrics_units=[""," (%)",""," (%)"," (sec)"," (sec)",""," (%)"," (sec)",""," (%)"," (%)"," (%)"," (%)"," (%)"," (sec)"," (sec)",\
-                       " (m)","","","","","","","","","","",""," (%)"," (m)"," (sec)","","","","","","","",\
+                       " (m)","","","","","","","","","","",""," (%)"," (m)"," (sec)"," (sec)","","","","","","","",\
                            ""," (sec)"," (m)"," (sec)",""," (sec)"," (m)"," (sec) "] 
         
 metrics_title=["Number of cancelled demands","Percentage of cancelled demands","Number of inoperative trajectories","Percentage of inoperative trajectories"\
@@ -123,7 +123,7 @@ metrics_title=["Number of cancelled demands","Percentage of cancelled demands","
                                "Ascending route efficiency","3D distance route efficiency","Route duration efficiency","Departure delay","Work done",\
                        "Weighted average altitude","Sound exposure","Number of points with significant sound exposure","Altitude dispersion","Number of conflicts",\
                            "Number of conflicts in constrained airspace","Number of conflicts in open airspace","Number of conflicts per flight","Number of intrusions","Number of severe intrusions",\
-                           "Number of intrusions in constrained airspace","Number of intrusions in open airspace","Intrusion prevention rate","Minimum separation","Time spent in LOS","Number of geofence violations","Number of severe geofence violations"\
+                           "Number of intrusions in constrained airspace","Number of intrusions in open airspace","Intrusion prevention rate","Minimum separation","Time spent in LOS","Average time spent in LOS","Number of geofence violations","Number of severe geofence violations"\
                                ,"Number of severe loitering NFZ violations","Number of severe buildings/static geofences violations","Number of severe open airspace geofences violations "\
                                    ,"Number of severe building violations ","Number of severe loitering NFZ violations \n with origin/destination in NFZ",\
                            "Number of severe loitering NFZ violations \n within 3 minutes of the NFZ activation","Weighted mission duration","Weighted mission track length",\
@@ -131,11 +131,11 @@ metrics_title=["Number of cancelled demands","Percentage of cancelled demands","
                                "Average mission duration per priority level","Average mission track length per priority level","Total delay per priority level"]    
             
 boxplot_metrics=["AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","EFF1","EFF2","EFF3","EFF4","EFF5","EFF6","ENV1",\
-                         "ENV2","ENV3_1","ENV3_2","ENV4","SAF1","SAF1_2","SAF1_3","SAF1_4","SAF2","SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4","SAF5","SAF6","SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5",\
+                         "ENV2","ENV3_1","ENV3_2","ENV4","SAF1","SAF1_2","SAF1_3","SAF1_4","SAF2","SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4","SAF5","SAF5_1","SAF6","SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5",\
                              "SAF6_6","SAF6_7","PRI1","PRI2"]
     
 metrics_names=["AEQ1","AEQ1.1","AEQ2","AEQ2.1","AEQ3","AEQ4","AEQ5","AEQ5.1","CAP1","CAP2","EFF1","EFF2","EFF3","EFF4","EFF5","EFF6","ENV1",\
-                         "ENV2","ENV3.1","ENV3.2","ENV4","SAF1","SAF1.2","SAF1.3","SAF1.4","SAF2","SAF2.1","SAF2.2","SAF2.3","SAF3","SAF4","SAF5","SAF6","SAF6.1","SAF6.2","SAF6.3","SAF6.4","SAF6.5",\
+                         "ENV2","ENV3.1","ENV3.2","ENV4","SAF1","SAF1.2","SAF1.3","SAF1.4","SAF2","SAF2.1","SAF2.2","SAF2.3","SAF3","SAF4","SAF5","SAF5.1","SAF6","SAF6.1","SAF6.2","SAF6.3","SAF6.4","SAF6.5",\
                              "SAF6.6","SAF6.7","PRI1","PRI2","CAP3","CAP4","PRI3","PRI4","PRI5"]
 
 boxplot_metrics_rogues=["CAP3","CAP4"]
@@ -632,7 +632,7 @@ class GraphCreator():
 
 
         ## Create the graphs
-        boxplot_metrics=["AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","EFF1","EFF2","EFF3","EFF4","EFF5","EFF6","ENV1","ENV2","ENV3_2","ENV4","SAF1","SAF1_2","SAF1_3","SAF1_4","SAF2","SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4","SAF5","SAF6","SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7","PRI1","PRI2"]
+        boxplot_metrics=["AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","EFF1","EFF2","EFF3","EFF4","EFF5","EFF6","ENV1","ENV2","ENV3_2","ENV4","SAF1","SAF1_2","SAF1_3","SAF1_4","SAF2","SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4","SAF5","SAF5_1","SAF6","SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7","PRI1","PRI2"]
         
         boxplot_metrics_rogues=["CAP3","CAP4"]
         

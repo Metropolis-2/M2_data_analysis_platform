@@ -32,7 +32,7 @@ def calc_flst_spawn_col(row):
     
 def calc_flst_mission_completed_col(row):
 
-    if row["DEL_time"]==row["Last_sim_time"] or (row["SPAWN_time"]>5400 and time_filtering) or (row["DEL_time"]>5400 and time_filtering) or row["Spawned"]==False :
+    if row["DEL_time"]==row["Last_sim_time"] or (row["SPAWN_time"]>5400 and time_filtering) or (row["DEL_time"]>5400 and time_filtering) or row["Spawned"]==False or row["ACID"][0]=="R" or (row["Dest_x"]-row["DEL_x"])*(row["Dest_x"]-row["DEL_x"])+(row["Dest_y"]-row["DEL_y"])*(row["Dest_y"]-row ["DEL_y"])>8000*8000:
         return False
     else:
         return True
@@ -116,11 +116,11 @@ class DataframeCreator():
         # self.create_metrics_dataframe()
 
         #self.create_flstlog_dataframe() 
-        self.create_loslog_dataframe() 
-        self.create_conflog_dataframe() 
+        #self.create_loslog_dataframe() 
+        #self.create_conflog_dataframe() 
         #self.create_geolog_dataframe()
         #self.create_env_metrics_dataframe()
-        self.create_env3_metric_dataframe()
+        #self.create_env3_metric_dataframe()
         #self.create_density_dataframe()
         #self.create_density_constrained_dataframe()
         self.create_metrics_dataframe()
@@ -1479,7 +1479,7 @@ class DataframeCreator():
 
     ##metrics dataframe
     def create_metrics_dataframe(self):
-        col_list = ["Scenario_name","SAF1","SAF1_3","SAF1_4", "SAF2", "SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4", "SAF5", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
+        col_list = ["Scenario_name","SAF1","SAF1_3","SAF1_4", "SAF2", "SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4", "SAF5","SAF5_1", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
             
  
         dataframe_cnt=0
@@ -1553,9 +1553,10 @@ class DataframeCreator():
                 saf1_4=SAF_metrics.compute_saf1_4(filtered_conf_dataframe) 
                 saf2_2=SAF_metrics.compute_saf2_2(filtered_conf_dataframe) 
                 saf2_3=SAF_metrics.compute_saf2_3(filtered_conf_dataframe) 
+                saf5_1=SAF_metrics.compute_saf5_1(filtered_los_dataframe)
 
 
-                tmp_list = [scenario_name, saf1,saf1_3,saf1_4,saf2,saf2_1,saf2_2,saf2_3,saf3,saf4,saf5,saf6,saf6_1,saf6_2,saf6_3,saf6_4,saf6_5,saf6_6,saf6_7]
+                tmp_list = [scenario_name, saf1,saf1_3,saf1_4,saf2,saf2_1,saf2_2,saf2_3,saf3,saf4,saf5,saf5_1,saf6,saf6_1,saf6_2,saf6_3,saf6_4,saf6_5,saf6_6,saf6_7]
                     
  
 
