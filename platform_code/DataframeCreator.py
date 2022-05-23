@@ -1551,8 +1551,8 @@ class DataframeCreator():
                 saf6_7=SAF_metrics.compute_saf6_7(filtered_geo_dataframe)
                 saf1_3=SAF_metrics.compute_saf1_3(filtered_conf_dataframe) 
                 saf1_4=SAF_metrics.compute_saf1_4(filtered_conf_dataframe) 
-                saf2_2=SAF_metrics.compute_saf2_2(filtered_conf_dataframe) 
-                saf2_3=SAF_metrics.compute_saf2_3(filtered_conf_dataframe) 
+                saf2_2=SAF_metrics.compute_saf2_2(filtered_los_dataframe) 
+                saf2_3=SAF_metrics.compute_saf2_3(filtered_los_dataframe) 
                 saf5_1=SAF_metrics.compute_saf5_1(filtered_los_dataframe)
 
 
