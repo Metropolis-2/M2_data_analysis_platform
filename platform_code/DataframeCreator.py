@@ -115,14 +115,14 @@ class DataframeCreator():
         # self.create_density_constrained_dataframe()
         # self.create_metrics_dataframe()
 
-        self.create_flstlog_dataframe() 
+        #self.create_flstlog_dataframe() 
         self.create_loslog_dataframe() 
         self.create_conflog_dataframe() 
-        self.create_geolog_dataframe()
-        self.create_env_metrics_dataframe()
+        #self.create_geolog_dataframe()
+        #self.create_env_metrics_dataframe()
         self.create_env3_metric_dataframe()
-        self.create_density_dataframe()
-        self.create_density_constrained_dataframe()
+        #self.create_density_dataframe()
+        #self.create_density_constrained_dataframe()
         self.create_metrics_dataframe()
         
         
@@ -140,10 +140,10 @@ class DataframeCreator():
     def create_loslog_dataframe(self):
         
         dataframe_cnt=0
-        col_list = ["LOS_id", "Scenario_name", "LOS_exit_time", "LOS_start_time", "LOS_duration_time", "LAT1", "LON1", "ALT1", "LAT2", "LON2", "ALT2", "DIST","crash","in_time"]
+        col_list = ["LOS_id", "Scenario_name", "LOS_exit_time", "LOS_start_time", "LOS_duration_time", "LAT1", "LON1", "ALT1", "LAT2", "LON2", "ALT2", "DIST","crash","in_time","constrained"]
         
         loslog_list = list()
-        
+        constrained_airspace=util_functions.Constrained_airspace()
         los_id=0
         ##Read LOSLOGs
         for ii,file_name in enumerate(self.centralised_log_names+self.decentralised_log_names+self.hybrid_log_names):
@@ -217,6 +217,14 @@ class DataframeCreator():
                             in_time=False
                     
                     tmp_list.append(in_time)
+                    
+                    
+                    lat=float(line_list[5])
+                    lon=float(line_list[6])
+                    
+                    constrained=constrained_airspace.inConstrained([lon,lat])
+                    
+                    tmp_list.append(constrained)
 
                     loslog_list.append(tmp_list)
         
@@ -236,6 +244,7 @@ class DataframeCreator():
         ii=x[0]
         tmp_list=[]
         tmp2_list=[]     
+        constrained_airspace=util_functions.Constrained_airspace()
         if ii<len(self.centralised_log_names):
             log_file=path_to_logs+"Centralised/"+file_name
             concept="1" ##CENTRALISED
@@ -290,11 +299,19 @@ class DataframeCreator():
                     in_time=False
             
             tmp_list.append(in_time)
+            
+            lat=float(line_list[3])
+            lon=float(line_list[4])
+            
+            constrained=constrained_airspace.inConstrained([lon,lat])
+            
+            tmp_list.append(constrained)
+            
             tmp2_list.append(tmp_list)
         return tmp2_list
     ##CONFLOG dataframe
     def create_conflog_dataframe(self):
-        col_list = ["CONF_id", "Scenario_name", "CONF_detected_time", "CPALAT", "CPALON","in_time"] 
+        col_list = ["CONF_id", "Scenario_name", "CONF_detected_time", "CPALAT", "CPALON","in_time","constrained"] 
         conflog_list = list()
         maplist=[]        
         ##Read CONFLOGs
@@ -1013,10 +1030,12 @@ class DataframeCreator():
                 if iv == 0:
                     time_stamp=float(acid_line_list[0])
                     #print(time_stamp)
-                    continue
+                    
+                    
+                if float(alt_line_list[iv])>=30:
                 
-                tmp=[float(lat_line_list[iv]),float(lon_line_list[iv]),float(alt_line_list[iv])]
-                positions_list.append(tmp)
+                    tmp=[float(lat_line_list[iv]),float(lon_line_list[iv]),float(alt_line_list[iv])]
+                    positions_list.append(tmp)
  
         
  
@@ -1460,7 +1479,7 @@ class DataframeCreator():
 
     ##metrics dataframe
     def create_metrics_dataframe(self):
-        col_list = ["Scenario_name","SAF1", "SAF2", "SAF2_1","SAF3","SAF4", "SAF5", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
+        col_list = ["Scenario_name","SAF1","SAF1_3","SAF1_4", "SAF2", "SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4", "SAF5", "SAF6", "SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5","SAF6_6","SAF6_7" ]
             
  
         dataframe_cnt=0
@@ -1530,9 +1549,13 @@ class DataframeCreator():
                 saf6_5=SAF_metrics.compute_saf6_5(filtered_geo_dataframe)
                 saf6_6=SAF_metrics.compute_saf6_6(filtered_geo_dataframe)
                 saf6_7=SAF_metrics.compute_saf6_7(filtered_geo_dataframe)
+                saf1_3=SAF_metrics.compute_saf1_3(filtered_conf_dataframe) 
+                saf1_4=SAF_metrics.compute_saf1_4(filtered_conf_dataframe) 
+                saf2_2=SAF_metrics.compute_saf2_2(filtered_conf_dataframe) 
+                saf2_3=SAF_metrics.compute_saf2_3(filtered_conf_dataframe) 
 
 
-                tmp_list = [scenario_name, saf1,saf2,saf2_1,saf3,saf4,saf5,saf6,saf6_1,saf6_2,saf6_3,saf6_4,saf6_5,saf6_6,saf6_7]
+                tmp_list = [scenario_name, saf1,saf1_3,saf1_4,saf2,saf2_1,saf2_2,saf2_3,saf3,saf4,saf5,saf6,saf6_1,saf6_2,saf6_3,saf6_4,saf6_5,saf6_6,saf6_7]
                     
  
 

@@ -17,6 +17,31 @@ def compute_saf1(df):
 
     saf1=df[df['in_time']].shape[0]
     return saf1
+def compute_saf1_3(df):
+    """ SAF-1_3: Number of conflicts in constarined
+
+    Number of aircraft pairs that will experience a loss of separation
+    within the look-ahead time.
+
+    :param input_dataframes: the filtered by scenario conflog_datframe.
+    :return: the computed SAF1 metric.
+    """
+
+    saf1_3=df[(df['in_time'])&(df["constrained"])].shape[0]
+    return saf1_3
+
+def compute_saf1_4(df):
+    """ SAF-1_4: Number of conflicts in open
+
+    Number of aircraft pairs that will experience a loss of separation
+    within the look-ahead time.
+
+    :param input_dataframes: the filtered by scenario conflog_datframe.
+    :return: the computed SAF1 metric.
+    """
+
+    saf1_4=df[(df['in_time'])&(df["constrained"]==False)].shape[0]
+    return saf1_4
 
 def compute_saf2(df):
     """ SAF-2: Number of intrusions
@@ -28,7 +53,27 @@ def compute_saf2(df):
     """
     saf2=df[df['in_time']].shape[0]
     return saf2
+def compute_saf2_2(df):
+    """ SAF-2_2: Number of intrusions in constrained
 
+    Number of aircraft pairs that experience loss of separation.
+    
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF2 metric.
+    """
+    saf2_2=df[(df['in_time'])&(df["constrained"])].shape[0]
+    return saf2_2
+
+def compute_saf2_3(df):
+    """ SAF-2_3: Number of intrusions in open
+
+    Number of aircraft pairs that experience loss of separation.
+    
+    :param input_dataframes: the filtered by scenario loslog_datframe.
+    :return: the computed SAF2 metric.
+    """
+    saf2_3=df[(df['in_time'])&(df["constrained"]==False)].shape[0]
+    return saf2_3
 
 def compute_saf2_1(df):
     """ SAF-2-1: Count of crashes
