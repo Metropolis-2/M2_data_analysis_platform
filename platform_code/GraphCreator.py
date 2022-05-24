@@ -122,7 +122,7 @@ metrics_title=["Number of cancelled demands","Percentage of cancelled demands","
                            "Average demand delay","Average number of intrusions","Horizontal distance route efficiency","Vertical distance route efficiency",\
                                "Ascending route efficiency","3D distance route efficiency","Route duration efficiency","Departure delay","Work done",\
                        "Weighted average altitude","Sound exposure","Number of points with significant sound exposure","Altitude dispersion","Number of conflicts",\
-                           "Number of conflicts in constrained airspace","Number of conflicts in open airspace","Number of conflicts per flight","Number of intrusions","Number of severe intrusions",\
+                           "Number of conflicts per flight","Number of conflicts in constrained airspace","Number of conflicts in open airspace","Number of intrusions","Number of severe intrusions",\
                            "Number of intrusions in constrained airspace","Number of intrusions in open airspace","Intrusion prevention rate","Minimum separation","Time spent in LOS","Average time spent in LOS","Number of geofence violations","Number of severe geofence violations"\
                                ,"Number of severe loitering NFZ violations","Number of severe buildings/static geofences violations","Number of severe open airspace geofences violations "\
                                    ,"Number of severe building violations ","Number of severe loitering NFZ violations \n with origin/destination in NFZ",\
