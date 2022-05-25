@@ -28,7 +28,7 @@ input_file=open(dills_path+"metrics_dataframe.dill", 'rb')
 scenario_metrics_df=dill.load(input_file)
 input_file.close()
      
-concepts=[1,2,3]
+concepts=["1","2","3"]
 concept_names=["Centralised","Hybrid","Decentralised"]
 
 
@@ -50,6 +50,11 @@ repetitions=["0","1","2","3","4","5","6","7","8"]
 #If you do not want to graph for all seven uncertainy types, you may delete the unwanted uncertainty types from the variables uncertainties,rogue_uncertainties,wind_uncertainties and uncertainties_names
 uncertainties=["","R1","R2","R3","W1","W3","W5"]
 
+concept_name = concept_names[concepts.index(concept_choice)]
+print(f'Concept:     {concept_name}')
+print(f'Density:     {density_choice}')
+print(f'Traffic mix: {traffic_mix_choice}')
+print(f'Metric:      {metric_choice}')
 val_list = []
 for repit in repetitions:
 
@@ -62,7 +67,7 @@ for repit in repetitions:
 
     # change the metric here!!!
     metric_value=filterd_dataframe[f"{metric_choice}"].values[0]
-    print(f'Repition {repit}:{metric_value}')
+#    print(f'Repition {repit}:{metric_value}')
     
     val_list.append(metric_value)
 
