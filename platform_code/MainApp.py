@@ -51,20 +51,6 @@ if __name__ == "__main__":
     
             current_time = now.strftime("%H:%M:%S")
             print("env stats ended =", current_time)    
-# =============================================================================
-#         elif choice==4:
-#             choice = input("Enter number of threads to use\n")
-#             choice = int(choice)
-#             now = datetime.now()
-#             current_time = now.strftime("%H:%M:%S")
-#             print("flst update started =", current_time)
-#             #m=MainClass(choice)
-#             dataframe_creator = DataframeCreator.DataframeCreator(choice)
-#             dataframe_creator.update_flst_dataframe()
-#             now = datetime.now()
-#     
-#             current_time = now.strftime("%H:%M:%S")
-#             print("flst update  ended =", current_time)               
-# =============================================================================
+
 
             

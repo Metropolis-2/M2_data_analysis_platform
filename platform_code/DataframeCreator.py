@@ -115,14 +115,14 @@ class DataframeCreator():
         # self.create_density_constrained_dataframe()
         # self.create_metrics_dataframe()
 
-        #self.create_flstlog_dataframe() 
-        #self.create_loslog_dataframe() 
-        #self.create_conflog_dataframe() 
-        #self.create_geolog_dataframe()
-        #self.create_env_metrics_dataframe()
-        #self.create_env3_metric_dataframe()
-        #self.create_density_dataframe()
-        #self.create_density_constrained_dataframe()
+        self.create_flstlog_dataframe() 
+        self.create_loslog_dataframe() 
+        self.create_conflog_dataframe() 
+        self.create_geolog_dataframe()
+        self.create_env_metrics_dataframe()
+        self.create_env3_metric_dataframe()
+        self.create_density_dataframe()
+        self.create_density_constrained_dataframe()
         self.create_metrics_dataframe()
         
         
