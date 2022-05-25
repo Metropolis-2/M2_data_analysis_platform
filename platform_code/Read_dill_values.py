@@ -6,6 +6,18 @@ Created on Tue May 24 15:42:46 2022
 """
 import dill
 import pandas
+import sys
+
+metric_choice = sys.argv[1]
+concept_choice = sys.argv[2]
+density_choice = sys.argv[3]
+traffic_mix_choice = sys.argv[4]
+
+try:
+    uncertainty_choice = sys.argv[5]
+except IndexError:
+    uncertainty_choice = ""
+
 dills_path="dills/"
 boxplot_metrics=["AEQ1","AEQ1_1","AEQ2","AEQ2_1","AEQ3","AEQ4","AEQ5","AEQ5_1","CAP1","CAP2","EFF1","EFF2","EFF3","EFF4","EFF5","EFF6","ENV1",\
                          "ENV2","ENV3_1","ENV3_2","ENV4","SAF1","SAF1_2","SAF1_3","SAF1_4","SAF2","SAF2_1","SAF2_2","SAF2_3","SAF3","SAF4","SAF5","SAF5_1","SAF6","SAF6_1","SAF6_2","SAF6_3","SAF6_4","SAF6_5",\
@@ -16,7 +28,7 @@ input_file=open(dills_path+"metrics_dataframe.dill", 'rb')
 scenario_metrics_df=dill.load(input_file)
 input_file.close()
      
-concepts=["1_","2_","3_"]
+concepts=[1,2,3]
 concept_names=["Centralised","Hybrid","Decentralised"]
 
 
@@ -32,21 +44,33 @@ traffic_mix_names=["40%","50%","60%"]
 
 ##Initialisation of the repetition number to be graphed
 #If you do not want to graph for all nine repetitions, you may delete the unwanted repetitions from the variable repetitions
-repetitions=["0_","1_","2_","3_","4_","5_","6_","7_","8_"]
+repetitions=["0","1","2","3","4","5","6","7","8"]
 
 ##Initialisation of the uncertaity type to be graphed
 #If you do not want to graph for all seven uncertainy types, you may delete the unwanted uncertainty types from the variables uncertainties,rogue_uncertainties,wind_uncertainties and uncertainties_names
 uncertainties=["","R1","R2","R3","W1","W3","W5"]
 
+val_list = []
+for repit in repetitions:
 
-scenario_name="1_very_low_40_0_"
-#scenario_name=conc+density+t_mix+rep+uncertainty
+    # define scenario name here!!!!!!
+    scenario_name=f"{concept_choice}_{density_choice}_{traffic_mix_choice}_{repit}_{uncertainty_choice}"
 
-filterd_dataframe=scenario_metrics_df[scenario_metrics_df["Scenario_name"]==scenario_name]
+    #scenario_name=conc+density+t_mix+rep+uncertainty
 
-metric_value=filterd_dataframe["AEQ1"].values[0]
-print(metric_value)
+    filterd_dataframe=scenario_metrics_df[scenario_metrics_df["Scenario_name"]==scenario_name]
 
+    # change the metric here!!!
+    metric_value=filterd_dataframe[f"{metric_choice}"].values[0]
+    print(f'Repition {repit}:{metric_value}')
+    
+    val_list.append(metric_value)
+
+# make df
+df_fun = pandas.DataFrame(val_list)
+print(df_fun.describe())
+
+print('------------------------------------')
 priority_metrics=["PRI3","PRI4","PRI5"]
 input_file=open(dills_path+"prio_metrics_dataframe.dill", 'rb')
 scenario_priority_metrics_df=dill.load(input_file)
@@ -56,7 +80,8 @@ filterd_dataframe=scenario_priority_metrics_df[scenario_priority_metrics_df["Sce
 
 priority="1"
 
-filterd_dataframe=filterd_dataframe[filterd_dataframe["Priority"]==[priority]]
+filterd_dataframe=filterd_dataframe[filterd_dataframe["Priority"]==priority]
 
-metric_value=filterd_dataframe["AEQ1"].values[0]
-print(metric_value)
+# priority metric
+metric_value=filterd_dataframe["PRI3"].values[0]
+#print(metric_value)
