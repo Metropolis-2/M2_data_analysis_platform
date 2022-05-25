@@ -38,3 +38,8 @@ To run the overall system :
 6.	After the MainApp.py code is completed check that it created the dataframes. There should be 9 dill files in the dills folder.
 7.	Run the MainApp.py 
 8.	Press 2 and then Enter
+9.	If you want to compute and print sound exposure metrics
+10.	Run the MainApp.py 
+11.	Press 3 and then Enter
+12.	Insert the wanted number of threads, to run it as a single thread press 1 and then Enter
+13.	The statistics for the noise exposure for the 5 different densities should be printed.
