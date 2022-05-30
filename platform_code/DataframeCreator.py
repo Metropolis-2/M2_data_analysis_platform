@@ -115,14 +115,14 @@ class DataframeCreator():
         # self.create_density_constrained_dataframe()
         # self.create_metrics_dataframe()
 
-        self.create_flstlog_dataframe() 
-        self.create_loslog_dataframe() 
-        self.create_conflog_dataframe() 
+        #self.create_flstlog_dataframe() 
+        #self.create_loslog_dataframe() 
+        #self.create_conflog_dataframe() 
         self.create_geolog_dataframe()
         self.create_env_metrics_dataframe()
         self.create_env3_metric_dataframe()
-        self.create_density_dataframe()
-        self.create_density_constrained_dataframe()
+        #self.create_density_dataframe()
+        #self.create_density_constrained_dataframe()
         self.create_metrics_dataframe()
         
         
@@ -388,8 +388,11 @@ class DataframeCreator():
             if cnt < 10:
                 continue
             line_list = line.split(",")
+            if line_list[1][0]=="R":
+                continue
             tmp_list = [scenario_name]
             for iv, value in enumerate(line_list):
+                
                 if iv==3:
                     tmp_list.append(value)
                 elif iv==4:
@@ -1027,6 +1030,8 @@ class DataframeCreator():
             positions_list=[]
     
             for iv, value in enumerate(acid_line_list):
+                if value[0]=="R":
+                    continue
                 if iv == 0:
                     time_stamp=float(acid_line_list[0])
                     #print(time_stamp)
@@ -1162,6 +1167,8 @@ class DataframeCreator():
         length=0
 
         for acid in    acid_reg_dict.keys():
+            if acid[0]=="R":
+                continue
             env2_tmp=0
             for j in range(len(acid_reg_dict[acid])-1):
                 alt1=acid_reg_dict[acid][j][0]
@@ -1272,7 +1279,9 @@ class DataframeCreator():
                     for iv, value in enumerate(acid_line_list):
                         if iv == 0:
                             continue
-            
+                        
+                        if value[0]=="R":
+                            continue
                         tmp_list = [ scenario_name, float(acid_line_list[0])]
                  
                         tmp_list.append(value)
