@@ -193,6 +193,8 @@ class GraphCreator():
                         scenario_name=conc+density+t_mix+rep
                         try:
                             if conc=='4_':
+                                if rep not in ["0_","1_","2_"]:
+                                    continue
                                 metric_value=hybrid_dataframe[hybrid_dataframe["Scenario_name"]==scenario_name][metric].values[0]
                             else:
                                 metric_value=dataframe[dataframe["Scenario_name"]==scenario_name][metric].values[0]
