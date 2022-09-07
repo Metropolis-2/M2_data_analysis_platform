@@ -476,7 +476,7 @@ class GraphCreator():
              if metric in percentage_metrics and scale_y:
                  plt.ylim(-5, 105)
              plt.savefig(diagrams_path+"line_graphs/priority/by_density/"+metric+"_"+dens,bbox_inches='tight')  
-             plt.savefig(diagrams_path+"pdfs/line_gra[hs/priority/by_density/"+metric+"_"+dens+".pdf",bbox_inches='tight')    
+             plt.savefig(diagrams_path+"pdfs/line_graphs/priority/by_density/"+metric+"_"+dens+".pdf",bbox_inches='tight')    
              plt.clf()
              
     def createGraphs(self):       
